@@ -1,0 +1,23 @@
+# Sensível — nunca sobe
+.env
+.env.local
+docker-compose.override.yml
+
+# Gemini CLI — gerado localmente
+.gemini/
+GEMINI.md
+gemini-output/
+.gemini_history
+
+# Notas pessoais — cada um cria livremente
+NOTAS_*.md
+TODO_*.md
+rascunho_*.md
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Dependências (se Composer for adotado)
+vendor/
+composer.lock
