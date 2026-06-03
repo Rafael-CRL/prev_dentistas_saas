@@ -1,62 +1,127 @@
-# Planejamento de Execução - Prev-Dentistas (MVC + SaaS)
-
-Roteiro técnico para refatoração e implementação do modelo multi-tenant.
-
-## 1. Configuração de Infraestrutura e Git
-
-### Fluxo Git
-*   **main:** Estável, reflete produção.
-*   **dev:** Integração de funcionalidades testadas.
-*   **feature/xxx:** Desenvolvimento individual.
-*   **Requisito:** Pull Request (PR) com 1 review obrigatório para merge em `dev`.
-
-### Banco de Dados e Ambiente
-*   **Remoto:** Banco MariaDB centralizado no Railway (acesso comum para os 5 membros).
-*   **Local:** Docker apenas para servidor Apache/PHP.
-*   **Config:** Variáveis de conexão via `.env` (nunca subir para o Git).
-
-## 2. Fases do Projeto
-
-### Fase 1: Novo DER (Design de Dados)
-*   **Decisão Técnica:** Um dentista (usuário) pertence a apenas **uma clínica** (Relação 1:N).
-*   **Estrutura:** Adicionar `clinica_id` como FK direta na tabela `usuarios`.
-*   Desenhar esquema com tabela `clinicas` e `clinica_id` em: `usuarios`, `pacientes`, `procedimentos`, `atendimentos`, `despesas`.
-*   Criar tabelas `clinica_taxas_cartao` e `clinica_regras_comissao`.
-
-### Fase 2: Setup do Repositório
-*   Configurar `.gitignore` (excluir `.env`, `vendor/`, `.gemini/`).
-*   Configurar `config/database.php` para usar `$_ENV`.
-*   Validar conexão de todos os membros ao banco Railway.
-
-### Fase 3: Saneamento e Estrutura
-*   Eliminar arquivos redundantes (`_2`, `_3`, etc).
-*   Criar estrutura: `app/Models`, `app/Controllers`, `app/Views`, `public/`.
-*   Implementar Autoloader PSR-4.
-
-### Fase 4: Migração (Migration)
-*   Aplicar script SQL para atualizar o banco para o novo DER.
-*   Inserir dados iniciais da clínica padrão.
-
-### Fase 5: Infraestrutura de Configuração
-*   Criar classe `Config` para leitura dinâmica de taxas e comissões.
-*   Substituir cálculos fixos no PHP por chamadas ao banco.
-
-### Fase 6: Refatoração MVC (Módulos)
-1.  **Pacientes:** Model -> Controller -> View.
-2.  **Procedimentos:** Model -> Controller -> View.
-3.  **Atendimentos:** Integração com os anteriores.
-4.  **Financeiro:** Cálculos baseados no novo DER.
-
-### Fase 7: Interface e Dashboard
-*   Padronizar componentes visuais.
-*   Refatorar Dashboard com dados reais dos Models.
-
-## 3. Matriz de Responsabilidades (Sugestão)
-*   **Membro A:** DB Admin & Infra (Railway/Docker).
-*   **Membro B:** Core MVC (Front Controller/Router/Autoloader).
-*   **Membro C:** Módulo Pacientes/Procedimentos.
-*   **Membro D:** Módulo Atendimentos/Financeiro.
-*   **Membro E:** UI/UX e Frontend das Views.
+# Plano de Execução — Prev-Dentistas (Versão Atualizada)
+> Refatoração para MVC + SaaS Multi-Tenant — Grupo de 5  
+> Projeto Integrado II — UFPA
 
 ---
-*Este plano substitui todas as versões anteriores e é o guia oficial para o desenvolvimento.*
+
+## Contexto e Mandatos
+
+O sistema será transformado em um **Produto de Prateleira (SaaS)**. O objetivo é a refatoração completa para MVC com Orientação a Objetos, garantindo isolamento total entre clínicas e eliminando regras de negócio fixas no código (**Zero Hardcode**).
+
+**Decisões Estratégicas:**
+- **Isolamento:** `clinica_id` obrigatório em todas as tabelas transacionais e cadastrais.
+- **Banco Remoto:** Railway (MySQL/MariaDB) para ambiente colaborativo.
+- **Arquitetura:** MVC manual (sem frameworks) com **Camada de Serviço** para lógica complexa.
+- **Versionamento:** Git Flow (`main` → `dev` → `feature/xxx`).
+
+---
+
+## Infraestrutura e Git
+
+**Ambiente:**
+- Banco de dados centralizado no Railway.
+- Docker local apenas para servidor Apache/PHP.
+- Variáveis sensíveis via `.env` (excluído do Git).
+
+**Fluxo de Trabalho:**
+- `main`: Estável/Produção.
+- `dev`: Integração e testes.
+- `feature/xxx`: Desenvolvimento de funcionalidades específicas.
+- *Requisito:* PR com revisão antes do merge em `dev`.
+
+---
+
+## Estrutura de Pastas (Nova Arquitetura)
+
+```
+/
+├── app/
+│   ├── Controllers/       ← Orquestração da lógica
+│   ├── Models/            ← Interação com banco e abstração de dados
+│   ├── Services/          ← Lógica de negócio complexa (Ex: FinanceiroService)
+│   └── Views/             ← Templates (mínimo de PHP possível)
+├── config/
+│   ├── app.php
+│   └── database.php       ← Conexão PDO lendo do $_ENV
+├── public/                ← Único diretório exposto ao servidor web
+│   ├── index.php          ← Front Controller (Ponto de entrada único)
+│   └── assets/            ← CSS, JS, Imagens
+├── .env.example           ← Modelo de variáveis de ambiente
+├── .gitignore
+├── DB.md                  ← Planejamento detalhado do banco de dados
+└── README.md
+```
+
+---
+
+## Divisão de Módulos e Responsabilidades
+
+| Responsável | Módulo | Dependências |
+| :--- | :--- | :--- |
+| **A** | Gestão de Pacientes | — |
+| **B** | Gestão de Procedimentos | — |
+| **C** | Autenticação, Sessão e Multi-tenancy | — |
+| **D** | Fluxo de Atendimentos | A + B |
+| **E** | Financeiro, Comissões e Dashboard | D + Camada Service |
+
+---
+
+## Fases de Execução
+
+### Fase 1 — Diagrama de Dados (DER)
+Implementar as novas tabelas e relacionamentos conforme definido no `DB.md`:
+
+| Nova Tabela | Objetivo |
+| :--- | :--- |
+| **`clinicas`** | Cadastro mestre de clientes SaaS. |
+| **`clinica_configuracoes`** | Chave-Valor para personalização (Logos, Cores, Recibos). |
+| **`clinica_taxas_cartao`** | Parâmetros de taxas de maquininha (Fim do Hardcode). |
+| **`clinica_regras_comissao`** | Regras de repasse e metas (Bônus). |
+
+- **Isolamento:** Adicionar `clinica_id` em: `usuarios`, `pacientes`, `procedimentos`, `atendimentos`, `despesas`, `atendimento_procedimentos` e `atendimento_pagamentos`.
+
+### Fase 2 — Saneamento e Estrutura
+- **Limpeza:** Deletar arquivos duplicados identificados:
+    - `relatorio_paciente2.php`, `relatorio_paciente3.php`
+    - `views/novo_atendimento2.php`, `novo_atendimento3.php`, `novo_atendimento4.php`
+    - `actions/salvar_atendimento2.php`
+- **Organização:** Criar estrutura de pastas `app/` e `public/`.
+- **Autoload:** Implementar Autoloader PSR-4 para carregamento automático de classes.
+- **Padrão de Resposta (Híbrido):**
+    - **Redirecionamento (`header("Location")`):** Obrigatório para fluxos de formulários (Salvar, Editar, Excluir).
+    - **JSON (`json_encode`):** Obrigatório para consultas dinâmicas, Dashboard e integrações via AJAX.
+
+### Fase 3 — Migração e Setup
+- Aplicar script SQL de migração no Railway.
+- Vincular dados legados a uma clínica padrão.
+- Validar conectividade de todos os membros.
+
+### Fase 4 — Camada de Serviço e Configuração
+- Criar a classe **`FinanceiroService.php`** (ou similar) para centralizar os cálculos de taxas e comissões.
+- Implementar classe de configuração que lê as tabelas `clinica_configuracoes` em tempo real.
+
+### Fase 5 — Refatoração MVC (Módulos)
+Refatoração iterativa seguindo a ordem de dependências.
+- **Regra:** Todo Model deve filtrar automaticamente pelo `clinica_id` da sessão ativa.
+
+### Fase 6 — UI/UX e Validação
+- Padronização estética.
+- Refatoração do Dashboard usando dados consolidados dos Models/Services.
+
+---
+
+## Metas e Critérios de Sucesso
+1. **Multi-tenancy Ativo:** Nenhuma clínica consegue ver dados de outra.
+2. **Zero Hardcode:** Nenhuma taxa ou percentual fixo nos arquivos PHP.
+3. **Padrão MVC:** Separação clara de responsabilidades confirmada por revisão de código.
+
+---
+
+## Itens Opcionais (Se houver margem)
+- **Segurança:** Proteção CSRF e regeneração de ID de sessão no login.
+- **Logística:** Exclusão lógica (`deleted_at`) em vez de `DELETE` físico.
+- **Precisão:** Uso de centavos inteiros (integers) para cálculos financeiros críticos.
+- **Bônus de Meta:** Implementar a lógica de meta de faturamento (Ex: R$ 10k) como parâmetro dinâmico no banco.
+
+---
+*UFPA - Projeto Integrado II*
