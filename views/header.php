@@ -21,6 +21,7 @@ function isActive($urls) {
     <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="<?= BASE_URL ?>assets/js/mascaras.js"></script>
 </head>
 <body>
     <header class="navbar">
@@ -40,11 +41,11 @@ function isActive($urls) {
             <?php if(isset($_SESSION['usuario_id'])): ?>
                 <a href="<?= BASE_URL ?>index.php" class="<?= isActive(['index.php']) ? 'active' : '' ?>">Dashboard</a>
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['novo_atendimento3.php', 'confirmar_pagamento.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['novo_atendimento.php', 'confirmar_pagamento.php']) ? 'active' : '' ?>">
                         Novo Atendimento <small>▾</small>
                     </a>
                     <div class="dropdown-content">
-                        <a href="<?= BASE_URL ?>views/novo_atendimento3.php">Lançar/Executar Procedimento</a>
+                        <a href="<?= BASE_URL ?>views/novo_atendimento.php">Lançar/Executar Procedimento</a>
                         <a href="<?= BASE_URL ?>views/confirmar_pagamento.php">Confirmar Pagamento</a>
                     </div>
                 </div>
@@ -66,14 +67,14 @@ function isActive($urls) {
                 <?php endif; ?>
 
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['relatorio_diario.php', 'relatorio_dentistas.php', 'relatorios.php', 'relatorio_paciente3.php', 'relatorio_procedimentos.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['relatorio_diario.php', 'relatorio_dentistas.php', 'relatorios.php', 'relatorio_paciente.php', 'relatorio_procedimentos.php']) ? 'active' : '' ?>">
                         Relatórios <small>▾</small>
                     </a>
                     <div class="dropdown-content">
                         <a href="<?= BASE_URL ?>relatorio_diario.php">Diário</a>
                         <?php if (is_admin() || is_dentista()): ?>
                         <a href="<?= BASE_URL ?>relatorio_dentistas.php">Por Dentista</a>
-                        <a href="<?= BASE_URL ?>relatorio_paciente3.php">Por Paciente</a>
+                        <a href="<?= BASE_URL ?>relatorio_paciente.php">Por Paciente</a>
                         <?php endif; ?>
 
                         <?php if (is_admin()): ?>

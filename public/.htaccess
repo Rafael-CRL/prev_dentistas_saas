@@ -1,0 +1,9 @@
+# public/.htaccess
+RewriteEngine On
+
+# Não redireciona se for um arquivo ou diretório real (Assets, Uploads)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redireciona tudo para o index.php
+RewriteRule ^ index.php [QSA,L]
