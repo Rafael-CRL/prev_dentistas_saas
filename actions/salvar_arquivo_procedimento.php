@@ -13,7 +13,7 @@ if (!is_admin() && !is_dentista()) {
 }
 
 function redirect_with_error($message, $paciente_nome) {
-    $redirect_url = BASE_URL . 'relatorio_paciente3.php?paciente_nome=' . urlencode($paciente_nome) . '&erro=' . urlencode($message);
+    $redirect_url = BASE_URL . 'relatorio_paciente.php?paciente_nome=' . urlencode($paciente_nome) . '&erro=' . urlencode($message);
     header("Location: " . $redirect_url);
     exit;
 }
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $uploadDir = __DIR__ . '/../uploads/';
+        $uploadDir = __DIR__ . '/../public/uploads/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE atendimento_procedimentos SET url_arquivo = ? WHERE id = ?");
         $stmt->execute([$urlArquivo, $atendimento_procedimento_id]);
 
-        $redirect_url = BASE_URL . 'relatorio_paciente3.php?paciente_nome=' . urlencode($paciente_nome_redirect) . '&msg=upload_sucesso';
+        $redirect_url = BASE_URL . 'relatorio_paciente.php?paciente_nome=' . urlencode($paciente_nome_redirect) . '&msg=upload_sucesso';
         header("Location: " . $redirect_url);
         exit;
 
