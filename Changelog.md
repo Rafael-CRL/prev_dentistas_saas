@@ -54,3 +54,29 @@ Finalização da Fase 2 com a implementação dos componentes base da nova arqui
 
 ---
 *Status: Fase 2 Concluída. Sistema estável e estruturado para Fase 3 (Migração de Banco).*
+
+---
+
+## [2026-06-04] — Fase 3: Transição para SaaS Multi-tenant (Banco de Dados)
+
+Implementação da estrutura de isolamento de dados e regras administrativas flexíveis, eliminando a dependência de parâmetros fixos no código.
+
+### 🗄️ Estruturação Multi-tenant
+- **Âncora de Dados (`clinicas`):** Criação da tabela mestre para gestão de clientes SaaS. Sincronizada com o schema remoto (`nome_fantasia`, `razao_social`).
+- **Isolamento de Dados:** Inclusão da coluna `clinica_id` em todas as entidades do sistema (`usuarios`, `pacientes`, `procedimentos`, `atendimentos`, `despesas`, `atendimento_procedimentos`, `atendimento_pagamentos`).
+- **Migração de Dados Legados:** Todos os registros existentes foram vinculados automaticamente a uma "Clínica Principal" (ID 1) para preservar a integridade histórica.
+
+### 🛡️ Integridade e Segurança
+- **Índices Compostos:** Conversão de índices únicos simples para únicos compostos (`clinica_id` + `cpf` / `clinica_id` + `login`). Isso permite que o mesmo dado (ex: CPF) coexista no sistema em clínicas diferentes.
+- **Constraints de Integridade:** Implementação de Foreign Keys (`ON DELETE CASCADE`) vinculando todas as tabelas à tabela `clinicas`.
+
+### ⚙️ Configurações Dinâmicas (Zero Hardcode)
+- **Tabelas de Parâmetros:** Criação de `clinica_configuracoes`, `clinica_taxas_cartao` e `clinica_regras_comissao`.
+- **Carga de Inicialização:** Inserção de taxas de operadoras (Visa/Master) e regras de repasse para permitir o funcionamento imediato dos cálculos financeiros na próxima fase.
+
+### 📂 Artefatos de Desenvolvimento
+- **Migration Consolidada:** Criação do arquivo `database/migration.sql` contendo o histórico completo da evolução do schema.
+- **Validação Automatizada:** Ajuste no script `scripts/auditoria_conclusao_fase3.php` para garantir a conformidade técnica rigorosa do banco de dados remoto.
+
+---
+*Status: Fase 3 Concluída. Banco de Dados preparado para implementação da lógica de negócio (Fase 4).*

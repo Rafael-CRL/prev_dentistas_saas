@@ -200,7 +200,7 @@ RewriteRule ^ index.php [QSA,L]
 
 ---
 
-### Fase 3 — Migration do banco
+### Fase 3 — Migration do banco ✅ (CONCLUÍDA)
 
 Criar um único arquivo `database/migration.sql` versionado no repositório contendo todos os `ALTER TABLE` e `CREATE TABLE` do novo DER. Não aplicar manualmente tabela por tabeta — tudo em um script só para garantir que qualquer membro do grupo pode replicar o estado do banco do zero.
 
