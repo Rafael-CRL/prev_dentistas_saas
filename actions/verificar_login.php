@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['usuario_id'] = $usuario['id'];
             $_SESSION['usuario_nome'] = $usuario['nome'];
             $_SESSION['usuario_perfil'] = $usuario['perfil'];
+            $_SESSION['clinica_id'] = $usuario['clinica_id'] ?? 1; // Fallback para 1 caso o dado seja antigo
             header("Location: " . BASE_URL . "index.php");
             exit;
         } else {

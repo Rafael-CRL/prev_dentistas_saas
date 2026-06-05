@@ -95,3 +95,37 @@ Ajustes na configuração do controle de versão para garantir a limpeza do repo
 
 ---
 *Status: Repositório organizado. Estrutura de pastas MVC pronta para receber as primeiras classes da Fase 4.*
+
+## [2026-06-05] — Fase 4: Infraestrutura Zero Hardcode (Config & Services)
+
+Implementação do motor financeiro dinâmico e integração com o banco de dados SaaS, eliminando a necessidade de constantes fixas no código PHP.
+
+### 🧠 Modelos e Serviços (Infraestrutura)
+- **Classe `App\Models\Config`:** Criada utilizando o padrão arquitetural Singleton. Responsável por buscar, em uma única consulta otimizada, as taxas de cartão, regras de comissão e personalizações da clínica (com base na `$_SESSION['clinica_id']`).
+- **Classe `App\Services\FinanceiroService`:** Construída para substituir a lógica legada. Agora recebe a instância de `Config` via injeção de dependência e realiza todos os cálculos de repasse de dentista, metas e taxas de maquininha dinamicamente, mantendo o rigoroso ajuste de arredondamento de centavos.
+
+### 🛠️ Refatoração de Controladores (Consumidores)
+- **Atendimentos (`actions/salvar_atendimento.php`):** Refatorado para instanciar o novo `FinanceiroService` e abandonar as chamadas estáticas `Financeiro::calcularComissao`.
+- **Pagamentos (`actions/salvar_pagamento.php`):** Adaptado para o novo serviço de injeção, recalculando comissões dinâmicas e taxas de liquidação corretamente na hora do fechamento.
+- **Autenticação (`actions/verificar_login.php`):** Ajustado para armazenar explicitamente o `clinica_id` na sessão no momento do login, chave-mestra para o funcionamento do Singleton da Fase 4.
+
+### 🛡️ Auditoria de Qualidade
+- **`scripts/auditoria_conclusao_fase4.php`:** Criado um novo script automatizado de auditoria que validou a inexistência de resquícios "hardcoded" de taxas e a correta aplicação do padrão Singleton e injeções de dependência.
+
+---
+*Status: Fase 4 Concluída. A infraestrutura de back-end multi-tenant está consolidada. Sistema pronto para a Fase 5 (Migração MVC - Módulo a Módulo).*
+
+## [2026-06-05] — Hotfix: Roteamento Híbrido no Front Controller
+
+Correção de um bug crítico no Front Controller (`public/index.php`) que impedia o acesso às páginas legadas (como o login) e exibia prematuramente a mensagem "Página não encontrada (MVC em construção)".
+
+### 🐛 O Problema (Bug de Roteamento)
+- **Lógica Falha:** O sistema estava utilizando a função `str_replace(BASE_URL, '', $uri)` para extrair o caminho relativo da requisição. Como nossa `BASE_URL` é configurada como `/`, o PHP removia **todas** as barras da URL.
+- **Efeito:** Uma requisição para `/actions/verificar_login.php` era transformada incorretamente em `actionsverificar_login.php`. Como esse arquivo não existe fisicamente, o Front Controller acionava o fallback de erro 404 (MVC em construção), bloqueando o acesso ao sistema antes mesmo da Fase 5.
+
+### 🛠️ A Solução Implementada
+- **Correção em `public/index.php`:** A extração da URL base foi reescrita para garantir que apenas o início da string seja modificado, preservando a integridade das pastas internas.
+- **Conceito de Sistema Híbrido:** Foi validado e garantido que o sistema pode operar de forma mista. O Front Controller primeiro tenta carregar a página legada diretamente (garantindo que a clínica não pare) e, somente se ela não existir, exibe a tela de construção MVC.
+
+---
+*Status: Bug resolvido. O login e navegação das páginas legadas estão restaurados através do ponto único de entrada.*

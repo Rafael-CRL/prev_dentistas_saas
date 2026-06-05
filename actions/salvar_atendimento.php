@@ -3,11 +3,18 @@
 ini_set('display_errors', 0);
 error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
-require_once '../app/autoload.php';
+require_once '../config/session.php';
 require_once '../config/database.php';
 require_once '../config/app.php'; // Para usar a BASE_URL
+require_once __DIR__ . '/../app/autoload.php';
 
+use App\Models\Config;
 use App\Services\FinanceiroService;
+
+// Inicializa Motor Financeiro
+$clinicaId = $_SESSION['clinica_id'] ?? 1;
+$config = Config::getInstance($pdo, $clinicaId);
+$financeiroService = new FinanceiroService($config);
 
 // Garantir o fuso horário correto para funções de data (NOW, date)
 date_default_timezone_set('America/Sao_Paulo');
@@ -153,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtProcAtendimento = $pdo->prepare($sqlProcAtendimento);
 
             foreach ($procedimentosFinalizados as $proc) {
-                $resComissao = FinanceiroService::calcularComissao($proc['valor_total'], $proc['categoria'], $faturamentoBrutoMensal, $proc['custo_auxiliar_manual'], $proc['natureza']);
+                $resComissao = $financeiroService->calcularComissao($proc['valor_total'], $proc['categoria'], $faturamentoBrutoMensal, $proc['custo_auxiliar_manual'], $proc['natureza']);
                 $comissaoProcedimento = $resComissao['dentista'];
                 $custoAuxiliarProcedimento = $resComissao['auxiliar'] ?? 0.0;
                 $totalComissaoDentista += $comissaoProcedimento;
