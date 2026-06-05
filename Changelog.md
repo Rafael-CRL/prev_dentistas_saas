@@ -115,17 +115,22 @@ Implementação do motor financeiro dinâmico e integração com o banco de dado
 ---
 *Status: Fase 4 Concluída. A infraestrutura de back-end multi-tenant está consolidada. Sistema pronto para a Fase 5 (Migração MVC - Módulo a Módulo).*
 
-## [2026-06-05] — Hotfix: Roteamento Híbrido no Front Controller
+## [2026-06-05] — Fase 4: Consolidação Arquitetural e Refinamento de Segurança
 
-Correção de um bug crítico no Front Controller (`public/index.php`) que impedia o acesso às páginas legadas (como o login) e exibia prematuramente a mensagem "Página não encontrada (MVC em construção)".
+Após a integração das frentes de trabalho da Fase 4, o sistema foi consolidado seguindo um padrão de excelência técnica, unindo a robustez de segurança com a flexibilidade da Injeção de Dependência.
 
-### 🐛 O Problema (Bug de Roteamento)
-- **Lógica Falha:** O sistema estava utilizando a função `str_replace(BASE_URL, '', $uri)` para extrair o caminho relativo da requisição. Como nossa `BASE_URL` é configurada como `/`, o PHP removia **todas** as barras da URL.
-- **Efeito:** Uma requisição para `/actions/verificar_login.php` era transformada incorretamente em `actionsverificar_login.php`. Como esse arquivo não existe fisicamente, o Front Controller acionava o fallback de erro 404 (MVC em construção), bloqueando o acesso ao sistema antes mesmo da Fase 5.
+### 🏗️ Integração e Refinamento Arquitetural
+- **Padrão de Projeto:** Implementação definitiva das classes `App\Models\Config` e `App\Services\FinanceiroService` utilizando **Injeção de Dependência (DI)**. Esta escolha técnica permite maior testabilidade e desacoplamento, preparando o sistema para testes unitários automatizados.
+- **Merge de Contribuições:** Integração da branch `fase4-financeiro-saas`, preservando o histórico de desenvolvimento colaborativo e consolidando a lógica de negócio parametrizada.
 
-### 🛠️ A Solução Implementada
-- **Correção em `public/index.php`:** A extração da URL base foi reescrita para garantir que apenas o início da string seja modificado, preservando a integridade das pastas internas.
-- **Conceito de Sistema Híbrido:** Foi validado e garantido que o sistema pode operar de forma mista. O Front Controller primeiro tenta carregar a página legada diretamente (garantindo que a clínica não pare) e, somente se ela não existir, exibe a tela de construção MVC.
+### 🛡️ Hotfix: Roteamento Híbrido e Segurança Avançada (Front Controller)
+- **Estratégia de Roteamento:** O Front Controller (`public/index.php`) foi atualizado para uma versão de segurança avançada.
+- **Validação de Caminhos:** Implementação de checagem via `realpath()` e validação de escopo de diretório, prevenindo vulnerabilidades de *Directory Traversal*.
+- **Gestão de Ativos:** Adicionado tratamento nativo para arquivos estáticos (CSS, JS, Imagens, PDFs), garantindo que o servidor web os sirva corretamente sem interferência do motor PHP.
+- **Compatibilidade Legada:** Mantido o suporte ao sistema híbrido para garantir a operação ininterrupta das páginas atuais durante a migração para o padrão MVC.
+
+---
+*Status: Fase 4 Finalizada e Documentada. Infraestrutura de segurança e finanças consolidada na branch principal.*
 
 ---
 *Status: Bug resolvido. O login e navegação das páginas legadas estão restaurados através do ponto único de entrada.*
