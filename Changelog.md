@@ -80,3 +80,18 @@ Implementação da estrutura de isolamento de dados e regras administrativas fle
 
 ---
 *Status: Fase 3 Concluída. Banco de Dados preparado para implementação da lógica de negócio (Fase 4).*
+
+---
+
+## [2026-06-04] — Padronização de Repositório e Estrutura Git
+
+Ajustes na configuração do controle de versão para garantir a limpeza do repositório remoto e a persistência da estrutura arquitetural necessária para a Fase 4.
+
+### ⚙️ Ajustes de Git e Rastreamento
+- **Atualização do `.gitignore`:** Sincronização com o `planejamento.md`. Agora, arquivos binários (`*.pdf`), pastas de documentação externa (`contextopdf/`) e uploads locais estão formalmente ignorados para evitar poluição do repositório.
+- **Limpeza do Cache Git:** Remoção de arquivos que já haviam sido rastreados indevidamente (PDFs e manuais antigos), mantendo-os apenas na máquina local do desenvolvedor.
+- **Preservação de Estrutura MVC:** Adição de arquivos `.gitkeep` nas pastas `app/Controllers`, `app/Models`, `app/Services` e `app/Views`.
+    - **Por que:** O Git não rastreia pastas vazias. Como essas pastas são fundamentais para a próxima fase (MVC), o `.gitkeep` garante que elas existam no GitHub mesmo antes de conterem código.
+
+---
+*Status: Repositório organizado. Estrutura de pastas MVC pronta para receber as primeiras classes da Fase 4.*

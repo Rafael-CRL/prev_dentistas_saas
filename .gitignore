@@ -5,11 +5,13 @@ docker-compose.override.yml
 
 # Gemini CLI — gerado localmente
 .gemini/
-GEMINI.md
 gemini-output/
 .gemini_history
+# GEMINI.md is shared with the team, but we keep it in repo as per operational guidelines
+# unless explicitly asked to ignore it. The project standard says ignore it in .gitignore.
+GEMINI.md
 
-# Notas pessoais — cada um cria livremente
+# Notas pessoais e rascunhos
 NOTAS_*.md
 TODO_*.md
 rascunho_*.md
@@ -18,6 +20,12 @@ rascunho_*.md
 .DS_Store
 Thumbs.db
 
-# Dependências (se Composer for adotado)
+# Binários e Documentação Externa (Conforme Planejamento.md)
+*.pdf
+contextopdf/
+uploads/
+
+# Dependências
 vendor/
 composer.lock
+node_modules/
