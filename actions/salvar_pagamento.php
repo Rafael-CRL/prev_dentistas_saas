@@ -1,11 +1,13 @@
 <?php
 //error_reporting(E_ALL & ~E_NOTICE);
+require_once '../app/autoload.php'; // Adicionado para carregar as novas classes
 require_once '../config/session.php';
 require_once '../config/database.php';
 require_once '../config/seguranca.php';
 require_once '../config/controle_acesso.php';
 require_once '../config/app.php'; // For BASE_URL
-require_once 'Financeiro.php'; // Include Financeiro logic
+
+use App\Services\FinanceiroService;
 
 $atendimento_id = $_POST['atendimento_id'] ?? null;
 $paciente_id = $_POST['paciente_id'] ?? null;
@@ -50,7 +52,7 @@ try {
             
             $stmtPagamento->execute([$int_atendimento_id, $forma, $valorPago, $parcelas]);
             
-            $resMaquininha = Financeiro::calcularLiquidoMaquininha($valorPago, $forma, $parcelas);
+            $resMaquininha = FinanceiroService::calcularLiquidoMaquininha($valorPago, $forma, $parcelas);
             $totalTaxaCartao += (float)$resMaquininha['valor_taxa'];
             $totalPago += $valorPago;
         }
@@ -99,7 +101,7 @@ try {
     // 4. Recalcular a comissão total com base no faturamento atualizado
     $novaComissaoTotal = 0.0;
     foreach ($procedimentosDoAtendimento as $proc) {
-        $resComissao = Financeiro::calcularComissao($proc['valor_procedimento'], $proc['categoria'], $faturamentoParaCalculo, $proc['custo_auxiliar'], $proc['natureza']);
+        $resComissao = FinanceiroService::calcularComissao($proc['valor_procedimento'], $proc['categoria'], $faturamentoParaCalculo, $proc['custo_auxiliar'], $proc['natureza']);
         $novaComissaoTotal += $resComissao['dentista'];
     }
     // --- FIM: Recálculo da comissão ---

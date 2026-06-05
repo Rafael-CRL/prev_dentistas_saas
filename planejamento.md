@@ -213,7 +213,7 @@ Validar que todos os 5 conseguem acessar o banco com a nova estrutura antes de a
 
 ---
 
-### Fase 4 — Infraestrutura de configuração
+### Fase 4 — Infraestrutura de configuração ✅ (CONCLUÍDA)
 
 **Classe `Config`**  
 Criar `app/Models/Config.php` as Singleton — uma única instância que lê `clinica_taxas_cartao` e `clinica_regras_comissao` do banco para a clínica da sessão ativa. Todos os Controllers que precisam de taxas ou comissões consultam essa classe. Após essa fase, nenhum percentual ou taxa pode estar fixo em PHP.

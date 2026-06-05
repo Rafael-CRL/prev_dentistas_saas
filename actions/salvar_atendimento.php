@@ -3,9 +3,11 @@
 ini_set('display_errors', 0);
 error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
+require_once '../app/autoload.php';
 require_once '../config/database.php';
 require_once '../config/app.php'; // Para usar a BASE_URL
-require_once 'Financeiro.php';
+
+use App\Services\FinanceiroService;
 
 // Garantir o fuso horário correto para funções de data (NOW, date)
 date_default_timezone_set('America/Sao_Paulo');
@@ -151,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtProcAtendimento = $pdo->prepare($sqlProcAtendimento);
 
             foreach ($procedimentosFinalizados as $proc) {
-                $resComissao = Financeiro::calcularComissao($proc['valor_total'], $proc['categoria'], $faturamentoBrutoMensal, $proc['custo_auxiliar_manual'], $proc['natureza']);
+                $resComissao = FinanceiroService::calcularComissao($proc['valor_total'], $proc['categoria'], $faturamentoBrutoMensal, $proc['custo_auxiliar_manual'], $proc['natureza']);
                 $comissaoProcedimento = $resComissao['dentista'];
                 $custoAuxiliarProcedimento = $resComissao['auxiliar'] ?? 0.0;
                 $totalComissaoDentista += $comissaoProcedimento;
