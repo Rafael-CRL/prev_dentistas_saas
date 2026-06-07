@@ -5,7 +5,7 @@ require_once __DIR__ . '/../config/controle_acesso.php';
 function isActive($urls) {
     if (!is_array($urls)) { $urls = [$urls]; }
     foreach ($urls as $url) {
-        if (strpos($_SERVER['REQUEST_URI'], $url) !== false) {
+        if (strpos($_SERVER['REQUEST_URI'], $url) !== false || (strpos($url, '.php') !== false && strpos($_SERVER['REQUEST_URI'], str_replace('.php', '', $url)) !== false)) {
             return true;
         }
     }

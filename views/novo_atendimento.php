@@ -419,7 +419,7 @@ $(document).ready(function() {
     pacienteBuscaInput.autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "<?= BASE_URL ?>actions/buscar_paciente.php",
+                url: "<?= BASE_URL ?>pacientes/buscar",
                 dataType: "json",
                 data: { term: request.term },
                 success: function(data) {
@@ -470,7 +470,7 @@ $(document).ready(function() {
         container.html('<h4>Carregando procedimentos pendentes...</h4>');
 
         $.ajax({
-            url: "<?= BASE_URL ?>actions/buscar_procedimentos_pendentes.php",
+            url: "<?= BASE_URL ?>pacientes/pendentes",
             dataType: "json",
             data: { paciente_id: pacienteId },
             success: function(data) {
