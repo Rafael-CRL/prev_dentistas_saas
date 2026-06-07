@@ -72,12 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Bloco para obter/criar o ID do paciente
         if (!$pacienteId) {
-            $stmtPaciente = $pdo->prepare("INSERT INTO pacientes (nome) VALUES (?)");
-            $stmtPaciente->execute([$pacienteNome]);
+            $stmtPaciente = $pdo->prepare("INSERT INTO pacientes (nome, clinica_id) VALUES (?, ?)");
+            $stmtPaciente->execute([$pacienteNome, $clinicaId]);
             $pacienteId = $pdo->lastInsertId();
         } else {
-             $stmtNome = $pdo->prepare("SELECT nome FROM pacientes WHERE id = ?");
-             $stmtNome->execute([$pacienteId]);
+             $stmtNome = $pdo->prepare("SELECT nome FROM pacientes WHERE id = ? AND clinica_id = ?");
+             $stmtNome->execute([$pacienteId, $clinicaId]);
              $pacienteNome = $stmtNome->fetchColumn();
         }
 

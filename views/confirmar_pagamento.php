@@ -174,7 +174,7 @@ $(document).ready(function() {
     $("#paciente_busca").autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "<?= BASE_URL ?>actions/buscar_paciente.php",
+                url: "<?= BASE_URL ?>pacientes/buscar",
                 dataType: "json",
                 data: { term: request.term },
                 success: function(data) {

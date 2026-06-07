@@ -28,8 +28,46 @@ if (strpos($uri, $base_path) === 0) {
 }
 
 // Normalize URI
-if (empty($uri) || $uri === '/') {
-    $uri = '/index.php';
+$uri = ltrim($uri, '/');
+if (empty($uri)) {
+    $uri = 'index.php';
+}
+
+// Roteamento MVC (Módulo Pacientes)
+if (strpos($uri, 'pacientes') === 0) {
+    // Apenas usuários logados podem acessar
+    if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['clinica_id'])) {
+        header("Location: " . BASE_URL . "login.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\PacienteController($pdo, (int)$_SESSION['clinica_id']);
+    
+    // Suporte para pacientes.php e rotas limpas
+    if ($uri === 'pacientes' || $uri === 'pacientes/' || $uri === 'pacientes.php') {
+        $controller->index();
+        exit;
+    } elseif ($uri === 'pacientes/editar' || $uri === 'editar_paciente.php') {
+        $id = $_GET['id'] ?? null;
+        $controller->editar($id);
+        exit;
+    } elseif ($uri === 'pacientes/salvar' || $uri === 'actions/salvar_paciente.php') {
+        $controller->salvar();
+        exit;
+    } elseif ($uri === 'pacientes/excluir' || $uri === 'actions/excluir_paciente.php') {
+        $id = $_GET['id'] ?? null;
+        $controller->excluir($id);
+        exit;
+    } elseif ($uri === 'pacientes/buscar' || $uri === 'actions/buscar_paciente.php') {
+        $controller->apiBuscar();
+        exit;
+    } elseif ($uri === 'pacientes/historico' || $uri === 'actions/buscar_historico_paciente.php') {
+        $controller->apiHistorico();
+        exit;
+    } elseif ($uri === 'pacientes/pendentes' || $uri === 'actions/buscar_procedimentos_pendentes.php') {
+        $controller->apiPendentes();
+        exit;
+    }
 }
 
 // Se o arquivo existir na raiz (legado), permite o acesso (Transição)
