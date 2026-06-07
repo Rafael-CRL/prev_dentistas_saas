@@ -70,6 +70,27 @@ if (strpos($uri, 'pacientes') === 0) {
     }
 }
 
+// Roteamento MVC (Módulo Procedimentos)
+if (strpos($uri, 'procedimentos') === 0) {
+    if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['clinica_id'])) {
+        header("Location: " . BASE_URL . "login.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\ProcedimentoController($pdo, (int)$_SESSION['clinica_id']);
+
+    if ($uri === 'procedimentos' || $uri === 'procedimentos/' || $uri === 'procedimentos.php') {
+        $controller->index();
+        exit;
+    } elseif ($uri === 'procedimentos/salvar') {
+        $controller->salvar();
+        exit;
+    } elseif ($uri === 'procedimentos/excluir') {
+        $controller->excluir();
+        exit;
+    }
+}
+
 // Se o arquivo existir na raiz (legado), permite o acesso (Transição)
 $legacy_file_path = realpath(__DIR__ . '/../' . ltrim($uri, '/'));
 
