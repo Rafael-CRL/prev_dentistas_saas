@@ -1,37 +1,16 @@
-<?php
-require_once 'config/session.php';
-require_once 'config/seguranca.php';
-require_once 'config/controle_acesso.php';
-if (!is_admin()) {
-    header('Location: ' . BASE_URL . 'index.php');
-    exit;
-}
-require_once 'config/database.php';
-require_once 'views/header.php';
-
-// Busca procedimentos
-try {
-    $stmt = $pdo->query("SELECT * FROM procedimentos ORDER BY nome ASC");
-    $procedimentos = $stmt->fetchAll();
-} catch (Exception $e) {
-    echo "<p class='error'>Erro ao buscar procedimentos: " . $e->getMessage() . "</p>";
-    $procedimentos = [];
-}
-?>
-
 <div class="card">
     <h2>Gestão de Procedimentos</h2>
 
-    <?php if (isset($_GET['erro']) && $_GET['erro'] === 'conflito'): ?>
-        <p class="error">Não é possível excluir o procedimento, pois ele já está vinculado a um ou mais atendimentos.</p>
-    <?php elseif (isset($_GET['msg']) && $_GET['msg'] === 'sucesso'): ?>
-        <p style="color: green; background: #e8f5e9; padding: 1rem; border-radius: 6px;">Procedimento salvo com sucesso!</p>
+    <?php if (isset($_SESSION['feedback'])): ?>
+        <p class="<?= $_SESSION['feedback']['type'] === 'success' ? 'success' : 'error' ?>">
+            <?= htmlspecialchars($_SESSION['feedback']['message']) ?>
+        </p>
+        <?php unset($_SESSION['feedback']); ?>
     <?php endif; ?>
 
-    <!-- Formulário para Adicionar Procedimento -->
     <div class="card" style="margin-top: 2rem;">
         <h3>Novo Procedimento</h3>
-        <form action="<?= BASE_URL ?>actions/salvar_procedimento.php" method="POST">
+        <form action="<?= BASE_URL ?>procedimentos.php?action=salvar" method="POST">
             <div class="form-group">
                 <label for="nome">Nome do Procedimento</label>
                 <input type="text" name="nome" id="nome" required>
@@ -59,7 +38,6 @@ try {
         </form>
     </div>
 
-    <!-- Tabela de Procedimentos -->
     <h3 style="margin-top: 2rem;">Procedimentos Cadastrados</h3>
     <table class="mobile-card-table">
         <thead>
@@ -72,13 +50,19 @@ try {
         </thead>
         <tbody>
             <?php if (count($procedimentos) > 0): ?>
-                <?php foreach ($procedimentos as $procedimento): ?>
+                <?php foreach ($procedimentos as $proc): ?>
                     <tr>
-                        <td data-label="Nome"><?= htmlspecialchars($procedimento['nome']) ?></td>
-                        <td data-label="Categoria"><?= ucfirst($procedimento['categoria']) ?></td>
-                        <td data-label="Valor Base">R$ <?= number_format($procedimento['valor_base'], 2, ',', '.') ?></td>
+                        <td data-label="Nome"><?= htmlspecialchars($proc['nome']) ?></td>
+                        <td data-label="Categoria"><?= ucfirst($proc['categoria']) ?></td>
+                        <td data-label="Valor Base">
+                            R$ <?= number_format((float)$proc['valor_base'], 2, ',', '.') ?>
+                        </td>
                         <td data-label="Ações">
-                            <a href="<?= BASE_URL ?>actions/excluir_procedimento.php?id=<?= $procedimento['id'] ?>" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja remover este procedimento?');">Remover</a>
+                            <a href="<?= BASE_URL ?>procedimentos/excluir?id=<?= $proc['id'] ?>"
+                               class="btn btn-danger"
+                               onclick="return confirm('Tem certeza que deseja remover este procedimento?');">
+                                Remover
+                            </a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -91,4 +75,7 @@ try {
     </table>
 </div>
 
-<?php require_once 'views/footer.php'; ?>
+<style>
+.success { color: green; background: #e8f5e9; padding: 1rem; border-radius: 6px; }
+.error   { color: red;   background: #ffebee; padding: 1rem; border-radius: 6px; }
+</style>
