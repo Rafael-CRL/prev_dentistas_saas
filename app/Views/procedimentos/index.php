@@ -10,7 +10,7 @@
 
     <div class="card" style="margin-top: 2rem;">
         <h3>Novo Procedimento</h3>
-        <form action="<?= BASE_URL ?>procedimentos.php?action=salvar" method="POST">
+        <form action="<?= BASE_URL ?>procedimentos/salvar" method="POST">
             <div class="form-group">
                 <label for="nome">Nome do Procedimento</label>
                 <input type="text" name="nome" id="nome" required>
