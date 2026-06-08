@@ -117,17 +117,14 @@ class PacienteController extends BaseController
      */
     public function apiBuscar()
     {
-        header('Content-Type: application/json');
         $term = $_GET['term'] ?? '';
 
         if (strlen(trim($term)) < 2) {
-            echo json_encode([]);
-            exit;
+            return $this->json([]);
         }
 
         $results = $this->pacienteModel->search($term);
-        echo json_encode($results);
-        exit;
+        return $this->json($results);
     }
 
     /**
@@ -135,22 +132,17 @@ class PacienteController extends BaseController
      */
     public function apiHistorico()
     {
-        header('Content-Type: application/json');
         $pacienteId = $_GET['paciente_id'] ?? null;
 
         if (!$pacienteId) {
-            echo json_encode(['erro' => 'ID do paciente não fornecido.']);
-            exit;
+            return $this->json(['erro' => 'ID do paciente não fornecido.'], 400);
         }
 
         try {
             $historico = $this->pacienteModel->getHistorico((int)$pacienteId);
-            echo json_encode($historico);
-            exit;
+            return $this->json($historico);
         } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode(['erro' => 'Erro ao buscar histórico.']);
-            exit;
+            return $this->json(['erro' => 'Erro ao buscar histórico.'], 500);
         }
     }
 
@@ -159,22 +151,17 @@ class PacienteController extends BaseController
      */
     public function apiPendentes()
     {
-        header('Content-Type: application/json');
         $pacienteId = $_GET['paciente_id'] ?? null;
 
         if (!$pacienteId) {
-            echo json_encode([]);
-            exit;
+            return $this->json([]);
         }
 
         try {
             $pendentes = $this->pacienteModel->getPendentes((int)$pacienteId);
-            echo json_encode($pendentes);
-            exit;
+            return $this->json($pendentes);
         } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode(['erro' => 'Erro ao buscar pendências.']);
-            exit;
+            return $this->json(['erro' => 'Erro ao buscar pendências.'], 500);
         }
     }
 }

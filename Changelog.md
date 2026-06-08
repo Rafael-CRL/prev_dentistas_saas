@@ -158,8 +158,13 @@ Esta etapa marca a transição definitiva dos módulos core para o padrão MVC, 
 - **Módulo de Procedimentos:** Refatoração completa concluída. Implementação de exclusão lógica com validação de dependências (impede a exclusão de procedimentos vinculados a atendimentos).
 - **Limpeza Técnica:** Remoção de backups residuais (`.bak`, `.old`) e scripts de ação obsoletos (`actions/`) substituídos pela lógica dos controladores.
 
----
-*Status: Fase 5 (Parte 1) Concluída. Módulos de Autenticação, Pacientes e Procedimentos consolidados. Infraestrutura preparada para a refatoração dos módulos de Atendimentos e Financeiro.*
+### 🩹 Hotfixes e Refinamentos de Integridade (Sincronização de Sessão)
+- **Restauração de Componente Crítico:** Recuperação do diretório `app/Views/auth/` e da view `login.php`, corrigindo erro de "View não encontrada" na raiz do projeto após falha de merge.
+- **Sincronização de Schema (AuthModel):** Removido filtro por coluna `status` no `AuthModel.php`, resolvendo exceção `PDOException` (SQLSTATE[42S22]) decorrente de incompatibilidade com o schema da Fase 3.
+- **Padronização de Respostas API:** Refatoração completa das buscas AJAX no `PacienteController` para utilizar o método `$this->json()` do `BaseController`. 
+    - **Impacto:** Eliminação de redundâncias, centralização de cabeçalhos HTTP e garantia de consistência arquitetural de alto nível.
+- **Atualização da Auditoria Holística:** O script `scripts/auditoria_conclusao_fase5.php` foi atualizado para validar a nova sintaxe de controladores e as restrições de schema identificadas, mantendo o selo de conformidade do sistema.
 
 ---
-*Status: Bug resolvido. O login e navegação das páginas legadas estão restaurados através do ponto único de entrada.*
+*Status: Fase 5 (Parte 1) Concluída. Módulos de Autenticação, Pacientes e Procedimentos consolidados e auditados. Infraestrutura preparada para a refatoração do módulo de Atendimentos.*
+
