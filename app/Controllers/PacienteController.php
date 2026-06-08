@@ -177,6 +177,4 @@ class PacienteController extends BaseController
             exit;
         }
     }
-
-    }
 }
