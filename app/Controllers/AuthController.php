@@ -8,6 +8,7 @@ class AuthController extends BaseController {
     private $authModel;
 
     public function __construct(PDO $pdo) {
+        parent::__construct();
         $this->authModel = new AuthModel($pdo);
     }
 

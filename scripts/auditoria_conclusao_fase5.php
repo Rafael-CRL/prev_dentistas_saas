@@ -128,6 +128,24 @@ if (file_exists($authModelPath)) {
     }
 }
 
+// 4.5. Auditoria de Segurança Transversal (CSRF)
+$csrfHelperPath = __DIR__ . '/../app/Helpers/CsrfHelper.php';
+if (file_exists($csrfHelperPath)) {
+    logResultado($relatorio, 'seguranca', 'OK', "CsrfHelper encontrado (Geração/Validação de Token).");
+} else {
+    logResultado($relatorio, 'seguranca', 'ERRO', "CsrfHelper NÃO encontrado.");
+}
+
+$baseCtrlPath = __DIR__ . '/../app/Controllers/BaseController.php';
+if (file_exists($baseCtrlPath)) {
+    $content = file_get_contents($baseCtrlPath);
+    if (strpos($content, 'CsrfHelper::validate') !== false) {
+        logResultado($relatorio, 'seguranca', 'OK', "BaseController intercepta e valida tokens CSRF.");
+    } else {
+        logResultado($relatorio, 'seguranca', 'ERRO', "BaseController NÃO possui validação CSRF.");
+    }
+}
+
 // 5. Auditoria de Limpeza (Zero .bak/.old)
 $dirty_files = shell_exec("find . -name '*.bak' -o -name '*.old' | grep -v 'vendor'");
 if (empty($dirty_files)) {

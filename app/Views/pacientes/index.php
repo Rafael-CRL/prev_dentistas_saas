@@ -12,6 +12,7 @@
     <div class="card" style="margin-top: 2rem;">
         <h3>Novo Paciente</h3>
         <form action="<?= BASE_URL ?>pacientes/salvar" method="POST">
+            <?= \App\Helpers\CsrfHelper::input() ?>
              <div class="grid-container">
                 <div class="form-group grid-col-6">
                     <label for="paciente_nome">Nome Completo</label>
