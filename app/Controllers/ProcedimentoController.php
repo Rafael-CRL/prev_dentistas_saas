@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\Procedimento;
 use PDO;
 
-class ProcedimentoController
+class ProcedimentoController extends BaseController
 {
     private Procedimento $procedimentoModel;
 
@@ -97,13 +97,5 @@ class ProcedimentoController
 
         header("Location: " . BASE_URL . "procedimentos");
         exit;
-    }
-
-    private function render(string $view, array $data = []): void
-    {
-        extract($data);
-        require_once __DIR__ . '/../../views/header.php';
-        require_once __DIR__ . '/../Views/' . $view . '.php';
-        require_once __DIR__ . '/../../views/footer.php';
     }
 }

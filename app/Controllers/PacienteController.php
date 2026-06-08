@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\Paciente;
 use PDO;
 
-class PacienteController
+class PacienteController extends BaseController
 {
     private $pacienteModel;
 
@@ -178,14 +178,5 @@ class PacienteController
         }
     }
 
-    /**
-     * Renderiza uma view
-     */
-    private function render($view, $data = [])
-    {
-        extract($data);
-        require_once __DIR__ . '/../../views/header.php';
-        require_once __DIR__ . '/../Views/' . $view . '.php';
-        require_once __DIR__ . '/../../views/footer.php';
     }
 }
