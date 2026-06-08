@@ -16,7 +16,7 @@ class AuthModel {
      * O clinica_id é obtido do registro encontrado para isolamento posterior.
      */
     public function authenticate($login) {
-        $stmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE login = ? AND status = 1 LIMIT 1");
+        $stmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE login = ? LIMIT 1");
         $stmt->execute([$login]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
