@@ -11,6 +11,7 @@ class PacienteController extends BaseController
 
     public function __construct(PDO $pdo, int $clinica_id)
     {
+        parent::__construct();
         $this->pacienteModel = new Paciente($pdo, $clinica_id);
     }
 

@@ -165,6 +165,12 @@ Esta etapa marca a transição definitiva dos módulos core para o padrão MVC, 
     - **Impacto:** Eliminação de redundâncias, centralização de cabeçalhos HTTP e garantia de consistência arquitetural de alto nível.
 - **Atualização da Auditoria Holística:** O script `scripts/auditoria_conclusao_fase5.php` foi atualizado para validar a nova sintaxe de controladores e as restrições de schema identificadas, mantendo o selo de conformidade do sistema.
 
+### 🛡️ Segurança Transversal (CSRF - Requirement Elevation)
+- **Implementação do `CsrfHelper`:** Criação de um utilitário dedicado (`app/Helpers/CsrfHelper.php`) para geração (`random_bytes`) e validação (`hash_equals`) segura de tokens de sessão.
+- **Interceptação no `BaseController`:** O construtor do controlador base foi modificado para interceptar 100% das requisições `POST` no escopo MVC, exigindo um token CSRF válido e retornando erro 403 (Forbidden) em caso de falha. Isso garante que todos os futuros módulos herdem a segurança "by design".
+- **Retrofit de Módulos Consolidados:** Injeção da chamada `parent::__construct()` nos controladores e adição do input oculto `<?= \App\Helpers\CsrfHelper::input() ?>` nas views migradas (`login.php`, `Pacientes`, `Procedimentos`).
+- **Elevação de Mandato:** O planejamento foi atualizado para mover o CSRF de uma tarefa opcional ("Se sobrar tempo") para um requisito estrito (Passo 1) da Fase 5.
+
 ---
-*Status: Fase 5 (Parte 1) Concluída. Módulos de Autenticação, Pacientes e Procedimentos consolidados e auditados. Infraestrutura preparada para a refatoração do módulo de Atendimentos.*
+*Status: Fase 5 (Segurança Transversal) Concluída. Módulos de Autenticação, Pacientes e Procedimentos blindados contra CSRF. Infraestrutura preparada para a refatoração do módulo de Atendimentos.*
 

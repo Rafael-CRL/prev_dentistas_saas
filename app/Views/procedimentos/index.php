@@ -11,6 +11,7 @@
     <div class="card" style="margin-top: 2rem;">
         <h3>Novo Procedimento</h3>
         <form action="<?= BASE_URL ?>procedimentos/salvar" method="POST">
+            <?= \App\Helpers\CsrfHelper::input() ?>
             <div class="form-group">
                 <label for="nome">Nome do Procedimento</label>
                 <input type="text" name="nome" id="nome" required>

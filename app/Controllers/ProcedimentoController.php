@@ -11,6 +11,7 @@ class ProcedimentoController extends BaseController
 
     public function __construct(PDO $pdo, int $clinica_id)
     {
+        parent::__construct();
         $this->procedimentoModel = new Procedimento($pdo, $clinica_id);
     }
 

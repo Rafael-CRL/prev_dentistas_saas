@@ -9,6 +9,7 @@
     <?php endif; ?>
 
     <form action="<?= BASE_URL ?>pacientes/salvar" method="POST">
+        <?= \App\Helpers\CsrfHelper::input() ?>
         <input type="hidden" name="paciente_id" value="<?= $paciente['id'] ?>">
         
         <div class="grid-container">
