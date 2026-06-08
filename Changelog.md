@@ -132,5 +132,34 @@ Após a integração das frentes de trabalho da Fase 4, o sistema foi consolidad
 ---
 *Status: Fase 4 Finalizada e Documentada. Infraestrutura de segurança e finanças consolidada na branch principal.*
 
+## [2026-06-08] — Fase 5: Consolidação Arquitetural e Refatoração MVC (Módulos Base)
+
+Esta etapa marca a transição definitiva dos módulos core para o padrão MVC, unificando frentes de trabalho paralelas através de uma "Consolidação Cirúrgica" com foco em alta coesão e segurança SaaS.
+
+### 🏗️ Evolução da Infraestrutura (Refinamento de Arquiteto)
+- **Implementação do `App\Controllers\BaseController`:** 
+    - Introdução de uma classe abstrata base para todos os controladores.
+    - Centralização do motor de renderização de views (`render()`) e padronização de respostas JSON (`json()`).
+    - Redução drástica de redundância de código nos controladores de Pacientes e Procedimentos.
+- **Unificação do Front Controller (`public/index.php`):**
+    - Consolidação de rotas MVC para os módulos de Autenticação, Pacientes e Procedimentos.
+    - Refinamento da lógica de normalização de URI e suporte a rotas amigáveis (Ex: `/pacientes/editar?id=X`).
+    - Manutenção controlada da camada de compatibilidade legada (Strangler Fig Pattern).
+
+### 🛡️ Segurança e Multi-tenancy (Rigor SaaS)
+- **Refatoração do Módulo de Autenticação:**
+    - Migração para `AuthController` e `AuthModel` integrados ao fluxo MVC.
+    - **Correção Crítica de Segurança:** Busca de usuários agora valida o status ativo e garante o isolamento do `clinica_id` desde o ponto de entrada.
+    - **Proteção de Sessão:** Implementado `session_regenerate_id(true)` no sucesso do login para mitigar riscos de *Session Fixation*.
+- **Integridade de Dados:** Validação rigorosa de propriedade de registros (cláusula `WHERE clinica_id = ?`) em todas as operações de leitura e escrita nos novos Models.
+
+### 📦 Consolidação de Módulos (Feature Sync)
+- **Módulo de Pacientes:** Refatoração completa concluída. Integração de histórico de atendimentos e pendências via API JSON interna.
+- **Módulo de Procedimentos:** Refatoração completa concluída. Implementação de exclusão lógica com validação de dependências (impede a exclusão de procedimentos vinculados a atendimentos).
+- **Limpeza Técnica:** Remoção de backups residuais (`.bak`, `.old`) e scripts de ação obsoletos (`actions/`) substituídos pela lógica dos controladores.
+
+---
+*Status: Fase 5 (Parte 1) Concluída. Módulos de Autenticação, Pacientes e Procedimentos consolidados. Infraestrutura preparada para a refatoração dos módulos de Atendimentos e Financeiro.*
+
 ---
 *Status: Bug resolvido. O login e navegação das páginas legadas estão restaurados através do ponto único de entrada.*
