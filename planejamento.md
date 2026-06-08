@@ -227,11 +227,15 @@ Criar `app/Services/FinanceiroService.php` centralizando toda a lógica de cálc
 
 Para cada módulo, seguir obrigatoriamente essa sequência:
 
-**1. Model** — criar a classe em `app/Models/`. Mover todas as queries SQL do arquivo original para métodos da classe. Todo método que busca dados deve incluir `WHERE clinica_id = ?` usando o `clinica_id` da sessão. O Model não sabe o que é HTML, não sabe o que é uma requisição HTTP — só entende de dados.
+**1. Segurança (Transversal):**
+- **Proteção CSRF:** Implementar geração e validação de tokens em todos os formulários (`POST`) para mitigar ataques de Cross-Site Request Forgery.
+- **Prevenção de Session Fixation:** Garantir o uso de `session_regenerate_id(true)` no sucesso do login e em trocas de nível de acesso.
 
-**2. Controller** — criar a classe em `app/Controllers/`. Recebe os dados da requisição (`$_POST`, `$_GET`), valida, chama o Model, decide o que fazer com o resultado. Para ações, redireciona com `header()`. Para buscas dinâmicas, retorna JSON.
+**2. Model** — criar a classe em `app/Models/`. Mover todas as queries SQL do arquivo original para métodos da classe. Todo método que busca dados deve incluir `WHERE clinica_id = ?` usando o `clinica_id` da sessão. O Model não sabe o que é HTML, não sabe o que é uma requisição HTTP — só entende de dados.
 
-**3. View** — criar o arquivo em `app/Views/`. Apenas HTML com variáveis PHP simples para exibição. Sem queries, sem lógica de negócio, sem cálculos.
+**3. Controller** — criar a classe em `app/Controllers/`. Recebe os dados da requisição (`$_POST`, `$_GET`), valida, chama o Model, decide o que fazer com o resultado. Para ações, redireciona com `header()`. Para buscas dinâmicas, retorna JSON.
+
+**4. View** — criar o arquivo em `app/Views/`. Apenas HTML com variáveis PHP simples para exibição. Sem queries, sem lógica de negócio, sem cálculos.
 
 Ordem dos módulos:
 
@@ -260,15 +264,13 @@ Padronizar componentes visuais — botões, tabelas, cards, formulários — em 
 | Banco multi-tenant | 1 + 3 |
 | Código limpo e sem duplicatas | 2 |
 | Zero hardcode | 4 |
-| MVC + POO | 5 |
+| MVC + POO + Segurança (CSRF) | 5 |
 | Design profissional | 6 |
 
 ---
 
 ## Se sobrar tempo
 
-- Proteção CSRF nos formulários — token de validação em todos os POSTs
-- `session_regenerate_id()` no login para prevenir fixação de sessão
 - Remover `$e->getMessage()` das telas de erro — nunca expor detalhes do banco em produção
 - Exclusão lógica com `deleted_at` em vez de `DELETE` direto — preserva histórico e evita erros de FK
 - Arredondamento contábil com centavos inteiros no Financeiro — evita perda de precisão com `float`
