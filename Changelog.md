@@ -198,6 +198,13 @@ Conclusão da migração do core transacional da aplicação. O Módulo de Atend
     - Exclusão dos scripts obsoletos e inseguros `actions/salvar_atendimento.php` e `actions/verificar_pagamento_pendente.php`.
 - **Navegação Sincronizada:** Botões e menus do Dashboard e Header ajustados para direcionar à nova infraestrutura MVC.
 
+### 🐛 Hotfixes e Degradação Graciosa (Gestão de Débito Técnico)
+- **Correção Arquitetural (`AtendimentoController`):** Ajustada a chamada do construtor da classe base (`parent::__construct()`) que estava recebendo o `$pdo` indevidamente, prevenindo *Fatal Errors* e garantindo a instância do banco para as transações locais.
+- **Isolamento de Banco de Dados (`AtendimentoModel`):** Corrigida a omissão do `clinica_id` na query de inserção da tabela `atendimento_procedimentos`, resolvendo o erro `SQLSTATE[HY000]: General error: 1364` e assegurando o isolamento dos registros secundários.
+- **Degradação Graciosa do Financeiro (`actions/salvar_pagamento.php`):** O script legado de confirmação de pagamentos foi **bloqueado intencionalmente** com uma mensagem JSON amigável ("Módulo Financeiro em Refatoração").
+  - **Motivo:** O banco SaaS agora exige o `clinica_id` (erro 1364), e o script antigo não comporta essa injeção de forma segura.
+  - **Ação Futura:** Este script será substituído inteiramente por um novo `FinanceiroController` (ou `PagamentoController`) na próxima etapa do cronograma (Refatoração do Módulo Financeiro).
+
 ---
-*Status: Módulo de Atendimentos consolidado na arquitetura SaaS/MVC e protegido por CSRF.*
+*Status: Módulo de Atendimentos consolidado, rigorosamente validado na arquitetura SaaS/MVC e protegido por CSRF. Débito técnico do módulo financeiro isolado com segurança.*
 

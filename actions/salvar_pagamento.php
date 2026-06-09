@@ -28,6 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || (!is_admin() && !is_recepcionista()
 
 $pagamentos = $_POST['pagamentos'] ?? [];
 
+// --- TRAVA DE DEGRADAÇÃO GRACIOSA (REFATORAÇÃO FASE 5) ---
+// O módulo financeiro ainda será refatorado para MVC. O banco já exige clinica_id.
+header('Content-Type: application/json');
+http_response_code(403);
+echo json_encode(['sucesso' => false, 'erro' => 'Módulo Financeiro em Refatoração (SaaS/MVC). A confirmação de pagamentos está temporariamente indisponível.']);
+exit;
+// --------------------------------------------------------
+
 if (!$atendimento_id || !$paciente_id || empty($pagamentos['valor'])) {
     header('Content-Type: application/json');
     http_response_code(400);
