@@ -91,13 +91,14 @@ class Atendimento
     public function criarProcedimentosAtendimento(int $idAtendimento, array $procedimentos): void
     {
         $sql = "INSERT INTO atendimento_procedimentos 
-                (id_atendimento, id_procedimento, quantidade, valor_procedimento, custo_auxiliar, local, descricao, status_execucao, natureza) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (clinica_id, id_atendimento, id_procedimento, quantidade, valor_procedimento, custo_auxiliar, local, descricao, status_execucao, natureza) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $this->pdo->prepare($sql);
 
         foreach ($procedimentos as $proc) {
             $stmt->execute([
+                $this->clinicaId,
                 $idAtendimento,
                 $proc['id'],
                 $proc['quantidade'] ?? 1,
