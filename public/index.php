@@ -85,6 +85,25 @@ if (strpos($uri, 'procedimentos') === 0) {
     exit;
 }
 
+// 4. Módulo de Atendimentos
+if (strpos($uri, 'atendimentos') === 0) {
+    if (!isset($_SESSION['usuario_id'])) {
+        header("Location: " . BASE_URL . "login.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\AtendimentoController($pdo, (int)$_SESSION['clinica_id']);
+
+    if ($uri === 'atendimentos/cadastrar' || $uri === 'views/novo_atendimento.php') {
+        $controller->cadastrar();
+    } elseif ($uri === 'atendimentos/salvar' || $uri === 'actions/salvar_atendimento.php') {
+        $controller->salvar();
+    } elseif ($uri === 'atendimentos/verificar-pagamento' || $uri === 'actions/verificar_pagamento_pendente.php') {
+        $controller->verificarPagamentoPendente();
+    }
+    exit;
+}
+
 // --- COMPATIBILIDADE LEGADA ---
 
 $legacy_file_path = realpath(__DIR__ . '/../' . ltrim($uri, '/'));

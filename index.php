@@ -259,7 +259,7 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
                 <button type="submit" class="btn btn-secondary">Buscar</button>
             </form>
             <?php if (is_admin()): ?>
-            <a href="<?= BASE_URL ?>views/novo_atendimento.php" class="btn btn-primary">Novo Lançamento +</a>
+            <a href="<?= BASE_URL ?>atendimentos/cadastrar" class="btn btn-primary">Novo Lançamento +</a>
             <?php endif; ?>
         </div>
     </div>

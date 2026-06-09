@@ -1,34 +1,16 @@
 <?php
-// views/novo_atendimento.php
-require_once '../config/session.php';
-require_once '../config/seguranca.php';
-require_once '../config/database.php';
-require_once 'header.php';
-require_once '../config/controle_acesso.php';
+// app/Views/atendimentos/cadastrar.php
+require_once __DIR__ . '/../../../views/header.php';
 
-if (!is_admin() && !is_dentista() && !is_recepcionista()) {
-    header('Location: ' . BASE_URL . 'index.php');
-    exit;
-}
-
-// Busca dados para preencher os selects (Dentistas e Procedimentos)
-try {
-    $stmtDentistas = $pdo->query("SELECT id, nome FROM usuarios WHERE perfil = 'dentista'");
-    $dentistas = $stmtDentistas->fetchAll();
-
-    $stmtProc = $pdo->query("SELECT id, nome, categoria, valor_base, tipo FROM procedimentos");
-    $procedimentos = $stmtProc->fetchAll();
-} catch (Exception $e) {
-    echo "<p class='error'>Erro ao carregar dados: " . $e->getMessage() . "</p>";
-    $dentistas = []; $procedimentos = [];
-}
+// As variáveis $dentistas e $procedimentos já estão disponíveis, injetadas pelo Controller.
 ?>
 
 <div id="toast-notification" class="toast"></div>
 
 <div class="card">
     <h2>Novo Lançamento de Atendimento</h2>
-    <form id="form-atendimento" action="<?= BASE_URL ?>actions/salvar_atendimento.php" method="POST" enctype="multipart/form-data">
+    <form id="form-atendimento" action="<?= BASE_URL ?>atendimentos/salvar" method="POST" enctype="multipart/form-data">
+        <?= \App\Helpers\CsrfHelper::input() ?>
         
         <fieldset>
             <legend>Dados do Paciente</legend>
@@ -1001,7 +983,7 @@ $(document).ready(function() {
         // 1. Verificar pagamento pendente
         if (pacienteId) {
             try {
-                const response = await fetch(`<?= BASE_URL ?>actions/verificar_pagamento_pendente.php?paciente_id=${pacienteId}`);
+                const response = await fetch(`<?= BASE_URL ?>atendimentos/verificar-pagamento?paciente_id=${pacienteId}`);
                 const data = await response.json();
 
                 if (data.pendente) {
@@ -1022,7 +1004,7 @@ $(document).ready(function() {
         const formData = new FormData(form);
 
         try {
-            const response = await fetch('<?= BASE_URL ?>actions/salvar_atendimento.php', {
+            const response = await fetch('<?= BASE_URL ?>atendimentos/salvar', {
                 method: 'POST',
                 body: formData
             });
@@ -1049,4 +1031,4 @@ $(document).ready(function() {
 });
 </script>
 
-<?php require_once 'footer.php'; ?>
+<?php require_once __DIR__ . '/../../../views/footer.php'; ?>

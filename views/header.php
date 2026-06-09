@@ -41,11 +41,11 @@ function isActive($urls) {
             <?php if(isset($_SESSION['usuario_id'])): ?>
                 <a href="<?= BASE_URL ?>index.php" class="<?= isActive(['index.php']) ? 'active' : '' ?>">Dashboard</a>
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['novo_atendimento.php', 'confirmar_pagamento.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['atendimentos/cadastrar', 'confirmar_pagamento.php']) ? 'active' : '' ?>">
                         Novo Atendimento <small>▾</small>
                     </a>
                     <div class="dropdown-content">
-                        <a href="<?= BASE_URL ?>views/novo_atendimento.php">Lançar/Executar Procedimento</a>
+                        <a href="<?= BASE_URL ?>atendimentos/cadastrar">Lançar/Executar Procedimento</a>
                         <a href="<?= BASE_URL ?>views/confirmar_pagamento.php">Confirmar Pagamento</a>
                     </div>
                 </div>
