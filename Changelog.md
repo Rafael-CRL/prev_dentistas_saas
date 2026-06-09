@@ -174,3 +174,30 @@ Esta etapa marca a transição definitiva dos módulos core para o padrão MVC, 
 ---
 *Status: Fase 5 (Segurança Transversal) Concluída. Módulos de Autenticação, Pacientes e Procedimentos blindados contra CSRF. Infraestrutura preparada para a refatoração do módulo de Atendimentos.*
 
+## [2026-06-09] — Fase 5: Refatoração MVC do Módulo de Atendimentos
+
+Conclusão da migração do core transacional da aplicação. O Módulo de Atendimentos, responsável pela orquestração do odontograma e lógica financeira, foi integralmente refatorado.
+
+### 🏗️ Evolução Arquitetural (MVC & SRP)
+- **Criação do `App\Models\Atendimento`:** 
+    - Toda a lógica de inserção principal, inserção de procedimentos atrelados e exclusão de pendências foi migrada das antigas *actions* procedurais.
+    - **Isolamento SaaS Garantido:** A coluna `clinica_id` agora é injetada nativamente via construtor do Model e propagada para todos os `INSERT`, `UPDATE` e `DELETE`, fechando uma brecha crítica que impedia a escalabilidade Multi-Tenant segura.
+- **Criação do `App\Controllers\AtendimentoController`:**
+    - Atua como o maestro do lançamento de dados, absorvendo a complexa lógica que residia no antigo `salvar_atendimento.php`.
+    - **Proteção Herdada:** Extensão da classe `BaseController`, garantindo a validação transversal de tokens CSRF em toda requisição POST, blindando o formulário contra falsificação.
+    - **Motor Zero Hardcode:** Injeção do `FinanceiroService` e o uso rigoroso do Model `Config`, garantindo que cálculos de custo e comissão respeitem as parametrizações da clínica do usuário ativo.
+
+### 🛡️ Limpeza, Rotas e Apresentação
+- **Limpeza de View (`app/Views/atendimentos/cadastrar.php`):** 
+    - O arquivo antigo `views/novo_atendimento.php` foi refatorado. Extirpou-se a lógica PHP de banco de dados do início do arquivo, passando as responsabilidades para o Controller.
+    - Injetada a tag de proteção de formulários (`CsrfHelper::input()`).
+    - Nomenclatura ajustada para maior expressividade ao domínio do negócio (`cadastrar.php`).
+- **Refinamento de Rotas (`public/index.php`):** 
+    - Registrado o bloco MVC `atendimentos/` para capturar requisições de página (`cadastrar`) e chamadas de API internas (`salvar`, `verificar-pagamento`).
+- **Limpeza de Base (`Dívida Técnica Expurgo`):** 
+    - Exclusão dos scripts obsoletos e inseguros `actions/salvar_atendimento.php` e `actions/verificar_pagamento_pendente.php`.
+- **Navegação Sincronizada:** Botões e menus do Dashboard e Header ajustados para direcionar à nova infraestrutura MVC.
+
+---
+*Status: Módulo de Atendimentos consolidado na arquitetura SaaS/MVC e protegido por CSRF.*
+

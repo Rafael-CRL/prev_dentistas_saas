@@ -17,10 +17,12 @@ class AtendimentoController extends BaseController
     private $procedimentoModel;
     private $financeiroService;
     private $clinicaId;
+    private $pdo;
 
     public function __construct(PDO $pdo, int $clinicaId)
     {
-        parent::__construct($pdo);
+        parent::__construct();
+        $this->pdo = $pdo;
         $this->clinicaId = $clinicaId;
         $this->atendimentoModel = new Atendimento($pdo, $clinicaId);
         $this->pacienteModel = new Paciente($pdo, $clinicaId);
