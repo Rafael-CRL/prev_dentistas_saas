@@ -110,6 +110,23 @@ class Paciente
     }
 
     /**
+     * Cria rapidamente um paciente apenas com o nome (usado no Lançamento de Atendimento).
+     * @return int O ID do paciente criado.
+     * @throws Exception Se falhar na criação.
+     */
+    public function criar(string $nome): int
+    {
+        $sql = "INSERT INTO pacientes (nome, clinica_id) VALUES (?, ?)";
+        $stmt = $this->pdo->prepare($sql);
+        
+        if ($stmt->execute([$nome, $this->clinica_id])) {
+            return (int)$this->pdo->lastInsertId();
+        }
+        
+        throw new Exception("Falha ao criar o paciente rapidamente.");
+    }
+
+    /**
      * Exclui um paciente, verificando se há atendimentos vinculados.
      */
     public function delete(int $id): bool
