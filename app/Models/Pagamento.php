@@ -24,7 +24,7 @@ class Pagamento
      */
     public function registrarPagamentos(int $atendimento_id, array $pagamentos): bool
     {
-        $sql = "INSERT INTO atendimento_pagamentos (clinica_id, id_atendimento, forma_pagamento, valor_pago, parcelas) 
+        $sql = "INSERT INTO atendimento_pagamentos (clinica_id, id_atendimento, forma_pagamento, valor, qtd_parcelas) 
                 VALUES (:clinica_id, :atendimento_id, :forma, :valor, :parcelas)";
         
         $stmt = $this->pdo->prepare($sql);
