@@ -27,14 +27,14 @@ try {
         JOIN pacientes p ON a.paciente_id = p.id
         JOIN usuarios u ON a.id_dentista = u.id AND u.perfil = 'dentista'
         LEFT JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
-        WHERE a.id = ? AND ap.status_execucao = 'feito'
+        WHERE a.id = ? AND a.clinica_id = ? AND ap.status_execucao IN ('feito', 'finalizado')
         GROUP BY a.id
     ");
-    $stmt->execute([$id_atendimento]);
+    $stmt->execute([$id_atendimento, $_SESSION['clinica_id']]);
     $atendimento = $stmt->fetch();
 
     if (!$atendimento) {
-        die("Atendimento não encontrado.");
+        die("Atendimento não encontrado ou acesso negado.");
     }
 
     // Buscar procedimentos realizados
@@ -42,9 +42,9 @@ try {
         SELECT proc.nome, ap.valor_procedimento
         FROM atendimento_procedimentos ap
         JOIN procedimentos proc ON ap.id_procedimento = proc.id
-        WHERE ap.id_atendimento = ? AND ap.status_execucao = 'feito'
+        WHERE ap.id_atendimento = ? AND ap.clinica_id = ? AND ap.status_execucao IN ('feito', 'finalizado')
     ");
-    $stmt_proc->execute([$id_atendimento]);
+    $stmt_proc->execute([$id_atendimento, $_SESSION['clinica_id']]);
     $procedimentos = $stmt_proc->fetchAll();
 
 } catch (Exception $e) {

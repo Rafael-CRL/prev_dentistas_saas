@@ -95,13 +95,13 @@ try {
         a.url_arquivo,
         u.nome AS dentista,
         SUM(CASE 
-            WHEN ap.status_execucao = 'feito' 
+            WHEN ap.status_execucao IN ('feito', 'finalizado')
             THEN ap.valor_procedimento 
             ELSE 0 
         END) AS valor_bruto_total,
         GROUP_CONCAT(
             CASE 
-                WHEN ap.status_execucao = 'feito' 
+                WHEN ap.status_execucao IN ('feito', 'finalizado')
                 THEN proc.nome 
             END 
             SEPARATOR ', '
