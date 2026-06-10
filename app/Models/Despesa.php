@@ -55,4 +55,60 @@ class Despesa
         $stmt = $this->pdo->prepare("DELETE FROM despesas WHERE id = ? AND clinica_id = ?");
         return $stmt->execute([$id, $this->clinica_id]);
     }
+
+    public function obterTotalPeriodo(string $inicio, string $fim): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(valor) as total 
+            FROM despesas 
+            WHERE data_despesa BETWEEN ? AND ? 
+            AND clinica_id = ?
+        ");
+        $stmt->execute([$inicio, $fim, $this->clinica_id]);
+        return (float) ($stmt->fetchColumn() ?: 0.0);
+    }
+
+    public function obterContagemPeriodo(string $inicio, string $fim): int
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(id) 
+            FROM despesas 
+            WHERE data_despesa BETWEEN ? AND ? 
+            AND clinica_id = ?
+        ");
+        $stmt->execute([$inicio, $fim, $this->clinica_id]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function listarPeriodoPaginado(string $inicio, string $fim, int $limit, int $offset): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT * 
+            FROM despesas 
+            WHERE data_despesa BETWEEN :data_inicio AND :data_fim 
+            AND clinica_id = :clinica_id 
+            ORDER BY data_despesa DESC 
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue(':data_inicio', $inicio);
+        $stmt->bindValue(':data_fim', $fim);
+        $stmt->bindValue(':clinica_id', $this->clinica_id, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function listarPorData(string $data): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT * 
+            FROM despesas 
+            WHERE data_despesa = ? 
+            AND clinica_id = ? 
+            ORDER BY descricao
+        ");
+        $stmt->execute([$data, $this->clinica_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

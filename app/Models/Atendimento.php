@@ -141,4 +141,354 @@ class Atendimento
         $stmt->execute([$atendimentoId, $this->clinicaId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Calcula o faturamento bruto total de atendimentos pagos no período para a clínica atual.
+     */
+    public function obterFaturamentoBrutoPeriodo(string $dataInicio, string $dataFim): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(ap.valor_procedimento) 
+            FROM atendimentos a 
+            JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
+            WHERE a.data_atendimento BETWEEN ? AND ? 
+            AND a.status_pagamento = 'pago' 
+            AND ap.status_execucao IN ('feito', 'finalizado')
+            AND a.clinica_id = ?
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId]);
+        return (float) ($stmt->fetchColumn() ?: 0.0);
+    }
+
+    /**
+     * Calcula o faturamento líquido total da clínica no período.
+     */
+    public function obterFaturamentoLiquidoPeriodo(string $dataInicio, string $dataFim): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(valor_liquido_clinica) 
+            FROM atendimentos 
+            WHERE data_atendimento BETWEEN ? AND ? 
+            AND status_pagamento = 'pago'
+            AND clinica_id = ?
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId]);
+        return (float) ($stmt->fetchColumn() ?: 0.0);
+    }
+
+    /**
+     * Conta atendimentos pagos no período para paginação.
+     */
+    public function obterContagemPeriodo(string $dataInicio, string $dataFim): int
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(DISTINCT a.id) 
+            FROM atendimentos a 
+            WHERE a.data_atendimento BETWEEN ? AND ? 
+            AND a.status_pagamento = 'pago'
+            AND a.clinica_id = ?
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Lista atendimentos pagos no período com paginação.
+     */
+    public function listarPeriodoPaginado(string $dataInicio, string $dataFim, int $limit, int $offset): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                a.id, a.data_atendimento, p.nome as paciente_nome, a.valor_liquido_clinica, 
+                u.nome as dentista, 
+                GROUP_CONCAT(CASE WHEN ap.status_execucao IN ('feito', 'finalizado') THEN proc.nome END SEPARATOR ', ') as procedimento, 
+                SUM(CASE WHEN ap.status_execucao IN ('feito', 'finalizado') THEN ap.valor_procedimento ELSE 0 END) as valor_bruto 
+            FROM atendimentos a 
+            JOIN pacientes p ON a.paciente_id = p.id
+            JOIN usuarios u ON a.id_dentista = u.id 
+            LEFT JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento 
+            LEFT JOIN procedimentos proc ON ap.id_procedimento = proc.id 
+            WHERE a.data_atendimento BETWEEN :data_inicio AND :data_fim 
+            AND a.status_pagamento = 'pago'
+            AND a.clinica_id = :clinica_id
+            GROUP BY a.id
+            ORDER BY a.data_atendimento DESC
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue(':data_inicio', $data_inicio);
+        $stmt->bindValue(':data_fim', $data_fim);
+        $stmt->bindValue(':clinica_id', $this->clinicaId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Relatório diário: faturamento bruto do dia.
+     */
+    public function obterFaturamentoBrutoDiario(string $data): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(ap.valor_procedimento) as total 
+            FROM atendimentos a
+            JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
+            WHERE DATE(a.data_atendimento) = ? 
+            AND a.status_pagamento = 'pago' 
+            AND ap.status_execucao IN ('feito', 'finalizado')
+            AND a.clinica_id = ?
+        ");
+        $stmt->execute([$data, $this->clinicaId]);
+        return (float) ($stmt->fetchColumn() ?: 0.0);
+    }
+
+    /**
+     * Relatório diário: total de taxas de cartão aplicadas no dia.
+     */
+    public function obterTaxasCartaoDiario(string $data): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(a.taxa_cartao) as total 
+            FROM atendimentos a 
+            WHERE DATE(a.data_atendimento) = ? 
+            AND a.status_pagamento = 'pago' 
+            AND a.clinica_id = ?
+            AND EXISTS (
+                SELECT 1 
+                FROM atendimento_procedimentos ap 
+                WHERE ap.id_atendimento = a.id 
+                AND ap.status_execucao IN ('feito', 'finalizado')
+            )
+        ");
+        $stmt->execute([$data, $this->clinicaId]);
+        return (float) ($stmt->fetchColumn() ?: 0.0);
+    }
+
+    /**
+     * Relatório diário: custo com auxiliar/protético no dia.
+     */
+    public function obterCustoAuxiliarDiario(string $data): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(a.custo_auxiliar) as total 
+            FROM atendimentos a 
+            WHERE DATE(a.data_atendimento) = ? 
+            AND a.status_pagamento = 'pago' 
+            AND a.clinica_id = ?
+            AND EXISTS (
+                SELECT 1 
+                FROM atendimento_procedimentos ap 
+                WHERE ap.id_atendimento = a.id 
+                AND ap.status_execucao IN ('feito', 'finalizado')
+            )
+        ");
+        $stmt->execute([$data, $this->clinicaId]);
+        return (float) ($stmt->fetchColumn() ?: 0.0);
+    }
+
+    /**
+     * Relatório diário: comissões pagas para dentistas no dia.
+     */
+    public function obterComissoesDentistasDiario(string $data): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT u.nome, SUM(a.comissao_dentista) as total_comissao
+            FROM atendimentos a
+            JOIN usuarios u ON a.id_dentista = u.id
+            WHERE DATE(a.data_atendimento) = ? 
+            AND a.status_pagamento = 'pago' 
+            AND a.clinica_id = ?
+            AND EXISTS (
+                SELECT 1 
+                FROM atendimento_procedimentos ap 
+                WHERE ap.id_atendimento = a.id 
+                AND ap.status_execucao IN ('feito', 'finalizado')
+            )
+            GROUP BY u.nome
+            HAVING total_comissao > 0
+            ORDER BY u.nome
+        ");
+        $stmt->execute([$data, $this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Relatório de dentistas: faturamento e comissões por dentista no período.
+     */
+    public function obterFaturamentoPorDentistaPeriodo(string $dataInicio, string $dataFim, string $dentistaId = 'todos'): array
+    {
+        $sql = "
+            SELECT
+                u.id as dentista_id,
+                u.nome as dentista_nome,
+                COUNT(atendimento_agg.id) as total_atendimentos,
+                SUM(atendimento_agg.faturamento_bruto) as faturamento_bruto,
+                SUM(atendimento_agg.valor_liquido_clinica) as valor_para_clinica,
+                SUM(atendimento_agg.comissao_dentista) as valor_para_dentista
+            FROM usuarios u
+            JOIN (
+                SELECT
+                    a.id_dentista,
+                    a.id,
+                    a.valor_liquido_clinica,
+                    a.comissao_dentista,
+                    SUM(ap.valor_procedimento) as faturamento_bruto
+                FROM atendimentos a
+                JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
+                WHERE a.data_atendimento BETWEEN :data_inicio AND :data_fim
+                  AND ap.status_execucao IN ('finalizado', 'feito')
+                  AND a.status_pagamento = 'pago'
+                  AND a.clinica_id = :clinica_id
+                GROUP BY a.id, a.id_dentista, a.valor_liquido_clinica, a.comissao_dentista
+            ) as atendimento_agg ON u.id = atendimento_agg.id_dentista
+            WHERE u.clinica_id = :clinica_id
+        ";
+
+        $params = [
+            'data_inicio' => $dataInicio,
+            'data_fim' => $dataFim,
+            'clinica_id' => $this->clinicaId
+        ];
+
+        if ($dentistaId !== 'todos') {
+            $sql .= " AND u.id = :dentista_id";
+            $params['dentista_id'] = (int)$dentistaId;
+        }
+
+        $sql .= " GROUP BY u.id, u.nome ORDER BY faturamento_bruto DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Relatório por procedimentos: contagem e representação.
+     */
+    public function obterRelatorioProcedimentosPeriodo(string $dataInicio, string $dataFim): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                p.nome as procedimento_nome,
+                SUM(ap.quantidade) as quantidade_executada,
+                SUM(ap.valor_procedimento) as valor_bruto_total
+            FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            JOIN procedimentos p ON ap.id_procedimento = p.id
+            WHERE a.data_atendimento BETWEEN ? AND ? 
+            AND ap.status_execucao IN ('feito', 'finalizado')
+            AND a.status_pagamento = 'pago'
+            AND a.clinica_id = ?
+            GROUP BY p.id, p.nome
+            ORDER BY quantidade_executada DESC, valor_bruto_total DESC
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Relatório por procedimentos: total de quantidades executadas no período.
+     */
+    public function obterTotalProcedimentosQuantidadePeriodo(string $dataInicio, string $dataFim): int
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT SUM(ap.quantidade) 
+            FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            WHERE a.data_atendimento BETWEEN ? AND ? 
+            AND ap.status_execucao IN ('feito', 'finalizado')
+            AND a.status_pagamento = 'pago'
+            AND a.clinica_id = ?
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Obtém dados consolidados de faturamento e despesas por dia no período (SaaS)
+     */
+    public function obterDadosGraficoFaturamentoEDespesas(string $dataInicio, string $dataFim): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT
+                dia,
+                SUM(faturamento) as faturamento,
+                SUM(despesa) as despesa
+            FROM (
+                SELECT
+                    DATE(a.data_atendimento) as dia,
+                    SUM(ap.valor_procedimento) as faturamento,
+                    0 as despesa
+                FROM atendimentos a
+                JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
+                WHERE a.data_atendimento BETWEEN ? AND ? 
+                AND a.status_pagamento = 'pago' 
+                AND ap.status_execucao IN ('feito', 'finalizado')
+                AND a.clinica_id = ?
+                GROUP BY DATE(a.data_atendimento)
+
+                UNION ALL
+
+                SELECT
+                    DATE(data_despesa) as dia,
+                    0 as faturamento,
+                    SUM(valor) as despesa
+                FROM despesas
+                WHERE data_despesa BETWEEN ? AND ?
+                AND clinica_id = ?
+                GROUP BY DATE(data_despesa)
+            ) as T
+            GROUP BY dia
+            ORDER BY dia
+        ");
+        $stmt->execute([
+            $dataInicio, $dataFim, $this->clinicaId,
+            $dataInicio, $dataFim, $this->clinicaId
+        ]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Obtém faturamento líquido consolidado da clínica por dia no período (SaaS)
+     */
+    public function obterDadosGraficoLiquido(string $dataInicio, string $dataFim): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT
+                DATE(data_atendimento) as dia,
+                SUM(valor_liquido_clinica) as liquido
+            FROM atendimentos
+            WHERE data_atendimento BETWEEN ? AND ? 
+            AND status_pagamento = 'pago'
+            AND clinica_id = ?
+            GROUP BY DATE(data_atendimento)
+            ORDER BY dia
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Obtém representação das formas de pagamento no período (SaaS)
+     */
+    public function obterDadosGraficoPagamentos(string $dataInicio, string $dataFim): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT
+                ap.forma_pagamento,
+                SUM(ap.valor) as total
+            FROM
+                atendimento_pagamentos ap
+            JOIN
+                atendimentos a ON ap.id_atendimento = a.id
+            WHERE
+                a.data_atendimento BETWEEN ? AND ?
+                AND a.clinica_id = ?
+                AND ap.clinica_id = ?
+            GROUP BY
+                ap.forma_pagamento
+        ");
+        $stmt->execute([$dataInicio, $dataFim, $this->clinicaId, $this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    }
 }

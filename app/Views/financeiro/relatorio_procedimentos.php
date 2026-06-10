@@ -1,61 +1,7 @@
-<?php
-require_once 'config/session.php';
-require_once 'config/seguranca.php';
-require_once 'config/database.php';
-require_once 'views/header.php';
-require_once 'config/controle_acesso.php';
-
-if (!is_admin()) {
-    header('Location: ' . BASE_URL . 'index.php');
-    exit;
-}
-
-// Filtro de data: O período vem preenchido por padrão com o mês atual
-$data_inicio = isset($_GET['inicio']) ? $_GET['inicio'] : date('Y-m-01');
-$data_fim = isset($_GET['fim']) ? $_GET['fim'] : date('Y-m-t');
-
-try {
-    // Buscar total de procedimentos executados no período para calcular a porcentagem
-    $stmtTotal = $pdo->prepare("
-        SELECT SUM(ap.quantidade) 
-        FROM atendimento_procedimentos ap
-        JOIN atendimentos a ON ap.id_atendimento = a.id
-        WHERE a.data_atendimento BETWEEN ? AND ? 
-        AND ap.status_execucao = 'feito'
-        AND a.status_pagamento = 'pago'
-    ");
-    $stmtTotal->execute([$data_inicio . ' 00:00:00', $data_fim . ' 23:59:59']);
-    $totalProcedimentos = $stmtTotal->fetchColumn() ?? 0;
-
-    // Buscar a lista de procedimentos, quantidade, e valor bruto
-    $stmtProc = $pdo->prepare("
-        SELECT 
-            p.nome as procedimento_nome,
-            SUM(ap.quantidade) as quantidade_executada,
-            SUM(ap.valor_procedimento) as valor_bruto_total
-        FROM atendimento_procedimentos ap
-        JOIN atendimentos a ON ap.id_atendimento = a.id
-        JOIN procedimentos p ON ap.id_procedimento = p.id
-        WHERE a.data_atendimento BETWEEN ? AND ? 
-        AND ap.status_execucao = 'feito'
-        AND a.status_pagamento = 'pago'
-        GROUP BY p.id, p.nome
-        ORDER BY quantidade_executada DESC, valor_bruto_total DESC
-    ");
-    $stmtProc->execute([$data_inicio . ' 00:00:00', $data_fim . ' 23:59:59']);
-    $procedimentos_relatorio = $stmtProc->fetchAll();
-
-} catch (Exception $e) {
-    echo "<p class='error'>Erro ao gerar relatório: " . $e->getMessage() . "</p>";
-    $procedimentos_relatorio = [];
-    $totalProcedimentos = 0;
-}
-?>
-
 <div class="card">
     <h2>Relatório por Procedimentos</h2>
 
-    <form method="GET" action="relatorio_procedimentos.php" class="card" style="margin-top: 1rem;">
+    <form method="GET" action="<?= BASE_URL ?>financeiro/relatorios/procedimentos" class="card" style="margin-top: 1rem;">
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
             <div class="form-group">
                 <label for="inicio">Data Início</label>
@@ -101,7 +47,7 @@ try {
             <tfoot>
                 <tr style="font-weight: bold; background-color: #f8f9fa;">
                     <td>Total</td>
-                    <td data-label="Total Executado"><?= $totalProcedimentos ?></td>
+                    <td data-label="Total Executado"><?= htmlspecialchars($totalProcedimentos) ?></td>
                     <td data-label="Total %">100,00%</td>
                     <td data-label="Soma Valor Bruto" style="color: var(--success-color);">R$ <?= number_format(array_sum(array_column($procedimentos_relatorio, 'valor_bruto_total')), 2, ',', '.') ?></td>
                 </tr>
@@ -110,5 +56,3 @@ try {
         </table>
     </div>
 </div>
-
-<?php require_once 'views/footer.php'; ?>

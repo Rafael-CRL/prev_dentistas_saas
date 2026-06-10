@@ -105,7 +105,7 @@ if (strpos($uri, 'atendimentos') === 0) {
 }
 
 // 5. Módulo Financeiro
-if (strpos($uri, 'financeiro') === 0) {
+if (strpos($uri, 'financeiro') === 0 || in_array($uri, ['relatorios.php', 'relatorio_diario.php', 'relatorio_dentistas.php', 'relatorio_procedimentos.php'])) {
     if (!isset($_SESSION['usuario_id'])) {
         header("Location: " . BASE_URL . "login.php");
         exit;
@@ -123,6 +123,14 @@ if (strpos($uri, 'financeiro') === 0) {
         $controller->salvarDespesa();
     } elseif ($uri === 'financeiro/despesas/excluir' || $uri === 'actions/excluir_despesa.php') {
         $controller->excluirDespesa();
+    } elseif ($uri === 'financeiro/relatorios/geral' || $uri === 'relatorios.php') {
+        $controller->relatorioGeral();
+    } elseif ($uri === 'financeiro/relatorios/diario' || $uri === 'relatorio_diario.php') {
+        $controller->relatorioDiario();
+    } elseif ($uri === 'financeiro/relatorios/dentistas' || $uri === 'relatorio_dentistas.php') {
+        $controller->relatorioDentistas();
+    } elseif ($uri === 'financeiro/relatorios/procedimentos' || $uri === 'relatorio_procedimentos.php') {
+        $controller->relatorioProcedimentos();
     }
     exit;
 }

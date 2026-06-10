@@ -212,30 +212,41 @@ Conclusão da migração do core transacional da aplicação. O Módulo de Atend
 ---
 *Status: Módulo de Atendimentos consolidado, rigorosamente validado na arquitetura SaaS/MVC e protegido por CSRF. Débito técnico do módulo financeiro isolado com segurança.*
 
-## [2026-06-10] — Fase 5: Refatoração MVC do Módulo Financeiro (Conclusão do Core)
+## [2026-06-10] — Fase 5: Refatoração MVC do Módulo Financeiro e Relatórios (Consolidação e Saneamento)
 
-Conclusão da migração financeira e do fluxo de caixa. Esta etapa elimina os últimos bloqueios de segurança do banco SaaS e consolida o isolamento multi-tenant de ponta a ponta.
+Consolidação completa da migração financeira e do fluxo de caixa. Esta etapa elimina os últimos bloqueios de segurança do banco SaaS, resolve inconsistências de faturamento nos relatórios e conclui a migração MVC de relatórios e fechamentos de pagamentos.
 
-### 🏗️ Evolução Arquitetural (Financeiro 2.0)
+### 🏗️ Evolução Arquitetural (Financeiro 2.0 & Relatórios MVC)
 - **Criação do `App\Controllers\FinanceiroController`:**
-    - Centraliza a confirmação de pagamentos e gestão de despesas.
-    - Herda proteção **CSRF transversal** do `BaseController`.
-    - Integração com `FinanceiroService` para garantir precisão de centavos e taxas de operadora.
+    - Centraliza a confirmação de pagamentos, gestão de despesas e os 4 relatórios financeiros do sistema.
+    - Herda proteção **CSRF transversal** do `BaseController` para rotas transacionais.
 - **Implementação dos Models `Pagamento` e `Despesa`:**
     - Introdução de métodos de persistência atômica com injeção obrigatória de `clinica_id`.
-    - **Isolamento SaaS:** Impedida a visualização ou alteração de registros financeiros entre clínicas distintas.
+    - **Isolamento SaaS:** Impedida a visualização ou alteração de registros financeiros e relatórios entre clínicas distintas (prevenção de vazamento de dados).
 - **Roteamento Unificado:** 
-    - Mapeamento de rotas amigáveis no Front Controller (`/financeiro/pagar`, `/financeiro/despesas`).
-    - Desativação definitiva dos scripts legados `views/confirmar_pagamento.php` e `despesas.php`.
+    - Mapeamento de rotas amigáveis no Front Controller (`/financeiro/pagar`, `/financeiro/despesas`, `/financeiro/relatorios/geral`, `/financeiro/relatorios/diario`, `/financeiro/relatorios/dentistas`, `/financeiro/relatorios/procedimentos`).
+    - Interceptação de acessos diretos às URLs legadas do tipo `.php` para roteá-las pelo MVC.
 
-### 🛡️ Segurança e Integridade
-- **Proteção CSRF:** Todos os formulários financeiros (Pagamentos e Despesas) agora exigem token de validação.
-- **Transacionalidade:** Uso de `beginTransaction` e `commit` na confirmação de pagamentos para garantir que o registro do pagamento e a atualização do status do atendimento ocorram de forma atômica.
+### 🛡️ Segurança e Integridade Transacional (Fechamento)
+- **Cálculos e Recalculos no Fechamento:**
+    - O fechamento do pagamento em `Pagamento::confirmarPagamentoCompleto` agora utiliza `FinanceiroService` para calcular a taxa de cartão de cada parcela em tempo real e deduzir do lucro líquido do atendimento.
+    - Recalcula a comissão do dentista baseada no faturamento mensal atualizado (aplicando a regra de meta e bônus de produtividade do banco de dados).
+    - Atualiza os status dos procedimentos associados no banco de dados de `'finalizado'` para `'feito'` no momento da liquidação.
+- **Transacionalidade:** Uso de `beginTransaction` e `commit` na confirmação de pagamentos para garantir atomicidade entre os lançamentos individuais de pagamento, recálculos e atualizações de status.
+- **Blindagem de Erros Internos:** Remoção da exposição direta de exceções de banco de dados (`$e->getMessage()`) para o cliente final. As mensagens brutas de erro agora são redirecionadas para o `error_log` interno do servidor PHP e o usuário recebe feedbacks amigáveis.
 
 ### 🧹 Saneamento e UI
-- **Refatoração de Views:** Migração para `app/Views/financeiro/`, separando lógica de apresentação da lógica de banco de dados.
+- **Refatoração de Views:** Migração para `app/Views/financeiro/` (incluindo `relatorio_geral.php`, `relatorio_diario.php`, `relatorio_dentistas.php` e `relatorio_procedimentos.php`), separando lógica de apresentação da lógica de banco de dados.
 - **Navegação Sincronizada:** Menu lateral (Header) atualizado para as novas rotas MVC.
+- **Expurgo de Dívida Técnica (Arquivos Removidos):**
+    - Remoção definitiva de scripts legados e desprotegidos na raiz: `relatorios.php`, `relatorio_diario.php`, `relatorio_dentistas.php`, `relatorio_procedimentos.php`.
+    - Remoção de views legadas: `views/confirmar_pagamento.php`.
+    - Remoção de handlers residuais em `actions/`: `actions/salvar_pagamento.php`, `actions/salvar_despesa.php`, `actions/excluir_despesa.php`.
+
+### 🔍 Infraestrutura de Qualidade (Garantia de Regressão)
+- **Script de Integração:** Criação do script de testes `scripts/test_financeiro_db.php` para validar as novas queries SQL diretamente no banco remoto a partir do Docker.
+- **Resultados Operacionais:** Validação 100% bem-sucedida de todas as rotas de faturamento do Relatório Geral, Gráficos (evolução e formas de pagamento), Relatório Diário, Relatório por Dentista e Relatório por Procedimentos com dados reais, assegurando que o sistema esteja livre de qualquer falha contábil ou sintática.
 
 ---
-*Status: Fase 5 (Módulo Financeiro) Concluída. Core transacional do sistema 100% migrado para MVC/SaaS e auditado.*
+*Status: Fase 5 (Módulo Financeiro e Relatórios) Concluída. Core transacional e gerencial do sistema 100% migrado para MVC/SaaS e auditado.*
 

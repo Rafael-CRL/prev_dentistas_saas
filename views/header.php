@@ -67,22 +67,20 @@ function isActive($urls) {
                 <?php endif; ?>
 
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['relatorio_diario.php', 'relatorio_dentistas.php', 'relatorios.php', 'relatorio_paciente.php', 'relatorio_procedimentos.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['financeiro/relatorios', 'relatorio_diario.php', 'relatorio_dentistas.php', 'relatorios.php', 'relatorio_paciente.php', 'relatorio_procedimentos.php']) ? 'active' : '' ?>">
                         Relatórios <small>▾</small>
                     </a>
                     <div class="dropdown-content">
-                        <a href="<?= BASE_URL ?>relatorio_diario.php">Diário</a>
+                        <a href="<?= BASE_URL ?>financeiro/relatorios/diario">Diário</a>
                         <?php if (is_admin() || is_dentista()): ?>
-                        <a href="<?= BASE_URL ?>relatorio_dentistas.php">Por Dentista</a>
+                        <a href="<?= BASE_URL ?>financeiro/relatorios/dentistas">Por Dentista</a>
                         <a href="<?= BASE_URL ?>relatorio_paciente.php">Por Paciente</a>
                         <?php endif; ?>
 
                         <?php if (is_admin()): ?>
-                        <a href="<?= BASE_URL ?>relatorios.php">Financeiro Geral</a>
-                        <a href="<?= BASE_URL ?>relatorio_procedimentos.php">Por Procedimentos</a>
-                        
+                        <a href="<?= BASE_URL ?>financeiro/relatorios/geral">Financeiro Geral</a>
+                        <a href="<?= BASE_URL ?>financeiro/relatorios/procedimentos">Por Procedimentos</a>
                         <?php endif; ?>
-                        
                     </div>
                 </div>
 
