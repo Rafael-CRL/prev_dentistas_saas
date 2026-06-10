@@ -40,7 +40,7 @@ class FinanceiroController extends BaseController
         ];
 
         if ($paciente_id) {
-            $data['paciente'] = $pacienteModel->buscarPorId($paciente_id);
+            $data['paciente'] = $pacienteModel->getById($paciente_id);
             // Reutiliza lógica de buscar último atendimento pendente
             $data['ultimo_atendimento_id'] = $atendimentoModel->buscarUltimoPendente($paciente_id);
 
