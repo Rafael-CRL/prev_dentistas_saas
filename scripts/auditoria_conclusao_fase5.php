@@ -2,7 +2,7 @@
 /**
  * scripts/auditoria_conclusao_fase5.php
  * Auditoria Holística de Conformidade MVC e Segurança SaaS
- * Foco: Autenticação, Pacientes, Procedimentos e BaseController
+ * Foco: Autenticação, Pacientes, Procedimentos, Atendimentos e BaseController
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -14,15 +14,18 @@ $requisitos_classes = [
     'App\Controllers\PacienteController' => 'app/Controllers/PacienteController.php',
     'App\Controllers\ProcedimentoController' => 'app/Controllers/ProcedimentoController.php',
     'App\Controllers\AuthController' => 'app/Controllers/AuthController.php',
+    'App\Controllers\AtendimentoController' => 'app/Controllers/AtendimentoController.php',
     'App\Models\Paciente' => 'app/Models/Paciente.php',
     'App\Models\Procedimento' => 'app/Models/Procedimento.php',
-    'App\Models\AuthModel' => 'app/Models/AuthModel.php'
+    'App\Models\AuthModel' => 'app/Models/AuthModel.php',
+    'App\Models\Atendimento' => 'app/Models/Atendimento.php'
 ];
 
 $controladores_filhos = [
     'App\Controllers\PacienteController',
     'App\Controllers\ProcedimentoController',
-    'App\Controllers\AuthController'
+    'App\Controllers\AuthController',
+    'App\Controllers\AtendimentoController'
 ];
 
 // --- MOTOR DE AUDITORIA ---
@@ -89,13 +92,12 @@ foreach ($controladores_filhos as $class) {
 }
 
 // 3. Auditoria de Segurança SaaS (Filtros clinica_id)
-$models_to_check = ['app/Models/Paciente.php', 'app/Models/Procedimento.php'];
+$models_to_check = ['app/Models/Paciente.php', 'app/Models/Procedimento.php', 'app/Models/Atendimento.php'];
 foreach ($models_to_check as $modelPath) {
     $path = __DIR__ . '/../' . $modelPath;
     if (file_exists($path)) {
         $content = file_get_contents($path);
         // Verifica se existem queries sem clinica_id (simplificado para fins de auditoria)
-        $queries = preg_match_all('/(SELECT|UPDATE|DELETE|INSERT).*(FROM|INTO|SET)\s+(\w+)/i', $content, $matches);
         $missing_filter = (strpos($content, 'clinica_id') === false);
         
         if ($missing_filter) {
@@ -123,7 +125,6 @@ if (file_exists($authModelPath)) {
     if (strpos($content, 'status =') !== false) {
         logResultado($relatorio, 'seguranca', 'OK', "AuthModel valida status do usuário.");
     } else {
-        // Não conta como falha de segurança se a coluna não existe no banco
         logResultado($relatorio, 'seguranca', 'OK', "AuthModel funcional (Observação: Filtro de 'status' ausente por restrição de schema).");
     }
 }
@@ -146,7 +147,51 @@ if (file_exists($baseCtrlPath)) {
     }
 }
 
-// 5. Auditoria de Limpeza (Zero .bak/.old)
+// 5. Auditoria Específica: Módulo de Atendimentos
+$atendimentoCtrlPath = __DIR__ . '/../app/Controllers/AtendimentoController.php';
+if (file_exists($atendimentoCtrlPath)) {
+    $content = file_get_contents($atendimentoCtrlPath);
+    
+    // Regra: Zero Hardcode (Uso do FinanceiroService)
+    if (strpos($content, 'FinanceiroService') !== false) {
+        logResultado($relatorio, 'arquitetura', 'OK', "AtendimentoController delega cálculos ao FinanceiroService (Zero Hardcode).");
+    } else {
+        logResultado($relatorio, 'arquitetura', 'ERRO', "AtendimentoController NÃO utiliza FinanceiroService para cálculos (Violação Zero Hardcode).");
+    }
+    
+    // Regra: Transações Atômicas
+    if (strpos($content, 'beginTransaction') !== false && strpos($content, 'commit') !== false) {
+        logResultado($relatorio, 'arquitetura', 'OK', "AtendimentoController utiliza transações atômicas de banco de dados.");
+    } else {
+        logResultado($relatorio, 'arquitetura', 'ERRO', "AtendimentoController NÃO utiliza transações (Risco de inconsistência).");
+    }
+}
+
+$atendimentoModelPath = __DIR__ . '/../app/Models/Atendimento.php';
+if (file_exists($atendimentoModelPath)) {
+    $content = file_get_contents($atendimentoModelPath);
+    
+    // Regra: Imutabilidade Financeira
+    if (strpos($content, 'comissao_dentista') !== false && strpos($content, 'valor_liquido_clinica') !== false) {
+        logResultado($relatorio, 'arquitetura', 'OK', "AtendimentoModel persiste comissão e valor líquido (Imutabilidade Histórica).");
+    } else {
+        logResultado($relatorio, 'arquitetura', 'ERRO', "AtendimentoModel NÃO salva dados financeiros calculados (Violação de Imutabilidade).");
+    }
+}
+
+$atendimentoViewPath = __DIR__ . '/../app/Views/atendimentos/cadastrar.php';
+if (file_exists($atendimentoViewPath)) {
+    $content = file_get_contents($atendimentoViewPath);
+    
+    // Regra: CSRF na View
+    if (strpos($content, 'CsrfHelper::input') !== false) {
+        logResultado($relatorio, 'seguranca', 'OK', "View de Atendimentos possui injeção de token CSRF.");
+    } else {
+        logResultado($relatorio, 'seguranca', 'ERRO', "View de Atendimentos NÃO possui token CSRF (Vulnerável).");
+    }
+}
+
+// 6. Auditoria de Limpeza (Zero .bak/.old)
 $dirty_files = shell_exec("find . -name '*.bak' -o -name '*.old' | grep -v 'vendor'");
 if (empty($dirty_files)) {
     logResultado($relatorio, 'limpeza', 'OK', "Nenhum arquivo de backup (.bak/.old) encontrado.");
