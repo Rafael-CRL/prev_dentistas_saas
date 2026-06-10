@@ -1,8 +1,7 @@
 <?php
 /**
- * Script de Verificação Pós-Saneamento
- * Este script valida a integridade do sistema após a limpeza de arquivos.
- * Foca em caminhos de arquivos, referências e estrutura de dados básica.
+ * Script de Verificação Pós-Saneamento (Versão Evoluída Fase 5)
+ * Este script valida a integridade do sistema após a limpeza de arquivos legados.
  */
 
 header('Content-Type: text/plain; charset=utf-8');
@@ -12,18 +11,18 @@ echo "=== INICIANDO VERIFICAÇÃO DE INTEGRIDADE ===\n\n";
 $erros = 0;
 $avisos = 0;
 
-// 1. Verificação de Arquivos Consolidados
+// 1. Verificação de Arquivos Críticos (Padrão MVC + Legado Estável)
 echo "[1/3] Verificando arquivos críticos...\n";
 $arquivos_obrigatorios = [
-    'relatorio_paciente.php',
-    'views/novo_atendimento.php',
-    'actions/salvar_atendimento.php',
+    'public/index.php',
+    'app/Controllers/AtendimentoController.php',
+    'app/Models/Atendimento.php',
     'config/database.php',
-    'assets/css/style.css'
+    'public/assets/css/style.css'
 ];
 
 foreach ($arquivos_obrigatorios as $arq) {
-    if (file_exists(__DIR__ . '/' . $arq)) {
+    if (file_exists(__DIR__ . '/../' . $arq)) {
         echo "  OK: $arq encontrado.\n";
     } else {
         echo "  ERRO: $arq NÃO ENCONTRADO!\n";
@@ -31,13 +30,13 @@ foreach ($arquivos_obrigatorios as $arq) {
     }
 }
 
-// 2. Verificação de Links Quebrados (Busca por resquícios de v2, v3, v4)
+// 2. Verificação de Links Quebrados (Busca por resquícios de arquivos deletados)
 echo "\n[2/3] Verificando referências a arquivos deletados...\n";
 $arquivos_de_busca = ['views/header.php', 'index.php', 'actions/salvar_arquivo_procedimento.php'];
-$padrao_lixo = '/(relatorio_paciente[23]|novo_atendimento[234]|salvar_atendimento2)\.php/';
+$padrao_lixo = '/(relatorio_paciente[23]|novo_atendimento[234]|salvar_atendimento2|salvar_atendimento|verificar_pagamento_pendente)\.php/';
 
 foreach ($arquivos_de_busca as $arq) {
-    $caminho = __DIR__ . '/' . $arq;
+    $caminho = __DIR__ . '/../' . $arq;
     if (file_exists($caminho)) {
         $conteudo = file_get_contents($caminho);
         if (preg_match_all($padrao_lixo, $conteudo, $matches)) {
@@ -49,12 +48,11 @@ foreach ($arquivos_de_busca as $arq) {
     }
 }
 
-// 3. Verificação de Estrutura de Banco de Dados (Lightweight)
-echo "\n[3/3] Verificando esquema do banco de dados (Railway-friendly)...\n";
+// 3. Verificação de Estrutura de Banco de Dados
+echo "\n[3/3] Verificando esquema do banco de dados...\n";
 try {
-    require_once __DIR__ . '/config/database.php';
+    require_once __DIR__ . '/../config/database.php';
     
-    // Verifica se colunas essenciais para a nova lógica existem
     $colunas_necessarias = [
         'atendimento_procedimentos' => ['custo_auxiliar', 'natureza', 'status_execucao'],
         'atendimentos' => ['comissao_dentista', 'valor_liquido_clinica']
