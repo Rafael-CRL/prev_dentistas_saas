@@ -24,6 +24,18 @@ if (empty($uri)) { $uri = 'index.php'; }
 
 // --- ROTEAMENTO MVC ---
 
+// 0. Módulo de Dashboard
+if ($uri === 'index.php' || $uri === 'index') {
+    if (!isset($_SESSION['usuario_id'])) {
+        header("Location: " . BASE_URL . "login.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\DashboardController($pdo, (int)$_SESSION['clinica_id']);
+    $controller->index();
+    exit;
+}
+
 // 1. Módulo de Autenticação
 if ($uri === 'login.php' || $uri === 'login' || $uri === 'logout.php' || $uri === 'actions/login_handler.php') {
     $controller = new \App\Controllers\AuthController($pdo);

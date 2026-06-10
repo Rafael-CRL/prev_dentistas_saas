@@ -491,4 +491,87 @@ class Atendimento
         $stmt->execute([$dataInicio, $dataFim, $this->clinicaId, $this->clinicaId]);
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
+
+    /**
+     * Conta atendimentos pagos para a clínica atual (Dashboard com busca)
+     */
+    public function obterContagemDashboard(string $busca = ''): int
+    {
+        $sql = "
+            SELECT COUNT(DISTINCT a.id) 
+            FROM atendimentos a 
+            JOIN pacientes p ON a.paciente_id = p.id
+            WHERE a.status_pagamento = 'pago' AND a.clinica_id = ?
+        ";
+        
+        $params = [$this->clinicaId];
+        if (!empty($busca)) {
+            $sql .= " AND p.nome LIKE ?";
+            $params[] = "%$busca%";
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Lista atendimentos pagos no Dashboard com paginação e busca por paciente (SaaS)
+     */
+    public function listarDashboard(string $busca, int $limit, int $offset): array
+    {
+        $sql = "
+            SELECT 
+                a.id,
+                a.data_atendimento,
+                p.nome AS paciente_nome,
+                a.status_pagamento,
+                a.taxa_cartao,
+                a.valor_liquido_clinica,
+                a.custo_auxiliar,
+                a.comissao_dentista,
+                a.url_arquivo,
+                u.nome AS dentista,
+                SUM(CASE 
+                    WHEN ap.status_execucao IN ('feito', 'finalizado')
+                    THEN ap.valor_procedimento 
+                    ELSE 0 
+                END) AS valor_bruto_total,
+                GROUP_CONCAT(
+                    CASE 
+                        WHEN ap.status_execucao IN ('feito', 'finalizado')
+                        THEN proc.nome 
+                    END 
+                    SEPARATOR ', '
+                ) AS procedimentos
+            FROM atendimentos a
+            JOIN pacientes p ON a.paciente_id = p.id
+            JOIN usuarios u ON a.id_dentista = u.id
+            LEFT JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
+            LEFT JOIN procedimentos proc ON ap.id_procedimento = proc.id
+            WHERE a.status_pagamento = 'pago' AND a.clinica_id = :clinica_id
+        ";
+
+        if (!empty($busca)) {
+            $sql .= " AND p.nome LIKE :busca";
+        }
+
+        $sql .= "
+            GROUP BY a.id
+            ORDER BY a.data_atendimento DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':clinica_id', $this->clinicaId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        if (!empty($busca)) {
+            $stmt->bindValue(':busca', "%$busca%", PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+

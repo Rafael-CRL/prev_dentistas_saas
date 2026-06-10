@@ -1,156 +1,3 @@
-<?php
-// index.php (Dashboard)
-require_once 'config/session.php';
-require_once 'config/seguranca.php';
-require_once 'config/database.php';
-require_once 'views/header.php';
-require_once 'config/controle_acesso.php';
-
-if (!is_admin() && !is_dentista() && !is_recepcionista()) {
-    header('Location: ' . BASE_URL . 'login.php');
-    exit;
-}
-
-// Define o fuso horário para garantir que o mês atual seja exibido corretamente
-date_default_timezone_set('America/Sao_Paulo');
-
-// Define o período (Mês selecionado ou atual)
-$mes_selecionado = isset($_GET['mes']) ? $_GET['mes'] : date('Y-m');
-
-// Validação básica do formato YYYY-MM para segurança
-if (!preg_match('/^\d{4}-\d{2}$/', $mes_selecionado)) {
-    $mes_selecionado = date('Y-m');
-}
-
-$data_inicio = date('Y-m-01', strtotime($mes_selecionado));
-$data_fim = date('Y-m-t', strtotime($mes_selecionado));
-
-// Navegação entre meses
-$mes_anterior = date('Y-m', strtotime($data_inicio . ' -1 month'));
-$mes_proximo = date('Y-m', strtotime($data_inicio . ' +1 month'));
-
-try {
-    // Faturamento Bruto (Apenas pagos)
-    $stmtFaturamento = $pdo->prepare("
-        SELECT SUM(ap.valor_procedimento)
-        FROM atendimento_procedimentos ap
-        JOIN atendimentos a ON ap.id_atendimento = a.id
-        WHERE a.data_atendimento BETWEEN ? AND ? AND a.status_pagamento = 'pago' AND ap.status_execucao = 'feito'
-    ");
-    $stmtFaturamento->execute([$data_inicio . ' 00:00:00', $data_fim . ' 23:59:59']);
-    $faturamentoBruto = $stmtFaturamento->fetchColumn() ?? 0;
-
-    // Lucro Líquido (Apenas pagos)
-    $stmtLucro = $pdo->prepare("
-        SELECT SUM(valor_liquido_clinica) 
-        FROM atendimentos 
-        WHERE data_atendimento BETWEEN ? AND ? AND status_pagamento = 'pago'
-    ");
-    $stmtLucro->execute([$data_inicio . ' 00:00:00', $data_fim . ' 23:59:59']);
-    $lucroLiquido = $stmtLucro->fetchColumn() ?? 0;
-
-    // Total de Despesas no período
-    $stmtDespesas = $pdo->prepare("SELECT SUM(valor) as total_despesas FROM despesas WHERE data_despesa BETWEEN ? AND ?");
-    $stmtDespesas->execute([$data_inicio, $data_fim]);
-    $totalDespesas = $stmtDespesas->fetchColumn() ?? 0;
-
-    // Paginação e Busca
-    $busca = isset($_GET['busca']) ? trim($_GET['busca']) : '';
-    $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-    if ($pagina < 1) $pagina = 1;
-    $itensPorPagina = 10;
-    $offset = ($pagina - 1) * $itensPorPagina;
-
-        // Contagem total para paginação
-        $sqlCount = "SELECT COUNT(DISTINCT a.id)
-                FROM atendimentos a
-                JOIN pacientes p ON a.paciente_id = p.id
-                JOIN usuarios u ON a.id_dentista = u.id
-                WHERE a.status_pagamento = 'pago' 
-                ";
-                        
-            $params = [];
-            
-        if (!empty($busca)) {
-            $sqlCount .= " AND p.nome LIKE ?";
-
-            $params[] = "%$busca%";
-        }
-    $stmtCount = $pdo->prepare($sqlCount);
-    $stmtCount->execute($params);
-    $totalRegistros = $stmtCount->fetchColumn();
-    $totalPaginas = ceil($totalRegistros / $itensPorPagina);
-
-    // Busca dos atendimentos paginados
-  $sqlLista = "
-    SELECT 
-        a.id,
-        a.data_atendimento,
-        p.nome AS paciente_nome,
-        a.status_pagamento,
-        a.taxa_cartao,
-        a.valor_liquido_clinica,
-        a.custo_auxiliar,
-        a.comissao_dentista,
-        a.url_arquivo,
-        u.nome AS dentista,
-        SUM(CASE 
-            WHEN ap.status_execucao IN ('feito', 'finalizado')
-            THEN ap.valor_procedimento 
-            ELSE 0 
-        END) AS valor_bruto_total,
-        GROUP_CONCAT(
-            CASE 
-                WHEN ap.status_execucao IN ('feito', 'finalizado')
-                THEN proc.nome 
-            END 
-            SEPARATOR ', '
-        ) AS procedimentos
-    FROM atendimentos a
-    JOIN pacientes p ON a.paciente_id = p.id
-    JOIN usuarios u ON a.id_dentista = u.id
-    LEFT JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
-    LEFT JOIN procedimentos proc ON ap.id_procedimento = proc.id
-    WHERE a.status_pagamento = 'pago'
-";
-
-if (!empty($busca)) {
-    $sqlLista .= " AND p.nome LIKE ?";
-}
-
-$sqlLista .= "
-    GROUP BY a.id
-    ORDER BY a.data_atendimento DESC
-    LIMIT $itensPorPagina OFFSET $offset
-";
-
-    $stmtLista = $pdo->prepare($sqlLista);
-    // Note que os parâmetros para a busca principal são os mesmos da contagem
-    $stmtLista->execute($params);
-    $ultimosAtendimentos = $stmtLista->fetchAll();
-
-} catch (Exception $e) {
-    $lucroLiquido = 0;
-    $faturamentoBruto = 0;
-    $totalDespesas = 0;
-    $ultimosAtendimentos = [];
-    $totalPaginas = 0;
-    echo "<p class='error'>Erro ao carregar dashboard: " . $e->getMessage() . "</p>";
-}
-
-// Formata o nome do mês em português
-$formatter = new IntlDateFormatter(
-    'pt_BR',
-    IntlDateFormatter::FULL,
-    IntlDateFormatter::NONE,
-    'America/Sao_Paulo',
-    IntlDateFormatter::GREGORIAN,
-    'MMMM \'de\' yyyy'
-);
-$mesAtual = $formatter->format(strtotime($data_inicio));
-
-?>
-
 <style>
     /* Estilos para o Modal */
     .modal {
@@ -166,7 +13,6 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
     }
     .modal-content {
         background-color: #fefefe;
-        margin: 10% auto;
         margin: 5% auto;
         padding: 25px;
         border: 1px solid #888;
@@ -221,9 +67,9 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
 <div style="display:flex; justify-content:space-between; align-items:center;">
     <h1>Dashboard Financeiro</h1>
     <div style="display:flex; align-items:center; gap: 1rem;">
-        <a href="?mes=<?= $mes_anterior ?>" class="btn btn-secondary" title="Mês Anterior">&lt;</a>
+        <a href="?mes=<?= htmlspecialchars($mes_anterior) ?><?= !empty($busca) ? '&busca=' . urlencode($busca) : '' ?>" class="btn btn-secondary" title="Mês Anterior">&lt;</a>
         <h2 style="color: var(--text-muted); margin: 0;"><?= ucfirst($mesAtual) ?></h2>
-        <a href="?mes=<?= $mes_proximo ?>" class="btn btn-secondary" title="Próximo Mês">&gt;</a>
+        <a href="?mes=<?= htmlspecialchars($mes_proximo) ?><?= !empty($busca) ? '&busca=' . urlencode($busca) : '' ?>" class="btn btn-secondary" title="Próximo Mês">&gt;</a>
     </div>
 </div>
 
@@ -253,9 +99,9 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3>Histórico de Atendimentos</h3>
         <div style="display:flex; gap: 1rem; align-items:center;">
-            <form method="GET" action="index.php" style="display:flex; gap: 0.5rem;">
+            <form method="GET" action="<?= BASE_URL ?>index.php" style="display:flex; gap: 0.5rem;">
                 <input type="hidden" name="mes" value="<?= htmlspecialchars($mes_selecionado) ?>">
-                <input type="text" name="busca" placeholder="Buscar por paciente..." value="<?= htmlspecialchars($busca ?? '') ?>" style="padding: 5px;">
+                <input type="text" name="busca" placeholder="Buscar por paciente..." value="<?= htmlspecialchars($busca) ?>" style="padding: 5px;">
                 <button type="submit" class="btn btn-secondary">Buscar</button>
             </form>
             <?php if (is_admin()): ?>
@@ -299,7 +145,7 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
                     <td data-label="Data"><?= date('d/m/Y H:i', strtotime($at['data_atendimento'])) ?></td>
                     <td data-label="Paciente"><?= htmlspecialchars($at['paciente_nome']) ?></td>
                     <td data-label="Ações">
-                        <a href="recibo.php?id=<?= $at['id'] ?>" class="btn btn-secondary" target="_blank" title="Gerar Recibo">
+                        <a href="<?= BASE_URL ?>recibo.php?id=<?= $at['id'] ?>" class="btn btn-secondary" target="_blank" title="Gerar Recibo" onclick="event.stopPropagation();">
                             <i class="fa fa-eye"></i>
                         </a>
                     </td>
@@ -314,7 +160,7 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="5" style="padding: 20px; text-align: center;">Nenhum atendimento registrado ainda.</td>
+                    <td colspan="6" style="padding: 20px; text-align: center;">Nenhum atendimento registrado ainda.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -326,7 +172,6 @@ $mesAtual = $formatter->format(strtotime($data_inicio));
         <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
             <?php 
                 $active = $i === $pagina ? 'background-color: var(--primary-color); color: white;' : 'background-color: #eee; color: #333;';
-                // Monta a URL mantendo os parâmetros existentes (mes, busca)
                 $queryParams = $_GET;
                 $queryParams['pagina'] = $i;
                 $url = '?' . http_build_query($queryParams);
@@ -359,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const closeModal = () => {
         modal.style.display = 'none';
-        modalBody.innerHTML = ''; // Limpa o conteúdo ao fechar
+        modalBody.innerHTML = '';
     };
 
     closeModalBtns.forEach(btn => btn.addEventListener('click', closeModal));
@@ -372,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', function() {
-            // Simplificado para usar os dados já presentes na linha, evitando o erro de fetch.
             const data = this.dataset.data;
             const paciente = this.dataset.paciente;
             const procedimentos = this.dataset.procedimentos;
@@ -386,7 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const isAdmin = <?= is_admin() ? 'true' : 'false' ?>;
             const baseUrl = '<?= BASE_URL ?>';
             
-            // Monta o HTML do modal com formato de formulário (campos de leitura)
             let html = `
                 <div class="form-group">
                     <label>Data do Atendimento</label>
@@ -461,5 +304,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<?php require_once 'views/footer.php'; ?>

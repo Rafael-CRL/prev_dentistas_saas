@@ -250,3 +250,30 @@ Consolidação completa da migração financeira e do fluxo de caixa. Esta etapa
 ---
 *Status: Fase 5 (Módulo Financeiro e Relatórios) Concluída. Core transacional e gerencial do sistema 100% migrado para MVC/SaaS e auditado.*
 
+## [2026-06-10] — Fase 5: Refatoração MVC do Módulo de Dashboard
+
+Conclusão da migração do painel principal (Dashboard) para a arquitetura MVC e padrão SaaS Multi-Tenant. Com esta etapa, a raiz do projeto foi completamente saneada, e toda a lógica de faturamento, despesas e atendimentos está centralizada no padrão MVC.
+
+### 🏗️ Evolução Arquitetural (Dashboard MVC & SaaS)
+- **Criação do `App\Controllers\DashboardController`:**
+    - Responsável por receber a requisição de exibição do painel principal da clínica do usuário logado.
+    - Realiza o processamento e a formatação de dados temporais (mês selecionado, navegação entre meses em português via `IntlDateFormatter`) e paginação de lançamentos.
+    - Delega consultas de faturamento bruto, lucro líquido e despesas aos Models `Atendimento` e `Despesa`, isolando a lógica de negócio do layout.
+- **Implementação do Isolamento SaaS:**
+    - Filtros de consulta e paginação baseados rigidamente em `clinica_id` nos Models `Atendimento` e `Despesa` para garantir a privacidade de dados entre clínicas no ecossistema SaaS.
+    - Tratamento unificado de atendimentos com status de execução `feito` e `finalizado` para integridade contábil do painel.
+- **Criação da View `app/Views/dashboard.php`:**
+    - Nova view limpa e desacoplada, contendo apenas elementos visuais, estruturação dos cards estatísticos e tabela dinâmica de histórico de atendimentos com busca e paginação.
+    - Implementação de um modal dinâmico JavaScript integrado para exibição detalhada de lançamentos e anexos de atendimento.
+
+### 🧹 Saneamento e Expurgo de Legados
+- **Remoção de `index.php` Legado:** Exclusão definitiva do arquivo procedural obsoleto na raiz (`index.php`), que continha misturas de requisições diretas de banco de dados, lógica financeira procedural e markup HTML.
+- **Roteamento MVC:** Configuração do Front Controller (`public/index.php`) para capturar acessos à raiz `/` e `/index.php` e direcionar ao `DashboardController`.
+
+### 🔍 Infraestrutura de Qualidade (Auditoria)
+- **Auditoria de Conformidade:** Execução do script `scripts/auditoria_conclusao_fase5.php` via Docker Compose validando 100% de sucesso nas validações de arquitetura, segurança (CSRF) e limpeza residual do sistema.
+
+---
+*Status: Fase 5 Concluída com Sucesso. Módulos de Pacientes, Procedimentos, Autenticação, Atendimentos, Financeiro, Relatórios e Dashboard integralmente migrados para MVC/SaaS Multi-Tenant.*
+
+
