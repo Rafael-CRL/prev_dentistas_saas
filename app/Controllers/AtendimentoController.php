@@ -81,9 +81,6 @@ class AtendimentoController extends BaseController
      */
     public function salvar()
     {
-        // Garantir o fuso horário correto
-        date_default_timezone_set('America/Sao_Paulo');
-
         try {
             $this->pdo->beginTransaction();
 
@@ -109,10 +106,7 @@ class AtendimentoController extends BaseController
 
             // 4. Obter/Criar Paciente
             if (!$pacienteId) {
-                // TODO: Adicionar método criar() no App\Models\Paciente se não existir, ou usar query direta temporariamente
-                $stmtPaciente = $this->pdo->prepare("INSERT INTO pacientes (nome, clinica_id) VALUES (?, ?)");
-                $stmtPaciente->execute([$pacienteNome, $this->clinicaId]);
-                $pacienteId = $this->pdo->lastInsertId();
+                $pacienteId = $this->pacienteModel->criar($pacienteNome);
             } else {
                  $stmtNome = $this->pdo->prepare("SELECT nome FROM pacientes WHERE id = ? AND clinica_id = ?");
                  $stmtNome->execute([$pacienteId, $this->clinicaId]);
