@@ -212,3 +212,30 @@ Conclusão da migração do core transacional da aplicação. O Módulo de Atend
 ---
 *Status: Módulo de Atendimentos consolidado, rigorosamente validado na arquitetura SaaS/MVC e protegido por CSRF. Débito técnico do módulo financeiro isolado com segurança.*
 
+## [2026-06-10] — Fase 5: Refatoração MVC do Módulo Financeiro (Conclusão do Core)
+
+Conclusão da migração financeira e do fluxo de caixa. Esta etapa elimina os últimos bloqueios de segurança do banco SaaS e consolida o isolamento multi-tenant de ponta a ponta.
+
+### 🏗️ Evolução Arquitetural (Financeiro 2.0)
+- **Criação do `App\Controllers\FinanceiroController`:**
+    - Centraliza a confirmação de pagamentos e gestão de despesas.
+    - Herda proteção **CSRF transversal** do `BaseController`.
+    - Integração com `FinanceiroService` para garantir precisão de centavos e taxas de operadora.
+- **Implementação dos Models `Pagamento` e `Despesa`:**
+    - Introdução de métodos de persistência atômica com injeção obrigatória de `clinica_id`.
+    - **Isolamento SaaS:** Impedida a visualização ou alteração de registros financeiros entre clínicas distintas.
+- **Roteamento Unificado:** 
+    - Mapeamento de rotas amigáveis no Front Controller (`/financeiro/pagar`, `/financeiro/despesas`).
+    - Desativação definitiva dos scripts legados `views/confirmar_pagamento.php` e `despesas.php`.
+
+### 🛡️ Segurança e Integridade
+- **Proteção CSRF:** Todos os formulários financeiros (Pagamentos e Despesas) agora exigem token de validação.
+- **Transacionalidade:** Uso de `beginTransaction` e `commit` na confirmação de pagamentos para garantir que o registro do pagamento e a atualização do status do atendimento ocorram de forma atômica.
+
+### 🧹 Saneamento e UI
+- **Refatoração de Views:** Migração para `app/Views/financeiro/`, separando lógica de apresentação da lógica de banco de dados.
+- **Navegação Sincronizada:** Menu lateral (Header) atualizado para as novas rotas MVC.
+
+---
+*Status: Fase 5 (Módulo Financeiro) Concluída. Core transacional do sistema 100% migrado para MVC/SaaS e auditado.*
+

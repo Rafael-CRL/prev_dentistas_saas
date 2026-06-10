@@ -15,17 +15,21 @@ $requisitos_classes = [
     'App\Controllers\ProcedimentoController' => 'app/Controllers/ProcedimentoController.php',
     'App\Controllers\AuthController' => 'app/Controllers/AuthController.php',
     'App\Controllers\AtendimentoController' => 'app/Controllers/AtendimentoController.php',
+    'App\Controllers\FinanceiroController' => 'app/Controllers/FinanceiroController.php',
     'App\Models\Paciente' => 'app/Models/Paciente.php',
     'App\Models\Procedimento' => 'app/Models/Procedimento.php',
     'App\Models\AuthModel' => 'app/Models/AuthModel.php',
-    'App\Models\Atendimento' => 'app/Models/Atendimento.php'
+    'App\Models\Atendimento' => 'app/Models/Atendimento.php',
+    'App\Models\Pagamento' => 'app/Models/Pagamento.php',
+    'App\Models\Despesa' => 'app/Models/Despesa.php'
 ];
 
 $controladores_filhos = [
     'App\Controllers\PacienteController',
     'App\Controllers\ProcedimentoController',
     'App\Controllers\AuthController',
-    'App\Controllers\AtendimentoController'
+    'App\Controllers\AtendimentoController',
+    'App\Controllers\FinanceiroController'
 ];
 
 // --- MOTOR DE AUDITORIA ---

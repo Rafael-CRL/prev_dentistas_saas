@@ -104,6 +104,29 @@ if (strpos($uri, 'atendimentos') === 0) {
     exit;
 }
 
+// 5. Módulo Financeiro
+if (strpos($uri, 'financeiro') === 0) {
+    if (!isset($_SESSION['usuario_id'])) {
+        header("Location: " . BASE_URL . "login.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\FinanceiroController($pdo, (int)$_SESSION['clinica_id']);
+
+    if ($uri === 'financeiro/pagar' || $uri === 'views/confirmar_pagamento.php') {
+        $controller->showPagar();
+    } elseif ($uri === 'financeiro/salvar-pagamento' || $uri === 'actions/salvar_pagamento.php') {
+        $controller->salvarPagamento();
+    } elseif ($uri === 'financeiro/despesas' || $uri === 'despesas.php') {
+        $controller->despesas();
+    } elseif ($uri === 'financeiro/despesas/salvar' || $uri === 'actions/salvar_despesa.php') {
+        $controller->salvarDespesa();
+    } elseif ($uri === 'financeiro/despesas/excluir' || $uri === 'actions/excluir_despesa.php') {
+        $controller->excluirDespesa();
+    }
+    exit;
+}
+
 // --- COMPATIBILIDADE LEGADA ---
 
 $legacy_file_path = realpath(__DIR__ . '/../' . ltrim($uri, '/'));

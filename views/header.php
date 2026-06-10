@@ -41,25 +41,25 @@ function isActive($urls) {
             <?php if(isset($_SESSION['usuario_id'])): ?>
                 <a href="<?= BASE_URL ?>index.php" class="<?= isActive(['index.php']) ? 'active' : '' ?>">Dashboard</a>
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['atendimentos/cadastrar', 'confirmar_pagamento.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['atendimentos/cadastrar', 'financeiro/pagar']) ? 'active' : '' ?>">
                         Novo Atendimento <small>▾</small>
                     </a>
                     <div class="dropdown-content">
                         <a href="<?= BASE_URL ?>atendimentos/cadastrar">Lançar/Executar Procedimento</a>
-                        <a href="<?= BASE_URL ?>views/confirmar_pagamento.php">Confirmar Pagamento</a>
+                        <a href="<?= BASE_URL ?>financeiro/pagar">Confirmar Pagamento</a>
                     </div>
                 </div>
                 
                 <?php if (is_admin() || is_dentista() ||is_recepcionista()): ?>
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['procedimentos.php', 'despesas.php', 'usuarios.php', 'pacientes.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['procedimentos', 'financeiro/despesas', 'usuarios.php', 'pacientes.php']) ? 'active' : '' ?>">
                         Cadastros <small>▾</small>
                     </a>
                     <div class="dropdown-content">
                         <a href="<?= BASE_URL ?>pacientes.php">Pacientes</a>
                         <?php if (is_admin()): ?>
                         <a href="<?= BASE_URL ?>procedimentos">Procedimentos</a>
-                        <a href="<?= BASE_URL ?>despesas.php">Despesas</a>
+                        <a href="<?= BASE_URL ?>financeiro/despesas">Despesas</a>
                         <a href="<?= BASE_URL ?>usuarios.php">Usuários</a>
                         <?php endif; ?>
                     </div>
