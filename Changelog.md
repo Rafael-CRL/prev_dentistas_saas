@@ -200,10 +200,14 @@ Conclusão da migração do core transacional da aplicação. O Módulo de Atend
 
 ### 🐛 Hotfixes e Degradação Graciosa (Gestão de Débito Técnico)
 - **Correção Arquitetural (`AtendimentoController`):** Ajustada a chamada do construtor da classe base (`parent::__construct()`) que estava recebendo o `$pdo` indevidamente, prevenindo *Fatal Errors* e garantindo a instância do banco para as transações locais.
+- **Purificação POO e Remoção de Hardcode (`AtendimentoController` e `PacienteModel`):** Removido SQL bruto do controlador (SRP Restaurado) criando o método genérico `criar()` no `PacienteModel`. Moviddo `date_default_timezone_set` para as configurações centrais em `config/app.php`.
 - **Isolamento de Banco de Dados (`AtendimentoModel`):** Corrigida a omissão do `clinica_id` na query de inserção da tabela `atendimento_procedimentos`, resolvendo o erro `SQLSTATE[HY000]: General error: 1364` e assegurando o isolamento dos registros secundários.
 - **Degradação Graciosa do Financeiro (`actions/salvar_pagamento.php`):** O script legado de confirmação de pagamentos foi **bloqueado intencionalmente** com uma mensagem JSON amigável ("Módulo Financeiro em Refatoração").
   - **Motivo:** O banco SaaS agora exige o `clinica_id` (erro 1364), e o script antigo não comporta essa injeção de forma segura.
   - **Ação Futura:** Este script será substituído inteiramente por um novo `FinanceiroController` (ou `PagamentoController`) na próxima etapa do cronograma (Refatoração do Módulo Financeiro).
+
+### 🔍 Evolução da Infraestrutura de Qualidade (Auditoria)
+- **Scripts de Auditoria e Saneamento:** Refatorados e adequados para reconhecer a nova arquitetura do módulo de Atendimentos. Corrigidos falsos-positivos na validação Fase 5 e adicionada cobertura explícita de "Zero Hardcode" e Imutabilidade Financeira ao longo do script de auditoria Fase 5. Ajustados os caminhos do `verify_saneamento.php` para impedir quebra.
 
 ---
 *Status: Módulo de Atendimentos consolidado, rigorosamente validado na arquitetura SaaS/MVC e protegido por CSRF. Débito técnico do módulo financeiro isolado com segurança.*
