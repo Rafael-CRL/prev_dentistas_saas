@@ -111,4 +111,34 @@ class Atendimento
             ]);
         }
     }
+
+    /**
+     * Busca o ID do último atendimento pendente de um paciente.
+     */
+    public function buscarUltimoPendente(int $pacienteId): ?int
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT id FROM atendimentos 
+            WHERE paciente_id = ? AND clinica_id = ? AND status_pagamento = 'pendente' 
+            ORDER BY id DESC LIMIT 1
+        ");
+        $stmt->execute([$pacienteId, $this->clinicaId]);
+        $id = $stmt->fetchColumn();
+        return $id ? (int)$id : null;
+    }
+
+    /**
+     * Busca procedimentos finalizados vinculados a um atendimento.
+     */
+    public function buscarProcedimentosFinalizados(int $atendimentoId): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT ap.id, p.nome, ap.valor_procedimento, ap.quantidade
+            FROM atendimento_procedimentos ap
+            JOIN procedimentos p ON ap.id_procedimento = p.id
+            WHERE ap.id_atendimento = ? AND ap.clinica_id = ? AND ap.status_execucao = 'finalizado'
+        ");
+        $stmt->execute([$atendimentoId, $this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
