@@ -93,7 +93,7 @@ class Usuario {
     }
 
     public function temAtendimentos($id) {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM atendimentos WHERE usuario_id = ?");
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM atendimentos WHERE id_dentista = ?");
         $stmt->execute([$id]);
         return $stmt->fetchColumn() > 0;
     }
