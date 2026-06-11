@@ -3,18 +3,20 @@
     --primary-color: #005b96;      /* Azul do padrão login */
     --primary-dark: #0370b5;       /* Equivalente ao primary-light do login */
     --background-color: #f4f7f6;   /* Cor bg-light do login */
-    --secondary-color: #6c757d;  /* Adicione esta linha */
-    --info-color: #17a2b8;       /* Adicione esta também para o btn-cancel/info */
+    --secondary-color: #6c757d;  
+    --info-color: #17a2b8;       
     --success-color: #28a745;      /* Verde sucesso */
     --danger-color: #dc3545;       /* Vermelho erro */
     --border-color: #dee2e6;
     --white-color: #ffffff;
+    --card-bg: #ffffff;
 
     /* Formato dos botões e elementos */
     --border-radius: 30px;         /* Formato arredondado presente nos botões e inputs do login */
     
     /* Outras variáveis existentes permanecem ou são adaptadas */
     --text-color: #2d3436;         /* Cor text-dark do login */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
     --shadow-md: 0 10px 30px rgba(0,0,0,0.1); /* Sombra padrão do login */
 }
 
@@ -163,7 +165,6 @@ html {
     box-shadow: var(--shadow-sm);
     padding: 0.8rem 1.5rem;
     display: flex;
-    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     border-bottom: none;
@@ -176,12 +177,16 @@ html {
 .logo {
     font-weight: bold;
     color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 .menu {
     display: flex;
     gap: 1.5rem;
     align-items: center;
+    flex-grow: 1;
+    justify-content: center;
 }
 
 .menu a {
