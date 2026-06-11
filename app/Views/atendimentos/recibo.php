@@ -1,9 +1,9 @@
 <?php
-// Dados da clínica (exemplo, idealmente viria de um config)
-$clinica_nome = "Clínica Odontológica Prev Dentistas";
-$clinica_endereco = "Rua União 1, Esquina com a Rua D - Atalaia, Ananindeua - PA, 67013-350";
-$clinica_cnpj = "29.249738/0001-79";
-$clinica_telefone = "(91) 98306-7459";
+// Dados da clínica injetados pelo Controller
+$clinica_nome = $clinica_nome ?? '';
+$clinica_endereco = $clinica_endereco ?? '';
+$clinica_cnpj = $clinica_cnpj ?? '';
+$clinica_telefone = $clinica_telefone ?? '';
 
 // Função para formatar o valor por extenso (Simples)
 function valorPorExtenso($valor) {

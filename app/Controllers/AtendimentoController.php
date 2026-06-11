@@ -317,16 +317,36 @@ class AtendimentoController extends BaseController
     {
         $idAtendimento = $_GET['id'] ?? null;
         if (!$idAtendimento) {
-            die("ID do atendimento não fornecido.");
+            $this->renderError('Erro', 'ID do atendimento não fornecido.');
+            exit;
         }
 
         $atendimento = $this->atendimentoModel->getAtendimentoFull((int)$idAtendimento);
         if (!$atendimento) {
-            die("Atendimento não encontrado ou acesso negado.");
+            $this->renderError('Erro', 'Atendimento não encontrado ou acesso negado.');
+            exit;
         }
 
+        // Controle de Acesso: Apenas admin, recepcionista ou o dentista responsável podem ver
+        if (!\is_admin() && !\is_recepcionista() && $_SESSION['usuario_id'] != $atendimento['id_dentista']) {
+             header('Location: ' . BASE_URL . 'index.php');
+             exit;
+        }
+
+        $stmtClinica = $this->pdo->prepare("SELECT nome_fantasia, cnpj FROM clinicas WHERE id = ?");
+        $stmtClinica->execute([$this->clinicaId]);
+        $clinica = $stmtClinica->fetch(PDO::FETCH_ASSOC);
+
+        $config = Config::getInstance($this->pdo, $this->clinicaId);
+        $clinica_endereco = $config->get('clinica_endereco');
+        $clinica_telefone = $config->get('clinica_telefone');
+
         return $this->renderRaw('atendimentos/recibo', [
-            'atendimento' => $atendimento
+            'atendimento' => $atendimento,
+            'clinica_nome' => $clinica['nome_fantasia'] ?? '',
+            'clinica_cnpj' => $clinica['cnpj'] ?? '',
+            'clinica_endereco' => $clinica_endereco ?? '',
+            'clinica_telefone' => $clinica_telefone ?? ''
         ]);
     }
 
