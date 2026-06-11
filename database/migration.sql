@@ -117,14 +117,34 @@ SET @exist = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TAB
 SET @sql = IF(@exist = 0, 'ALTER TABLE atendimento_pagamentos ADD CONSTRAINT fk_atendimento_pagamentos_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id)', 'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- 5. CARGA INICIAL DE PARÂMETROS (Necessário para Fase 4)
+-- 5. CARGA INICIAL DE PARÂMETROS (Necessário para Fase 4 e Zero Hardcode)
 INSERT IGNORE INTO `clinica_taxas_cartao` (`clinica_id`, `bandeira`, `modalidade`, `parcelas`, `taxa_percentual`) VALUES
 (@default_clinica_id, 'Visa', 'debito', 1, 1.50),
 (@default_clinica_id, 'Master', 'debito', 1, 1.50),
 (@default_clinica_id, 'Visa', 'credito', 1, 2.99),
-(@default_clinica_id, 'Master', 'credito', 1, 2.99);
+(@default_clinica_id, 'Master', 'credito', 1, 2.99),
+(@default_clinica_id, 'default', 'debito', 1, 0.99),
+(@default_clinica_id, 'default', 'credito', 1, 2.99),
+(@default_clinica_id, 'default', 'credito', 2, 5.00),
+(@default_clinica_id, 'default', 'credito', 3, 5.00),
+(@default_clinica_id, 'default', 'credito', 4, 5.00),
+(@default_clinica_id, 'default', 'credito', 5, 5.00),
+(@default_clinica_id, 'default', 'credito', 6, 5.00),
+(@default_clinica_id, 'default', 'credito', 7, 10.76),
+(@default_clinica_id, 'default', 'credito', 8, 10.76),
+(@default_clinica_id, 'default', 'credito', 9, 10.76),
+(@default_clinica_id, 'default', 'credito', 10, 10.76),
+(@default_clinica_id, 'default', 'credito', 11, 10.76),
+(@default_clinica_id, 'default', 'credito', 12, 10.76);
 
 INSERT IGNORE INTO `clinica_regras_comissao` (`clinica_id`, `tipo`, `valor_regra`, `valor_meta`, `percentual_bonus`) VALUES
 (@default_clinica_id, 'percentual', 20.00, 10000.00, 5.00);
+
+INSERT IGNORE INTO `clinica_configuracoes` (`clinica_id`, `chave`, `valor`) VALUES
+(@default_clinica_id, 'comissao_especializado', '50.00'),
+(@default_clinica_id, 'comissao_canal', '10.00'),
+(@default_clinica_id, 'comissao_protese', '10.00'),
+(@default_clinica_id, 'clinica_endereco', 'Rua União 1, Esquina com a Rua D - Atalaia, Ananindeua - PA, 67013-350'),
+(@default_clinica_id, 'clinica_telefone', '(91) 98306-7459');
 
 SET FOREIGN_KEY_CHECKS = 1;

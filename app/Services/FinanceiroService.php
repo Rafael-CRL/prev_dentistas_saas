@@ -62,10 +62,24 @@ class FinanceiroService
         $comissaoBonus = $comissaoBase + (floatval($regraComissao['percentual_bonus']) / 100);
         $metaFaturamento = floatval($regraComissao['valor_meta']);
 
-        // Configurações secundárias (com fallback para os percentuais legados caso não existam no banco)
-        $comissaoEspecializado = floatval($this->config->get('comissao_especializado', 50)) / 100;
-        $comissaoCanal = floatval($this->config->get('comissao_canal', 10)) / 100;
-        $comissaoProtese = floatval($this->config->get('comissao_protese', 10)) / 100;
+        // Configurações secundárias
+        $comissaoEspecializadoVal = $this->config->get('comissao_especializado');
+        if ($comissaoEspecializadoVal === null) {
+            throw new \Exception("Configuração 'comissao_especializado' ausente no banco de dados para a clínica.");
+        }
+        $comissaoEspecializado = floatval($comissaoEspecializadoVal) / 100;
+
+        $comissaoCanalVal = $this->config->get('comissao_canal');
+        if ($comissaoCanalVal === null) {
+            throw new \Exception("Configuração 'comissao_canal' ausente no banco de dados para a clínica.");
+        }
+        $comissaoCanal = floatval($comissaoCanalVal) / 100;
+
+        $comissaoProteseVal = $this->config->get('comissao_protese');
+        if ($comissaoProteseVal === null) {
+            throw new \Exception("Configuração 'comissao_protese' ausente no banco de dados para a clínica.");
+        }
+        $comissaoProtese = floatval($comissaoProteseVal) / 100;
 
         switch ($categoria) {
             case 'geral':

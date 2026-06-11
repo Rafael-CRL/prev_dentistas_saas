@@ -76,15 +76,8 @@ class Config
             return $this->taxasCartao['default'][$key];
         }
 
-        // Fallbacks baseados no sistema legado caso a configuração não exista no banco ainda
-        if ($modalidade === 'debito') return 0.009875;
-        if ($modalidade === 'credito') {
-            if ($parcelas <= 1) return 0.03;
-            if ($parcelas <= 6) return 0.05;
-            return 0.1076;
-        }
-
-        return 0.0;
+        // Lança exceção em vez de usar fallback hardcoded silencioso
+        throw new \Exception("Taxa de cartão ausente no banco de dados para a clínica ID {$this->clinicaId} (Modalidade: {$modalidade}, Parcelas: {$parcelas}, Bandeira: {$bandeira}).");
     }
 
     /**
@@ -92,14 +85,9 @@ class Config
      */
     public function getRegraComissao(): array
     {
-        // Se a clínica não tiver regra cadastrada, retorna fallback do sistema legado
+        // Se a clínica não tiver regra cadastrada, lança exceção em vez de usar fallback silencioso
         if (empty($this->regrasComissao)) {
-            return [
-                'tipo' => 'percentual',
-                'valor_regra' => 20.00,
-                'valor_meta' => 10000.00,
-                'percentual_bonus' => 10.00 // 20 base + 10 bônus = 30 total
-            ];
+            throw new \Exception("Regra de comissão de repasse ausente no banco de dados para a clínica ID {$this->clinicaId}.");
         }
         return $this->regrasComissao;
     }
