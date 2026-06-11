@@ -1,5 +1,37 @@
 # Changelog - Sistema de Gestão Odontológica
 
+## [2026-06-11] — Resolução de Débitos Técnicos Pós-Fase 5
+
+Correção cirúrgica de quatro débitos técnicos identificados após a consolidação da Fase 5, mantendo o isolamento multi-tenant, zero hardcode e o rigor arquitetural estabelecido.
+
+### 🛠️ Correções e Melhorias Realizadas
+
+- **Item 1: Recibo Dinâmico Multi-tenant**
+    - Refatorada a view [recibo.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Views/atendimentos/recibo.php) para eliminar dados institucionais fixos (*hardcoded*).
+    - Atualizado o [AtendimentoController::recibo](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Controllers/AtendimentoController.php) para obter dinamicamente as informações da clínica logada (`clinicas` e `clinica_configuracoes`) e injetá-las na view, removendo qualquer query direta da camada de visualização.
+
+- **Item 2: Autenticação SaaS Isolada por Clínica**
+    - Adicionado o campo `clinica_identificador` (Código ou CNPJ) no formulário de login na view [login.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Views/auth/login.php).
+    - Criado o método `findClinicaId()` no [AuthModel.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Models/AuthModel.php) para resolver o ID numérico da clínica a partir do identificador digitado (aceitando código, CNPJ com máscara ou CNPJ puramente numérico).
+    - Atualizada a busca de credenciais no método `authenticate()` do [AuthModel.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Models/AuthModel.php) para isolar estritamente a query com `AND clinica_id = ?`, prevenindo colisão ou autenticação cruzada de logins idênticos em clínicas distintas.
+
+- **Item 3: Exceções Explícitas para Configurações Ausentes (Zero Hardcode)**
+    - Removidos fallbacks fixos de taxas e comissões do código fonte PHP em [Config.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Models/Config.php) e [FinanceiroService.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Services/FinanceiroService.php).
+    - Substituídos os valores silenciosos por exceções explícitas (`\Exception`) que informam a ausência da configuração no banco de dados, fazendo o sistema falhar de forma informativa em vez de mascarar a ausência de parâmetros.
+    - Atualizado o dump de banco de dados [migration.sql](file:///home/rafael/Documents/projetointegrado2_turma2023/database/migration.sql) para injetar as taxas default e configurações da clínica principal.
+
+- **Item 4: Refatoração do Fluxo de Feedback no UsuarioController**
+    - Removidos todos os comandos `die()` no [UsuarioController.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Controllers/UsuarioController.php).
+    - Substituídos por redirecionamentos HTTP com mensagens de feedback flash salvas em `$_SESSION['feedback']`.
+    - Atualizadas as views de usuários [index.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Views/usuarios/index.php) e [editar.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Views/usuarios/editar.php) para renderizar dinamicamente os alertas e removê-los após a exibição.
+
+### 🔍 Infraestrutura de Qualidade (Validação Automatizada)
+- **Script de Validação (`scripts/valida_correcoes.php`):**
+    - Desenvolvido script de validação automatizada que realiza a varredura e checagem estática/lógica das quatro correções efetuadas.
+    - Executado via Docker com **100% de sucesso**, garantindo a conformidade e integridade das rotas afetadas.
+
+---
+
 ## [2026-06-04] — Fase de Saneamento e Consolidação Arquitetural
 
 Esta fase teve como objetivo eliminar a dívida técnica gerada por arquivos duplicados e versões evolutivas espalhadas pelo projeto, preparando o terreno para a migração MVC e Multi-tenant.
