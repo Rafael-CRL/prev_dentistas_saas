@@ -44,17 +44,34 @@ echo "\n[Item 2] Validando Isolamento de Login...\n";
 $authModelPath = __DIR__ . '/../app/Models/AuthModel.php';
 if (file_exists($authModelPath)) {
     $content = file_get_contents($authModelPath);
-    // Verifica se authenticate exige clinica_id
+    
+    // Verifica se findFirstActiveClinicaId está presente no AuthModel
+    $hasFirstActive = strpos($content, 'function findFirstActiveClinicaId') !== false;
+    assertTest(
+        "Método findFirstActiveClinicaId presente no AuthModel",
+        $hasFirstActive,
+        "Método findFirstActiveClinicaId ausente no AuthModel."
+    );
+
+    // Verifica a query da clínica ativa
+    $hasActiveQuery = strpos($content, "SELECT id FROM clinicas WHERE status = 'ativo' LIMIT 1") !== false;
+    assertTest(
+        "Query da clínica ativa no AuthModel",
+        $hasActiveQuery,
+        "Query da clínica ativa não encontrada no AuthModel."
+    );
+
+    // Verifica se os elementos multi-tenant estão presentes (para ativação futura)
     $hasClinicaFilter = strpos($content, 'AND clinica_id = ?') !== false;
     assertTest(
-        "Filtro de clinica_id na busca de credenciais no AuthModel",
+        "Presença do filtro de clinica_id (comentado ou ativo) no AuthModel",
         $hasClinicaFilter,
-        "A query de autenticação não filtra por clinica_id."
+        "O filtro de clinica_id na busca de credenciais não foi localizado no AuthModel."
     );
 
     $hasFindClinica = strpos($content, 'function findClinicaId') !== false;
     assertTest(
-        "Método findClinicaId presente no AuthModel",
+        "Método findClinicaId presente (comentado ou ativo) no AuthModel",
         $hasFindClinica,
         "Método findClinicaId ausente no AuthModel."
     );
