@@ -276,4 +276,36 @@ Conclusão da migração do painel principal (Dashboard) para a arquitetura MVC 
 ---
 *Status: Fase 5 Concluída com Sucesso. Módulos de Pacientes, Procedimentos, Autenticação, Atendimentos, Financeiro, Relatórios e Dashboard integralmente migrados para MVC/SaaS Multi-Tenant.*
 
+## [2026-06-10] — Fase 5: Conclusão do Saneamento e Migração Final
+
+Etapa final da Fase 5, focada na migração dos últimos módulos residuais e na limpeza total da raiz do projeto, consolidando a arquitetura MVC profissional.
+
+### 🏗️ Migração de Módulos Residuais
+- **Módulo de Usuários:**
+    - Criada a classe `App\Models\Usuario` para centralizar CRUD de usuários com isolamento SaaS.
+    - Criado `App\Controllers\UsuarioController` para gerenciar listagem, criação, edição e exclusão de usuários.
+    - Implementadas views em `app/Views/usuarios/` (`index.php`, `editar.php`).
+- **Módulo de Perfil/Configurações:**
+    - Migrada a lógica de alteração de senha e nome para o `UsuarioController`.
+    - Criada a view `app/Views/usuarios/configuracoes.php`.
+- **Relatório por Paciente e Odontograma:**
+    - Migrada a lógica complexa do Odontograma para o `PacienteController` e `PacienteModel`.
+    - Criada a view `app/Views/pacientes/relatorio.php`.
+- **Recibo e Detalhes de Atendimento:**
+    - Migrados para o `AtendimentoController`.
+    - Criadas as views `app/Views/atendimentos/detalhes.php` e `app/Views/atendimentos/recibo.php`.
+
+### 🧹 Saneamento Radical da Raiz (Zero Debt)
+- **Exclusão de Arquivos Legados:** Removidos todos os arquivos `.php` residuais da raiz (`usuarios.php`, `editar_usuario.php`, `configuracoes.php`, `login.php`, `despesas.php`, `relatorio_paciente.php`, etc.).
+- **Remoção da pasta `actions/`:** Toda a lógica procedural foi substituída por métodos nos Controllers MVC.
+- **Padronização de Uploads:** Movimentada a pasta `uploads/` da raiz para `public/uploads/`, alinhando com a estrutura de segurança que expõe apenas o diretório público.
+
+### 🛡️ Refinamentos de Infraestrutura
+- **Roteamento MVC:** Atualizado o Front Controller (`public/index.php`) para incluir as novas rotas de usuários, perfil, relatórios e recibos.
+- **Proteção CSRF:** Estendida a proteção CSRF para todos os novos formulários de usuários e configurações.
+- **Navegação:** Atualizado o `header.php` para utilizar exclusivamente as rotas amigáveis do MVC.
+
+---
+*Status: Fase 5 100% Concluída. Sistema totalmente migrado para MVC e pronto para a Fase 6 (Interface).*
+
 

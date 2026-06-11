@@ -223,7 +223,7 @@ Criar `app/Services/FinanceiroService.php` centralizando toda a lógica de cálc
 
 ---
 
-### Fase 5 — Refatoração MVC
+### Fase 5 — Refatoração MVC ✅ (CONCLUÍDA)
 
 Para cada módulo, seguir obrigatoriamente essa sequência:
 

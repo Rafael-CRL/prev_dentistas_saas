@@ -80,6 +80,20 @@ abstract class BaseController
     }
 
     /**
+     * Renderiza uma view sem o header e o footer padrão.
+     */
+    protected function renderRaw(string $view, array $data = []): void
+    {
+        extract($data);
+        $viewFile = __DIR__ . '/../Views/' . $view . '.php';
+        if (file_exists($viewFile)) {
+            require_once $viewFile;
+        } else {
+            echo "Erro: View [{$view}] não encontrada em " . $viewFile;
+        }
+    }
+
+    /**
      * Retorna uma resposta JSON e encerra a execução.
      */
     protected function json(array $data, int $statusCode = 200): void

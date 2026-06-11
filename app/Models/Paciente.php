@@ -208,32 +208,150 @@ class Paciente
     /**
      * Busca procedimentos pendentes do paciente.
      */
-    public function getPendentes(int $pacienteId): array
+    public function findByName(string $name)
     {
-        $sql = "SELECT
-                    ap.id as atendimento_procedimento_id,
-                    ap.id_procedimento,
-                    p.nome as procedimento_nome,
-                    p.categoria,
-                    ap.quantidade,
-                    ap.valor_procedimento,
-                    ap.local,
-                    ap.custo_auxiliar,
-                    ap.descricao,
-                    ap.natureza
-                FROM atendimento_procedimentos ap
-                JOIN atendimentos a ON ap.id_atendimento = a.id
-                JOIN procedimentos p ON ap.id_procedimento = p.id
-                WHERE a.paciente_id = :paciente_id 
-                AND a.clinica_id = :clinica_id 
-                AND ap.status_execucao = 'pendente'";
-        
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':paciente_id' => $pacienteId,
-            ':clinica_id' => $this->clinica_id
-        ]);
+        $stmt = $this->pdo->prepare("SELECT * FROM pacientes WHERE clinica_id = ? AND LOWER(nome) LIKE LOWER(?) LIMIT 1");
+        $stmt->execute([$this->clinica_id, '%' . $name . '%']);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
+    public function getRelatorioProcedimentos(int $pacienteId, int $limit, int $offset)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                ap.id as atendimento_procedimento_id,
+                proc.nome as procedimento_nome,
+                ap.local, 
+                ap.descricao,
+                a.data_atendimento,
+                ap.status_execucao,
+                a.status_pagamento,
+                ap.url_arquivo
+            FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            JOIN procedimentos proc ON ap.id_procedimento = proc.id
+            WHERE a.paciente_id = :paciente_id AND a.clinica_id = :clinica_id
+            ORDER BY a.data_atendimento DESC
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue(':paciente_id', $pacienteId, PDO::PARAM_INT);
+        $stmt->bindValue(':clinica_id', $this->clinica_id, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countRelatorioProcedimentos(int $pacienteId)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(ap.id)
+            FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            WHERE a.paciente_id = ? AND a.clinica_id = ?
+        ");
+        $stmt->execute([$pacienteId, $this->clinica_id]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getOdontogramaStatus(int $pacienteId)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT
+                ap.local,
+                ap.status_execucao
+            FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            WHERE a.paciente_id = ? AND a.clinica_id = ? AND ap.local IS NOT NULL AND ap.local != ''
+        ");
+        $stmt->execute([$pacienteId, $this->clinica_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $dente_status_raw = [];
+        foreach ($rows as $proc) {
+            $local = $proc['local'];
+            if (!isset($dente_status_raw[$local])) {
+                $dente_status_raw[$local] = ['pendente' => false, 'feito' => false];
+            }
+            if ($proc['status_execucao'] === 'feito') {
+                $dente_status_raw[$local]['feito'] = true;
+            }
+            if ($proc['status_execucao'] === 'pendente' || $proc['status_execucao'] === 'finalizado') {
+                $dente_status_raw[$local]['pendente'] = true;
+            }
+        }
+
+        $dente_status_color = [];
+        foreach ($dente_status_raw as $local => $statuses) {
+            if ($statuses['feito'] && $statuses['pendente']) {
+                $dente_status_color[$local] = 'yellow';
+            } elseif ($statuses['feito']) {
+                $dente_status_color[$local] = 'green';
+            } elseif ($statuses['pendente']) {
+                $dente_status_color[$local] = 'red';
+            }
+        }
+
+        return $dente_status_color;
+    }
+
+    public function removerAnexo(int $idProcedimento)
+    {
+        // Primeiro busca o arquivo para deletar fisicamente
+        $stmt = $this->pdo->prepare("
+            SELECT url_arquivo FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            WHERE ap.id = ? AND a.clinica_id = ?
+        ");
+        $stmt->execute([$idProcedimento, $this->clinica_id]);
+        $arquivo = $stmt->fetchColumn();
+
+        if ($arquivo) {
+            $filePath = __DIR__ . '/../../public/' . $arquivo;
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        $stmt = $this->pdo->prepare("UPDATE atendimento_procedimentos SET url_arquivo = NULL WHERE id = ?");
+        return $stmt->execute([$idProcedimento]);
+    }
+
+    public function removerProcedimento(int $idProcedimento)
+    {
+        // Verifica se o procedimento pertence à clínica e o status
+        $stmt = $this->pdo->prepare("
+            SELECT ap.status_execucao, a.status_pagamento, ap.url_arquivo
+            FROM atendimento_procedimentos ap
+            JOIN atendimentos a ON ap.id_atendimento = a.id
+            WHERE ap.id = ? AND a.clinica_id = ?
+        ");
+        $stmt->execute([$idProcedimento, $this->clinica_id]);
+        $proc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$proc) {
+            throw new Exception("Procedimento não encontrado.");
+        }
+
+        if (strtolower($proc['status_execucao']) !== 'pendente' || strtolower($proc['status_pagamento']) !== 'nao_aplicavel') {
+            throw new Exception("Você não tem autorização para apagar este procedimento.");
+        }
+
+        // Se tiver arquivo, remove
+        if ($proc['url_arquivo']) {
+            $filePath = __DIR__ . '/../../public/' . $proc['url_arquivo'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        $stmt = $this->pdo->prepare("DELETE FROM atendimento_procedimentos WHERE id = ?");
+        return $stmt->execute([$idProcedimento]);
+    }
+
+    public function salvarArquivo(int $idProcedimento, string $relativeUrl)
+    {
+        $stmt = $this->pdo->prepare("UPDATE atendimento_procedimentos SET url_arquivo = ? WHERE id = ?");
+        return $stmt->execute([$relativeUrl, $idProcedimento]);
     }
 }

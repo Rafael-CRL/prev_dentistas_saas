@@ -114,6 +114,155 @@ class PacienteController extends BaseController
     }
 
     /**
+     * Exibe o relatório por paciente com odontograma
+     */
+    public function relatorio()
+    {
+        if (!is_admin() && !is_dentista()) {
+            header('Location: ' . BASE_URL . 'index.php');
+            exit;
+        }
+
+        $paciente_nome = isset($_GET['paciente_nome']) ? trim($_GET['paciente_nome']) : '';
+        $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        if ($pagina < 1) $pagina = 1;
+
+        $viewData = [
+            'paciente_nome' => $paciente_nome,
+            'paciente' => null,
+            'procedimentos' => [],
+            'procedimentos_agrupados' => [],
+            'procedimentos_todos' => [],
+            'dente_status_color' => [],
+            'totalPaginas' => 0,
+            'pagina' => $pagina
+        ];
+
+        if (!empty($paciente_nome)) {
+            $paciente = $this->pacienteModel->findByName($paciente_nome);
+
+            if ($paciente) {
+                $itensPorPagina = 20;
+                $offset = ($pagina - 1) * $itensPorPagina;
+
+                $procedimentos = $this->pacienteModel->getRelatorioProcedimentos($paciente['id'], $itensPorPagina, $offset);
+                $totalRegistros = $this->pacienteModel->countRelatorioProcedimentos($paciente['id']);
+                
+                $viewData['paciente'] = $paciente;
+                $viewData['procedimentos'] = $procedimentos;
+                $viewData['totalPaginas'] = ceil($totalRegistros / $itensPorPagina);
+                $viewData['dente_status_color'] = $this->pacienteModel->getOdontogramaStatus($paciente['id']);
+
+                // Agrupa procedimentos por local
+                $agrupados = [];
+                foreach ($procedimentos as $proc) {
+                    $local = $proc['local'];
+                    if (!isset($agrupados[$local])) {
+                        $agrupados[$local] = [];
+                    }
+                    $agrupados[$local][] = $proc;
+                }
+
+                $viewData['procedimentos_todos'] = $agrupados['Todos'] ?? [];
+                unset($agrupados['Todos']);
+                uksort($agrupados, 'strnatcmp');
+                $viewData['procedimentos_agrupados'] = $agrupados;
+            }
+        }
+
+        return $this->render('pacientes/relatorio', $viewData);
+    }
+
+    /**
+     * API: Remove anexo de um procedimento
+     */
+    public function apiRemoverAnexo()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return $this->json(['status' => 'error', 'message' => 'Método inválido.'], 405);
+        }
+
+        $idProcedimento = $_POST['id_procedimento'] ?? null;
+        if (!$idProcedimento) {
+            return $this->json(['status' => 'error', 'message' => 'ID não fornecido.'], 400);
+        }
+
+        try {
+            $this->pacienteModel->removerAnexo((int)$idProcedimento);
+            return $this->json(['status' => 'success', 'message' => 'Arquivo removido com sucesso!']);
+        } catch (\Exception $e) {
+            return $this->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * API: Remove um procedimento
+     */
+    public function apiRemoverProcedimento()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return $this->json(['status' => 'error', 'message' => 'Método inválido.'], 405);
+        }
+
+        $idProcedimento = $_POST['id_procedimento'] ?? null;
+        if (!$idProcedimento) {
+            return $this->json(['status' => 'error', 'message' => 'ID não fornecido.'], 400);
+        }
+
+        try {
+            $this->pacienteModel->removerProcedimento((int)$idProcedimento);
+            return $this->json(['status' => 'success', 'message' => 'Procedimento removido com sucesso!']);
+        } catch (\Exception $e) {
+            return $this->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Salva arquivo anexo
+     */
+    public function salvarArquivo()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: " . BASE_URL . "pacientes/relatorio");
+            exit;
+        }
+
+        $idProcedimento = $_POST['atendimento_procedimento_id'] ?? null;
+        $pacienteNomeRedirect = $_POST['paciente_nome_redirect'] ?? '';
+
+        if (!$idProcedimento || !isset($_FILES['arquivo_procedimento'])) {
+            header("Location: " . BASE_URL . "pacientes/relatorio?paciente_nome=" . urlencode($pacienteNomeRedirect) . "&erro=Dados+inválidos");
+            exit;
+        }
+
+        $file = $_FILES['arquivo_procedimento'];
+        $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($extension, $allowedExtensions)) {
+            header("Location: " . BASE_URL . "pacientes/relatorio?paciente_nome=" . urlencode($pacienteNomeRedirect) . "&erro=Extensão+não+permitida");
+            exit;
+        }
+
+        $uploadDir = __DIR__ . '/../../public/uploads/procedimentos/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $fileName = uniqid('proc_') . '.' . $extension;
+        $uploadFile = $uploadDir . $fileName;
+
+        if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
+            $relativeUrl = 'uploads/procedimentos/' . $fileName;
+            $this->pacienteModel->salvarArquivo((int)$idProcedimento, $relativeUrl);
+            header("Location: " . BASE_URL . "pacientes/relatorio?paciente_nome=" . urlencode($pacienteNomeRedirect) . "&msg=upload_sucesso");
+        } else {
+            header("Location: " . BASE_URL . "pacientes/relatorio?paciente_nome=" . urlencode($pacienteNomeRedirect) . "&erro=Falha+no+upload");
+        }
+        exit;
+    }
+
+    /**
      * Busca rápida para AJAX
      */
     public function apiBuscar()

@@ -1,82 +1,13 @@
 <?php
-require_once 'config/session.php';
-require_once 'config/database.php';
-
-if (!isset($_GET['id'])) {
-    die("ID do atendimento não fornecido.");
-}
-
-$id_atendimento = $_GET['id'];
-
-try {
-    // Buscar dados do atendimento, paciente e dentista
-    $stmt = $pdo->prepare("
-        SELECT 
-            a.id,
-            a.data_atendimento,
-            p.nome AS paciente_nome,
-            p.cpf AS paciente_cpf,
-            p.endereco,
-            p.numero,
-            p.bairro,
-            p.cidade,
-            p.estado,
-            u.nome AS dentista_nome,
-            SUM(ap.valor_procedimento) AS valor_total
-        FROM atendimentos a
-        JOIN pacientes p ON a.paciente_id = p.id
-        JOIN usuarios u ON a.id_dentista = u.id AND u.perfil = 'dentista'
-        LEFT JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
-        WHERE a.id = ? AND a.clinica_id = ? AND ap.status_execucao IN ('feito', 'finalizado')
-        GROUP BY a.id
-    ");
-    $stmt->execute([$id_atendimento, $_SESSION['clinica_id']]);
-    $atendimento = $stmt->fetch();
-
-    if (!$atendimento) {
-        die("Atendimento não encontrado ou acesso negado.");
-    }
-
-    // Buscar procedimentos realizados
-    $stmt_proc = $pdo->prepare("
-        SELECT proc.nome, ap.valor_procedimento
-        FROM atendimento_procedimentos ap
-        JOIN procedimentos proc ON ap.id_procedimento = proc.id
-        WHERE ap.id_atendimento = ? AND ap.clinica_id = ? AND ap.status_execucao IN ('feito', 'finalizado')
-    ");
-    $stmt_proc->execute([$id_atendimento, $_SESSION['clinica_id']]);
-    $procedimentos = $stmt_proc->fetchAll();
-
-} catch (Exception $e) {
-    die("Erro ao buscar dados: " . $e->getMessage());
-}
-
 // Dados da clínica (exemplo, idealmente viria de um config)
 $clinica_nome = "Clínica Odontológica Prev Dentistas";
 $clinica_endereco = "Rua União 1, Esquina com a Rua D - Atalaia, Ananindeua - PA, 67013-350";
 $clinica_cnpj = "29.249738/0001-79";
 $clinica_telefone = "(91) 98306-7459";
 
-// Função para formatar o valor por extenso
+// Função para formatar o valor por extenso (Simples)
 function valorPorExtenso($valor) {
-    // Implementação simples, pode ser trocada por uma biblioteca mais robusta
-    $unidades = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
-    $dezenas = ["", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
-    $centenas = ["", "cem", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"];
-    
-    $valor = number_format($valor, 2, ',', '.');
-    list($reais, $centavos) = explode(',', $valor);
-
-    $extenso = "";
-
-    // Lógica para converter reais em extenso (simplificada)
-    // ...
-
-    $reais_texto = $reais > 1 ? "reais" : "real";
-    $centavos_texto = $centavos > 1 ? "centavos" : "centavo";
-    
-    // Retorno simplificado
-    return "$reais $reais_texto e $centavos $centavos_texto";
+    return number_format($valor, 2, ',', '.') . " Reais";
 }
 
 // Formata a data por extenso
@@ -89,16 +20,13 @@ $formatter = new IntlDateFormatter(
     'd \'de\' MMMM \'de\' yyyy'
 );
 $data_atendimento_formatada = $formatter->format(strtotime($atendimento['data_atendimento']));
-
-$dentista_nome = $atendimento['dentista_nome'] ?? 'Não informado';
-
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <title>Recibo de Pagamento</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <style>
         body {
@@ -147,15 +75,6 @@ $dentista_nome = $atendimento['dentista_nome'] ?? 'Não informado';
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        .info-item strong {
-            display: block;
-            color: #555;
-        }
         .procedimentos-table {
             width: 100%;
             border-collapse: collapse;
@@ -197,9 +116,6 @@ $dentista_nome = $atendimento['dentista_nome'] ?? 'Não informado';
             background: white;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .btn {
-            margin: 0 0.5rem;
         }
 
         @media print {
@@ -253,7 +169,7 @@ $dentista_nome = $atendimento['dentista_nome'] ?? 'Não informado';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($procedimentos as $proc): ?>
+                        <?php foreach($atendimento['procedimentos'] as $proc): ?>
                         <tr>
                             <td><?= htmlspecialchars($proc['nome']) ?></td>
                             <td>R$ <?= number_format($proc['valor_procedimento'], 2, ',', '.') ?></td>
@@ -271,20 +187,21 @@ $dentista_nome = $atendimento['dentista_nome'] ?? 'Não informado';
                     Para clareza, firmamos o presente.
                 </p>
                 <p style="text-align: right;">
-                    <?= htmlspecialchars($atendimento['cidade'] ?? '') ?>, <?= $data_atendimento_formatada ?>.
+                    <?= htmlspecialchars($atendimento['cidade'] ?? 'Ananindeua') ?>, <?= $data_atendimento_formatada ?>.
                 </p>
             </div>
 
             <div class="assinatura">
                 <div class="assinatura-linha"></div>
                 <p style="margin-top: 0.5rem;"><?= htmlspecialchars($clinica_nome ?? '') ?></p>
-                <p style="font-size: 0.9rem; color: #666;"><?= htmlspecialchars($dentista_nome) ?></p>
+                <p style="font-size: 0.9rem; color: #666;"><?= htmlspecialchars($atendimento['dentista_nome'] ?? 'Dentista Responsável') ?></p>
             </div>
         </div>
 
         <div class="actions">
             <button onclick="window.print()" class="btn btn-primary">Imprimir</button>
             <button id="download-btn" class="btn btn-secondary">Baixar PDF</button>
+            <button onclick="window.close()" class="btn btn-cancel">Fechar</button>
         </div>
     </div>
 
