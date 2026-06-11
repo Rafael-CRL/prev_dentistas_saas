@@ -278,4 +278,83 @@ class AtendimentoController extends BaseController
 
         return null;
     }
+
+    /**
+     * Exibe os detalhes de um atendimento (Página)
+     */
+    public function detalhes()
+    {
+        $idAtendimento = $_GET['id'] ?? null;
+        if (!$idAtendimento) {
+            header('Location: ' . BASE_URL . 'index.php');
+            exit;
+        }
+
+        $atendimento = $this->atendimentoModel->getAtendimentoFull((int)$idAtendimento);
+        if (!$atendimento) {
+            $this->renderError('Não Encontrado', 'Atendimento não encontrado ou acesso negado.');
+            exit;
+        }
+
+        // Controle de Acesso: Apenas admin, recepcionista ou o dentista responsável podem ver
+        if (!is_admin() && !is_recepcionista() && $_SESSION['usuario_id'] != $atendimento['id_dentista']) {
+             header('Location: ' . BASE_URL . 'index.php');
+             exit;
+        }
+
+        $pagamentos = $this->atendimentoModel->getPagamentos((int)$idAtendimento);
+        
+        return $this->render('atendimentos/detalhes', [
+            'atendimento' => $atendimento,
+            'pagamentos' => $pagamentos
+        ]);
+    }
+
+    /**
+     * Exibe o recibo de um atendimento (Impressão)
+     */
+    public function recibo()
+    {
+        $idAtendimento = $_GET['id'] ?? null;
+        if (!$idAtendimento) {
+            die("ID do atendimento não fornecido.");
+        }
+
+        $atendimento = $this->atendimentoModel->getAtendimentoFull((int)$idAtendimento);
+        if (!$atendimento) {
+            die("Atendimento não encontrado ou acesso negado.");
+        }
+
+        return $this->renderRaw('atendimentos/recibo', [
+            'atendimento' => $atendimento
+        ]);
+    }
+
+    /**
+     * API: Retorna detalhes do atendimento para modais ou dashboards
+     */
+    public function apiDetalhes()
+    {
+        $idAtendimento = $_GET['id'] ?? null;
+        if (!$idAtendimento || !filter_var($idAtendimento, FILTER_VALIDATE_INT)) {
+            return $this->json(['erro' => 'ID de atendimento inválido.'], 400);
+        }
+
+        $atendimento = $this->atendimentoModel->getAtendimentoFull((int)$idAtendimento);
+        if (!$atendimento) {
+            return $this->json(['erro' => 'Atendimento não encontrado.'], 404);
+        }
+
+        // Adiciona pagamentos
+        $atendimento['pagamentos'] = $this->atendimentoModel->getPagamentos((int)$idAtendimento);
+
+        // Calcula valor bruto total (soma dos procedimentos)
+        $valorBrutoTotal = 0;
+        foreach ($atendimento['procedimentos'] as $proc) {
+            $valorBrutoTotal += $proc['valor_procedimento'];
+        }
+        $atendimento['valor_bruto_total'] = $valorBrutoTotal;
+
+        return $this->json($atendimento);
+    }
 }

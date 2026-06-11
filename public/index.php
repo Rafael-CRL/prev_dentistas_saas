@@ -74,6 +74,14 @@ if (strpos($uri, 'pacientes') === 0 || $uri === 'editar_paciente.php') {
         $controller->apiHistorico();
     } elseif ($uri === 'pacientes/pendentes' || $uri === 'actions/buscar_procedimentos_pendentes.php') {
         $controller->apiPendentes();
+    } elseif ($uri === 'pacientes/relatorio' || $uri === 'relatorio_paciente.php') {
+        $controller->relatorio();
+    } elseif ($uri === 'pacientes/remover-anexo' || $uri === 'actions/remover_anexo.php') {
+        $controller->apiRemoverAnexo();
+    } elseif ($uri === 'pacientes/remover-procedimento' || $uri === 'actions/remover_procedimento.php') {
+        $controller->apiRemoverProcedimento();
+    } elseif ($uri === 'pacientes/salvar-arquivo' || $uri === 'actions/salvar_arquivo_procedimento.php') {
+        $controller->salvarArquivo();
     }
     exit;
 }
@@ -112,6 +120,12 @@ if (strpos($uri, 'atendimentos') === 0) {
         $controller->salvar();
     } elseif ($uri === 'atendimentos/verificar-pagamento' || $uri === 'actions/verificar_pagamento_pendente.php') {
         $controller->verificarPagamentoPendente();
+    } elseif ($uri === 'atendimentos/detalhes' || $uri === 'detalhes_atendimento.php') {
+        $controller->detalhes();
+    } elseif ($uri === 'atendimentos/recibo' || $uri === 'recibo.php') {
+        $controller->recibo();
+    } elseif ($uri === 'atendimentos/api-detalhes' || $uri === 'get_atendimento_details.php') {
+        $controller->apiDetalhes();
     }
     exit;
 }

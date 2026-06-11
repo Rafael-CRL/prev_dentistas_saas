@@ -1,133 +1,7 @@
-<?php
-require_once 'config/session.php';
-require_once 'config/seguranca.php';
-require_once 'config/database.php';
-require_once 'views/header.php';
-require_once 'config/controle_acesso.php';
-
-if (!is_admin() && !is_dentista()) {
-    header('Location: ' . BASE_URL . 'index.php');
-    exit;
-}
-
-// Inicializa variáveis
-$paciente_nome = '';
-$paciente = null;
-$procedimentos = [];
-$totalPaginas = 0;
-$pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-if ($pagina < 1) $pagina = 1;
-
-if (isset($_GET['paciente_nome'])) {
-    $paciente_nome = trim($_GET['paciente_nome']);
-
-    if (!empty($paciente_nome)) {
-        // Busca o paciente
-        $stmt = $pdo->prepare("SELECT * FROM pacientes WHERE LOWER(nome) LIKE LOWER(?)");
-        $stmt->execute(['%' . $paciente_nome . '%']);
-        $paciente = $stmt->fetch();
-
-        if ($paciente) {
-            $itensPorPagina = 20;
-            $offset = ($pagina - 1) * $itensPorPagina;
-
-            // Contagem total para paginação
-            $stmt_count = $pdo->prepare("
-                SELECT COUNT(ap.id)
-                FROM atendimento_procedimentos ap
-                JOIN atendimentos a ON ap.id_atendimento = a.id
-                WHERE a.paciente_id = ?
-            ");
-            $stmt_count->execute([$paciente['id']]);
-            $totalRegistros = $stmt_count->fetchColumn();
-            $totalPaginas = ceil($totalRegistros / $itensPorPagina);
-
-            // Busca procedimentos paginados
-            $stmt_procedimentos = $pdo->prepare("
-                SELECT 
-                    ap.id as atendimento_procedimento_id,
-                    proc.nome as procedimento_nome,
-                    ap.local, 
-                    ap.descricao,
-                    a.data_atendimento,
-                    ap.status_execucao,
-                    a.status_pagamento,
-                    ap.url_arquivo
-                FROM atendimento_procedimentos ap
-                JOIN atendimentos a ON ap.id_atendimento = a.id
-                JOIN procedimentos proc ON ap.id_procedimento = proc.id
-                WHERE a.paciente_id = :paciente_id
-                ORDER BY a.data_atendimento DESC
-                LIMIT :limit OFFSET :offset
-            ");
-            $stmt_procedimentos->bindValue(':paciente_id', $paciente['id'], PDO::PARAM_INT);
-            $stmt_procedimentos->bindValue(':limit', $itensPorPagina, PDO::PARAM_INT);
-            $stmt_procedimentos->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt_procedimentos->execute();
-            $procedimentos = $stmt_procedimentos->fetchAll();
-
-            // --- INÍCIO: Lógica para colorir o odontograma ---
-            $stmt_status = $pdo->prepare("
-                SELECT
-                    ap.local,
-                    ap.status_execucao
-                FROM atendimento_procedimentos ap
-                JOIN atendimentos a ON ap.id_atendimento = a.id
-                WHERE a.paciente_id = ? AND ap.local IS NOT NULL AND ap.local != ''
-            ");
-            $stmt_status->execute([$paciente['id']]);
-            $all_procedures_for_status = $stmt_status->fetchAll();
-
-            $dente_status_raw = [];
-            foreach ($all_procedures_for_status as $proc) {
-                $local = $proc['local'];
-                if (!isset($dente_status_raw[$local])) {
-                    $dente_status_raw[$local] = ['pendente' => false, 'feito' => false];
-                }
-                // 'feito' é o estado final pago
-                if ($proc['status_execucao'] === 'feito') {
-                    $dente_status_raw[$local]['feito'] = true;
-                }
-                // 'pendente' ou 'finalizado' (feito mas não pago) são considerados pendentes para a cor
-                if ($proc['status_execucao'] === 'pendente' || $proc['status_execucao'] === 'finalizado') {
-                    $dente_status_raw[$local]['pendente'] = true;
-                }
-            }
-
-            $dente_status_color = [];
-            foreach ($dente_status_raw as $local => $statuses) {
-                if ($statuses['feito'] && $statuses['pendente']) {
-                    $dente_status_color[$local] = 'yellow'; // Amarelo para misto
-                } elseif ($statuses['feito']) {
-                    $dente_status_color[$local] = 'green'; // Verde para concluído
-                } elseif ($statuses['pendente']) {
-                    $dente_status_color[$local] = 'red'; // Vermelho para pendente
-                }
-            }
-            // --- FIM: Lógica para colorir o odontograma ---
-
-            // Agrupa procedimentos por local
-            $procedimentos_agrupados = [];
-            foreach ($procedimentos as $proc) {
-                $local = $proc['local'];
-                if (!isset($procedimentos_agrupados[$local])) {
-                    $procedimentos_agrupados[$local] = [];
-                }
-                $procedimentos_agrupados[$local][] = $proc;
-            }
-
-            $procedimentos_todos = $procedimentos_agrupados['Todos'] ?? [];
-            unset($procedimentos_agrupados['Todos']);
-            uksort($procedimentos_agrupados, 'strnatcmp');
-        }
-    }
-}
-?>
-
 <div class="card">
     <h2>Relatório por Paciente</h2>
 
-    <form method="GET" action="relatorio_paciente.php" class="card" style="margin-top: 1rem;">
+    <form method="GET" action="<?= BASE_URL ?>pacientes/relatorio" class="card" style="margin-top: 1rem;">
         <div style="display: flex; gap: 1rem; align-items: center;">
             <div class="form-group" style="flex-grow: 1;">
                 <label for="paciente_nome">Buscar Paciente</label>
@@ -148,7 +22,7 @@ if (isset($_GET['paciente_nome'])) {
             <h3>Odontograma de <?= htmlspecialchars($paciente['nome']) ?></h3>
             
             <div class="canvas-container">
-                <img src="assets/img/odontograma.png" usemap="#image-map" class="img-odontograma" id="odontograma-img">
+                <img src="<?= BASE_URL ?>assets/img/odontograma.png" usemap="#image-map" class="img-odontograma" id="odontograma-img">
                 
                 <svg class="odontograma-overlay" id="odontograma-svg"></svg>
                 
@@ -299,7 +173,8 @@ if (isset($_GET['paciente_nome'])) {
 <div id="modalUpload" class="modal">
     <div class="modal-content">
         <h3>Anexar Arquivo ao Procedimento</h3>
-        <form id="form-upload-arquivo" action="<?= BASE_URL ?>actions/salvar_arquivo_procedimento.php" method="POST" enctype="multipart/form-data">
+        <form id="form-upload-arquivo" action="<?= BASE_URL ?>pacientes/salvar-arquivo" method="POST" enctype="multipart/form-data">
+            <?= \App\Helpers\CsrfHelper::input() ?>
             <input type="hidden" name="atendimento_procedimento_id" id="upload_atendimento_procedimento_id">
             <input type="hidden" name="paciente_nome_redirect" value="<?= htmlspecialchars($paciente_nome) ?>">
             <div class="form-group">
@@ -662,7 +537,7 @@ if (isset($_GET['paciente_nome'])) {
                 const container = button.closest('.arquivo-container');
 
                 showConfirm('Remover Anexo', 'Você realmente deseja apagar esse arquivo?', function() {
-                    fetch('<?= BASE_URL ?>actions/remover_anexo.php', {
+                    fetch('<?= BASE_URL ?>pacientes/remover-anexo', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -695,7 +570,7 @@ if (isset($_GET['paciente_nome'])) {
 
                 if (statusExecucao.toLowerCase() === 'pendente' && statusPagamento.toLowerCase() === 'nao_aplicavel') {
                     showConfirm('Remover Procedimento', 'Você realmente deseja remover este procedimento?', function() {
-                        fetch('<?= BASE_URL ?>actions/remover_procedimento.php', {
+                        fetch('<?= BASE_URL ?>pacientes/remover-procedimento', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -723,5 +598,3 @@ if (isset($_GET['paciente_nome'])) {
         });
     });
 </script>
-
-<?php require_once 'views/header.php'; ?>

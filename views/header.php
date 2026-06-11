@@ -74,7 +74,7 @@ function isActive($urls) {
                         <a href="<?= BASE_URL ?>financeiro/relatorios/diario">Diário</a>
                         <?php if (is_admin() || is_dentista()): ?>
                         <a href="<?= BASE_URL ?>financeiro/relatorios/dentistas">Por Dentista</a>
-                        <a href="<?= BASE_URL ?>relatorio_paciente.php">Por Paciente</a>
+                        <a href="<?= BASE_URL ?>pacientes/relatorio">Por Paciente</a>
                         <?php endif; ?>
 
                         <?php if (is_admin()): ?>

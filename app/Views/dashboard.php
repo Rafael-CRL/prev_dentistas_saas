@@ -145,7 +145,7 @@
                     <td data-label="Data"><?= date('d/m/Y H:i', strtotime($at['data_atendimento'])) ?></td>
                     <td data-label="Paciente"><?= htmlspecialchars($at['paciente_nome']) ?></td>
                     <td data-label="Ações">
-                        <a href="<?= BASE_URL ?>recibo.php?id=<?= $at['id'] ?>" class="btn btn-secondary" target="_blank" title="Gerar Recibo" onclick="event.stopPropagation();">
+                        <a href="<?= BASE_URL ?>atendimentos/recibo?id=<?= $at['id'] ?>" class="btn btn-secondary" target="_blank" title="Gerar Recibo" onclick="event.stopPropagation();">
                             <i class="fa fa-eye"></i>
                         </a>
                     </td>

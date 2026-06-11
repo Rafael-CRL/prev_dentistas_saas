@@ -1,75 +1,3 @@
-<?php
-// detalhes_atendimento.php
-require_once 'config/session.php';
-require_once 'config/seguranca.php';
-require_once 'config/database.php';
-require_once 'views/header.php';
-require_once 'config/controle_acesso.php';
-
-// Apenas usuários logados podem acessar
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ' . BASE_URL . 'login.php');
-    exit;
-}
-
-$id_atendimento = $_GET['id'] ?? null;
-
-if (!$id_atendimento) {
-    header('Location: ' . BASE_URL . 'index.php');
-    exit;
-}
-
-try {
-    // Buscar detalhes do atendimento, juntando com pacientes e usuários
-    $stmt = $pdo->prepare(
-        "SELECT 
-            a.*, 
-            u.nome as dentista_nome,
-            p.nome as paciente_nome,
-            p.cpf as paciente_cpf,
-            p.telefone as paciente_telefone,
-            p.email as paciente_email
-         FROM atendimentos a
-         JOIN usuarios u ON a.id_dentista = u.id
-         JOIN pacientes p ON a.paciente_id = p.id
-         WHERE a.id = ?");
-    $stmt->execute([$id_atendimento]);
-    $atendimento = $stmt->fetch();
-
-    if (!$atendimento) {
-        echo "<div class='card'><p class='error'>Atendimento não encontrado.</p></div>";
-        require_once 'views/footer.php';
-        exit;
-    }
-
-    // Controle de Acesso: Apenas admin, recepcionista ou o dentista responsável podem ver
-    if (!is_admin() && !is_recepcionista() && $_SESSION['user_id'] != $atendimento['id_dentista']) {
-         header('Location: ' . BASE_URL . 'index.php');
-         exit;
-    }
-    
-    // Buscar procedimentos do atendimento
-    $stmtProc = $pdo->prepare(
-       "SELECT p.nome, ap.quantidade, ap.valor_procedimento, p.categoria
-        FROM atendimento_procedimentos ap
-        JOIN procedimentos p ON ap.id_procedimento = p.id
-        WHERE ap.id_atendimento = ?"
-    );
-    $stmtProc->execute([$id_atendimento]);
-    $procedimentos = $stmtProc->fetchAll();
-
-    // Buscar pagamentos do atendimento
-    $stmtPag = $pdo->prepare("SELECT * FROM atendimento_pagamentos WHERE id_atendimento = ?");
-    $stmtPag->execute([$id_atendimento]);
-    $pagamentos = $stmtPag->fetchAll();
-
-} catch (Exception $e) {
-    echo "<div class='card'><p class='error'>Erro ao carregar detalhes: " . $e->getMessage() . "</p></div>";
-    require_once 'views/footer.php';
-    exit;
-}
-?>
-
 <div class="card">
     <h2>Detalhes do Atendimento #<?= $atendimento['id'] ?></h2>
 
@@ -90,7 +18,7 @@ try {
 
     <?php if (!empty($atendimento['url_arquivo'])): ?>
         <div class="detalhes-arquivo">
-            <strong>Arquivo de Raio-X:</strong>
+            <strong>Arquivo Anexo:</strong>
             <a href="<?= BASE_URL . htmlspecialchars($atendimento['url_arquivo']) ?>" target="_blank" class="btn btn-info">
                 Ver Arquivo
             </a>
@@ -110,10 +38,10 @@ try {
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($procedimentos as $proc): ?>
+            <?php foreach ($atendimento['procedimentos'] as $proc): ?>
                 <tr>
                     <td><?= htmlspecialchars($proc['nome']) ?></td>
-                    <td><?= htmlspecialchars(ucfirst($proc['categoria'])) ?></td>
+                    <td><?= htmlspecialchars(ucfirst($proc['categoria'] ?? 'N/A')) ?></td>
                     <td><?= $proc['quantidade'] ?></td>
                     <td>R$ <?= number_format($proc['valor_procedimento'], 2, ',', '.') ?></td>
                 </tr>
@@ -155,7 +83,10 @@ try {
 
     <hr>
     
-    <a href="<?= BASE_URL ?>index.php" class="btn">Voltar</a>
+    <div style="display: flex; gap: 1rem;">
+        <a href="<?= BASE_URL ?>" class="btn btn-secondary">Voltar ao Dashboard</a>
+        <a href="<?= BASE_URL ?>atendimentos/recibo?id=<?= $atendimento['id'] ?>" target="_blank" class="btn btn-primary">Ver Recibo</a>
+    </div>
 </div>
 
 <style>
@@ -186,6 +117,17 @@ try {
         border-top: 1px solid #eee;
         margin: 20px 0;
     }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    .table th, .table td {
+        padding: 10px;
+        border: 1px solid #eee;
+        text-align: left;
+    }
+    .table th {
+        background-color: #f8f9fa;
+    }
 </style>
-
-<?php require_once 'views/footer.php'; ?>

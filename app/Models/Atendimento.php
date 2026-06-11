@@ -573,5 +573,61 @@ class Atendimento
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Busca dados completos de um atendimento para detalhes e recibo.
+     */
+    public function getAtendimentoFull(int $idAtendimento): ?array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                a.*,
+                p.nome AS paciente_nome,
+                p.cpf AS paciente_cpf,
+                p.endereco,
+                p.numero,
+                p.bairro,
+                p.cidade,
+                p.estado,
+                p.telefone as paciente_telefone,
+                p.email as paciente_email,
+                u.nome AS dentista_nome
+            FROM atendimentos a
+            JOIN pacientes p ON a.paciente_id = p.id
+            JOIN usuarios u ON a.id_dentista = u.id
+            WHERE a.id = ? AND a.clinica_id = ?
+        ");
+        $stmt->execute([$idAtendimento, $this->clinicaId]);
+        $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$atendimento) {
+            return null;
+        }
+
+        // Buscar procedimentos
+        $stmt_proc = $this->pdo->prepare("
+            SELECT proc.nome, ap.valor_procedimento, ap.quantidade, proc.categoria, ap.status_execucao
+            FROM atendimento_procedimentos ap
+            JOIN procedimentos proc ON ap.id_procedimento = proc.id
+            WHERE ap.id_atendimento = ? AND ap.clinica_id = ?
+        ");
+        $stmt_proc->execute([$idAtendimento, $this->clinicaId]);
+        $atendimento['procedimentos'] = $stmt_proc->fetchAll(PDO::FETCH_ASSOC);
+
+        return $atendimento;
+    }
+
+    /**
+     * Busca os pagamentos de um atendimento.
+     */
+    public function getPagamentos(int $idAtendimento): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT * FROM atendimento_pagamentos 
+            WHERE id_atendimento = ? AND clinica_id = ?
+        ");
+        $stmt->execute([$idAtendimento, $this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
