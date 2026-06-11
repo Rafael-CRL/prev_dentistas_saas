@@ -172,21 +172,24 @@ html {
     position: sticky;
     top: 0;
     z-index: 2000;
+    gap: 1rem; /* Garante espaço mínimo entre os blocos */
 }
 
 .logo {
     font-weight: bold;
     color: white;
     font-size: 1.2rem;
+    white-space: nowrap; /* Impede que o logo quebre linha */
     flex-shrink: 0;
 }
 
 .menu {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.2rem;
     align-items: center;
     flex-grow: 1;
     justify-content: center;
+    overflow: hidden; /* Segurança extra */
 }
 
 .menu a {
@@ -196,6 +199,15 @@ html {
     padding: 0.5rem 0;
     transition: color 0.2s;
     position: relative;
+    white-space: nowrap; /* Evita que o texto traduzido quebre em 2 linhas no menu */
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0; /* Impede que o menu do usuário seja espremido */
+    white-space: nowrap;
 }
 
 .menu a::after {

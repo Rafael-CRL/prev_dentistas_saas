@@ -25,7 +25,7 @@ function isActive($urls) {
 </head>
 <body>
     <header class="navbar">
-        <div class="logo">
+        <div class="logo" translate="no">
             <a href="<?= BASE_URL ?>index.php" style="text-decoration:none; color:inherit;">🦷 Prev Dentistas</a>
         </div>
         
@@ -91,7 +91,7 @@ function isActive($urls) {
         <?php if(isset($_SESSION['usuario_id'])): ?>
             <div class="user-menu">
                 <span>Olá, <?= htmlspecialchars($_SESSION['usuario_nome']) ?></span>
-                <a href="<?= BASE_URL ?>logout" class="btn btn-secondary">Sair</a>
+                <a href="<?= BASE_URL ?>logout" class="btn btn-secondary" translate="no">Sair</a>
             </div>
         <?php endif; ?>
     </header>
