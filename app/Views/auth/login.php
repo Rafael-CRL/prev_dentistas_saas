@@ -478,6 +478,7 @@
                 
                 <form action="actions/login_handler.php" method="POST" class="header-login-form">
                     <?= \App\Helpers\CsrfHelper::input() ?>
+                    <input type="text" name="clinica_identificador" placeholder="Clínica (Código/CNPJ)" required style="width: 130px;">
                     <input type="text" name="login" placeholder="Usuário" required>
                     <input type="password" name="senha" placeholder="Senha" required>
                     <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
