@@ -12,6 +12,8 @@ set_include_path(get_include_path() . PATH_SEPARATOR . realpath(__DIR__ . '/../'
 
 require_once 'config/session.php';
 require_once 'config/database.php';
+require_once 'config/seguranca.php';
+require_once 'config/controle_acesso.php';
 
 // Normalização da URI para roteamento
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
