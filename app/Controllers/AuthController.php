@@ -39,15 +39,30 @@ class AuthController extends BaseController {
             exit;
         }
 
-        $clinicaIdentificador = $_POST['clinica_identificador'] ?? '';
         $login = $_POST['login'] ?? '';
         $senha = $_POST['senha'] ?? '';
 
+        /*
+        // PRONTO PARA PRODUÇÃO MULTI-TENANT COM MÚLTIPLAS CLÍNICAS:
+        // Obtém o identificador da clínica inserido pelo usuário na tela de login
+        $clinicaIdentificador = $_POST['clinica_identificador'] ?? '';
         $clinicaId = $this->authModel->findClinicaId($clinicaIdentificador);
-
         $usuario = null;
         if ($clinicaId !== null) {
             $usuario = $this->authModel->authenticate($login, $clinicaId);
+        }
+        */
+
+        // COMPORTAMENTO TEMPORÁRIO (Single-tenant com isolamento funcional):
+        // Resolve o clinica_id automaticamente pela primeira clínica ativa no banco
+        $clinicaId = $this->authModel->findFirstActiveClinicaId();
+        $usuario = null;
+        if ($clinicaId !== null) {
+            $usuario = $this->authModel->authenticate($login);
+            // Garante o isolamento funcional verificando se o usuário de fato pertence à clínica resolvida
+            if ($usuario && (int)$usuario['clinica_id'] !== $clinicaId) {
+                $usuario = null;
+            }
         }
 
         // Verificação de segurança rigorosa
