@@ -7,7 +7,7 @@ class UsuarioController extends BaseController {
     private $usuarioModel;
 
     public function __construct($pdo) {
-        parent::__construct($pdo);
+        parent::__construct();
         $this->usuarioModel = new Usuario($pdo, $_SESSION['clinica_id']);
     }
 
