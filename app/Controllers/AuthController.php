@@ -39,10 +39,16 @@ class AuthController extends BaseController {
             exit;
         }
 
+        $clinicaIdentificador = $_POST['clinica_identificador'] ?? '';
         $login = $_POST['login'] ?? '';
         $senha = $_POST['senha'] ?? '';
 
-        $usuario = $this->authModel->authenticate($login);
+        $clinicaId = $this->authModel->findClinicaId($clinicaIdentificador);
+
+        $usuario = null;
+        if ($clinicaId !== null) {
+            $usuario = $this->authModel->authenticate($login, $clinicaId);
+        }
 
         // Verificação de segurança rigorosa
         if ($usuario && password_verify($senha, $usuario['senha'])) {
