@@ -57,16 +57,22 @@ class UsuarioController extends BaseController {
 
             // Validação
             if (empty($nome) || empty($login) || empty($perfil)) {
-                die("Erro: Nome, login e perfil são obrigatórios.");
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Nome, login e perfil são obrigatórios.'];
+                $redirect = $id ? "usuarios/editar?id=$id" : "usuarios";
+                header("Location: " . BASE_URL . $redirect);
+                exit;
             }
 
             if (!$id && empty($senha)) {
-                die("Erro: Senha é obrigatória para novos usuários.");
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Senha é obrigatória para novos usuários.'];
+                header("Location: " . BASE_URL . "usuarios");
+                exit;
             }
 
             // Verificar login duplicado
             if ($this->usuarioModel->verificarLoginDuplicado($login, $id)) {
-                $redirect = $id ? "usuarios/editar?id=$id&erro=login_duplicado" : "usuarios?erro=login_duplicado";
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'O login informado já está em uso nesta clínica.'];
+                $redirect = $id ? "usuarios/editar?id=$id" : "usuarios";
                 header("Location: " . BASE_URL . $redirect);
                 exit;
             }
@@ -80,9 +86,12 @@ class UsuarioController extends BaseController {
             ];
 
             if ($this->usuarioModel->salvar($dados)) {
-                header("Location: " . BASE_URL . "usuarios?msg=sucesso");
+                $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Usuário salvo com sucesso!'];
+                header("Location: " . BASE_URL . "usuarios");
             } else {
-                die("Erro ao salvar usuário.");
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao salvar usuário.'];
+                $redirect = $id ? "usuarios/editar?id=$id" : "usuarios";
+                header("Location: " . BASE_URL . $redirect);
             }
             exit;
         }
@@ -102,20 +111,24 @@ class UsuarioController extends BaseController {
 
         // Não pode excluir a si mesmo
         if ($id == $_SESSION['usuario_id']) {
-            header("Location: " . BASE_URL . "usuarios?erro=autoexclusao");
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Você não pode excluir seu próprio usuário.'];
+            header("Location: " . BASE_URL . "usuarios");
             exit;
         }
 
         // Verificar dependências
         if ($this->usuarioModel->temAtendimentos($id)) {
-            header("Location: " . BASE_URL . "usuarios?erro=conflito_atendimento");
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Não é possível excluir o usuário, pois ele está vinculado a atendimentos.'];
+            header("Location: " . BASE_URL . "usuarios");
             exit;
         }
 
         if ($this->usuarioModel->remover($id)) {
-            header("Location: " . BASE_URL . "usuarios?msg=removido");
+            $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Usuário removido com sucesso!'];
+            header("Location: " . BASE_URL . "usuarios");
         } else {
-            die("Erro ao remover usuário.");
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Erro ao remover usuário.'];
+            header("Location: " . BASE_URL . "usuarios");
         }
         exit;
     }

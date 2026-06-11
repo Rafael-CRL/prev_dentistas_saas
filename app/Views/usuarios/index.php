@@ -1,23 +1,12 @@
 <div class="card">
     <h2>Gestão de Usuários</h2>
 
-    <?php if (isset($_GET['erro'])):
-        $erro = $_GET['erro'];
-        if ($erro === 'login_duplicado') {
-            echo "<p class='error'>O login informado já está em uso nesta clínica.</p>";
-        } elseif ($erro === 'autoexclusao') {
-            echo "<p class='error'>Você não pode excluir seu próprio usuário.</p>";
-        } elseif ($erro === 'conflito_atendimento') {
-            echo "<p class='error'>Não é possível excluir o usuário, pois ele está vinculado a atendimentos.</p>";
-        }
-    endif; ?>
-    <?php if (isset($_GET['msg'])):
-        if ($_GET['msg'] === 'sucesso') {
-            echo "<p style='color: green; background: #e8f5e9; padding: 1rem; border-radius: 6px;'>Usuário salvo com sucesso!</p>";
-        } elseif ($_GET['msg'] === 'removido') {
-            echo "<p style='color: green; background: #e8f5e9; padding: 1rem; border-radius: 6px;'>Usuário removido com sucesso!</p>";
-        }
-    endif; ?>
+    <?php if (isset($_SESSION['feedback'])): ?>
+        <p class="<?= $_SESSION['feedback']['type'] === 'success' ? 'success' : 'error' ?>">
+            <?= htmlspecialchars($_SESSION['feedback']['message']) ?>
+        </p>
+        <?php unset($_SESSION['feedback']); ?>
+    <?php endif; ?>
 
     <!-- Formulário para Adicionar Usuário -->
     <div class="card" style="margin-top: 2rem;">

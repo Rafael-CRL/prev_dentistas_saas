@@ -1,8 +1,11 @@
 <div class="card">
     <h2>Editar Usuário</h2>
 
-    <?php if (isset($_GET['erro']) && $_GET['erro'] === 'login_duplicado'): ?>
-        <p class='error'>O login informado já está em uso por outro usuário nesta clínica.</p>
+    <?php if (isset($_SESSION['feedback'])): ?>
+        <p class="<?= $_SESSION['feedback']['type'] === 'success' ? 'success' : 'error' ?>">
+            <?= htmlspecialchars($_SESSION['feedback']['message']) ?>
+        </p>
+        <?php unset($_SESSION['feedback']); ?>
     <?php endif; ?>
 
     <form action="<?= BASE_URL ?>usuarios/salvar" method="POST" style="margin-top: 1rem;">
