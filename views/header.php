@@ -52,22 +52,22 @@ function isActive($urls) {
                 
                 <?php if (is_admin() || is_dentista() ||is_recepcionista()): ?>
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['procedimentos', 'financeiro/despesas', 'usuarios.php', 'pacientes.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['procedimentos', 'financeiro/despesas', 'usuarios', 'pacientes']) ? 'active' : '' ?>">
                         Cadastros <small>▾</small>
                     </a>
                     <div class="dropdown-content">
-                        <a href="<?= BASE_URL ?>pacientes.php">Pacientes</a>
+                        <a href="<?= BASE_URL ?>pacientes">Pacientes</a>
                         <?php if (is_admin()): ?>
                         <a href="<?= BASE_URL ?>procedimentos">Procedimentos</a>
                         <a href="<?= BASE_URL ?>financeiro/despesas">Despesas</a>
-                        <a href="<?= BASE_URL ?>usuarios.php">Usuários</a>
+                        <a href="<?= BASE_URL ?>usuarios">Usuários</a>
                         <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
 
                 <div class="dropdown">
-                    <a href="javascript:void(0)" class="<?= isActive(['financeiro/relatorios', 'relatorio_diario.php', 'relatorio_dentistas.php', 'relatorios.php', 'relatorio_paciente.php', 'relatorio_procedimentos.php']) ? 'active' : '' ?>">
+                    <a href="javascript:void(0)" class="<?= isActive(['financeiro/relatorios', 'relatorio_paciente.php']) ? 'active' : '' ?>">
                         Relatórios <small>▾</small>
                     </a>
                     <div class="dropdown-content">
@@ -84,14 +84,14 @@ function isActive($urls) {
                     </div>
                 </div>
 
-                <a href="<?= BASE_URL ?>configuracoes.php" class="<?= isActive(['configuracoes.php']) ? 'active' : '' ?>">Configuração</a>
+                <a href="<?= BASE_URL ?>usuarios/configuracoes" class="<?= isActive(['usuarios/configuracoes']) ? 'active' : '' ?>">Configuração</a>
             <?php endif; ?>
         </nav>
 
         <?php if(isset($_SESSION['usuario_id'])): ?>
             <div class="user-menu">
                 <span>Olá, <?= htmlspecialchars($_SESSION['usuario_nome']) ?></span>
-                <a href="<?= BASE_URL ?>actions/logout.php" class="btn btn-secondary">Sair</a>
+                <a href="<?= BASE_URL ?>logout" class="btn btn-secondary">Sair</a>
             </div>
         <?php endif; ?>
     </header>
