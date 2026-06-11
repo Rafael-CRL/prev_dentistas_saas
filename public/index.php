@@ -37,7 +37,7 @@ if ($uri === 'index.php' || $uri === 'index') {
 }
 
 // 1. Módulo de Autenticação
-if ($uri === 'login.php' || $uri === 'login' || $uri === 'logout.php' || $uri === 'actions/login_handler.php') {
+if ($uri === 'login.php' || $uri === 'login' || $uri === 'logout.php' || $uri === 'logout' || $uri === 'actions/login_handler.php') {
     $controller = new \App\Controllers\AuthController($pdo);
     if (strpos($uri, 'logout') !== false) {
         $controller->logout();
