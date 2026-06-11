@@ -147,6 +147,31 @@ if (strpos($uri, 'financeiro') === 0 || in_array($uri, ['relatorios.php', 'relat
     exit;
 }
 
+// 6. Módulo de Usuários e Configurações
+if (strpos($uri, 'usuarios') === 0 || $uri === 'usuarios.php' || $uri === 'editar_usuario.php' || $uri === 'configuracoes.php') {
+    if (!isset($_SESSION['usuario_id'])) {
+        header("Location: " . BASE_URL . "login.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\UsuarioController($pdo);
+
+    if ($uri === 'usuarios' || $uri === 'usuarios.php') {
+        $controller->index();
+    } elseif ($uri === 'usuarios/editar' || $uri === 'editar_usuario.php') {
+        $controller->editar();
+    } elseif ($uri === 'usuarios/salvar' || $uri === 'actions/salvar_usuario.php') {
+        $controller->salvar();
+    } elseif ($uri === 'usuarios/remover' || $uri === 'actions/excluir_usuario.php') {
+        $controller->remover();
+    } elseif ($uri === 'usuarios/configuracoes' || $uri === 'configuracoes.php') {
+        $controller->configuracoes();
+    } elseif ($uri === 'usuarios/salvar-configuracoes' || $uri === 'actions/salvar_configuracoes.php') {
+        $controller->salvarConfiguracoes();
+    }
+    exit;
+}
+
 // --- COMPATIBILIDADE LEGADA ---
 
 $legacy_file_path = realpath(__DIR__ . '/../' . ltrim($uri, '/'));
