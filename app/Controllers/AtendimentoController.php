@@ -297,7 +297,7 @@ class AtendimentoController extends BaseController
         }
 
         // Controle de Acesso: Apenas admin, recepcionista ou o dentista responsável podem ver
-        if (!is_admin() && !is_recepcionista() && $_SESSION['usuario_id'] != $atendimento['id_dentista']) {
+        if (!\is_admin() && !\is_recepcionista() && $_SESSION['usuario_id'] != $atendimento['id_dentista']) {
              header('Location: ' . BASE_URL . 'index.php');
              exit;
         }

@@ -118,7 +118,7 @@ class PacienteController extends BaseController
      */
     public function relatorio()
     {
-        if (!is_admin() && !is_dentista()) {
+        if (!\is_admin() && !\is_dentista()) {
             header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
