@@ -16,12 +16,15 @@ $requisitos_classes = [
     'App\Controllers\AuthController' => 'app/Controllers/AuthController.php',
     'App\Controllers\AtendimentoController' => 'app/Controllers/AtendimentoController.php',
     'App\Controllers\FinanceiroController' => 'app/Controllers/FinanceiroController.php',
+    'App\Controllers\UsuarioController' => 'app/Controllers/UsuarioController.php',
     'App\Models\Paciente' => 'app/Models/Paciente.php',
     'App\Models\Procedimento' => 'app/Models/Procedimento.php',
     'App\Models\AuthModel' => 'app/Models/AuthModel.php',
     'App\Models\Atendimento' => 'app/Models/Atendimento.php',
     'App\Models\Pagamento' => 'app/Models/Pagamento.php',
-    'App\Models\Despesa' => 'app/Models/Despesa.php'
+    'App\Models\Despesa' => 'app/Models/Despesa.php',
+    'App\Models\Usuario' => 'app/Models/Usuario.php',
+    'App\Models\Config' => 'app/Models/Config.php'
 ];
 
 $controladores_filhos = [
@@ -29,7 +32,8 @@ $controladores_filhos = [
     'App\Controllers\ProcedimentoController',
     'App\Controllers\AuthController',
     'App\Controllers\AtendimentoController',
-    'App\Controllers\FinanceiroController'
+    'App\Controllers\FinanceiroController',
+    'App\Controllers\UsuarioController'
 ];
 
 // --- MOTOR DE AUDITORIA ---
@@ -195,12 +199,41 @@ if (file_exists($atendimentoViewPath)) {
     }
 }
 
-// 6. Auditoria de Limpeza (Zero .bak/.old)
+// 5.1 Auditoria de Novas Views Migradas
+$views_to_check = [
+    'app/Views/usuarios/index.php',
+    'app/Views/usuarios/editar.php',
+    'app/Views/usuarios/configuracoes.php',
+    'app/Views/pacientes/relatorio.php'
+];
+
+foreach ($views_to_check as $viewPath) {
+    $path = __DIR__ . '/../' . $viewPath;
+    if (file_exists($path)) {
+        $content = file_get_contents($path);
+        if (strpos($content, 'CsrfHelper::input') !== false) {
+            logResultado($relatorio, 'seguranca', 'OK', "View $viewPath possui token CSRF.");
+        } else {
+            logResultado($relatorio, 'seguranca', 'ERRO', "View $viewPath NÃO possui token CSRF.");
+        }
+    }
+}
+
+// 6. Auditoria de Limpeza (Zero .bak/.old e Zero Legado na Raiz)
 $dirty_files = shell_exec("find . -name '*.bak' -o -name '*.old' | grep -v 'vendor'");
 if (empty($dirty_files)) {
     logResultado($relatorio, 'limpeza', 'OK', "Nenhum arquivo de backup (.bak/.old) encontrado.");
 } else {
     logResultado($relatorio, 'limpeza', 'ERRO', "Arquivos residuais detectados:\n" . $dirty_files);
+}
+
+$legacy_root_files = ['usuarios.php', 'relatorio_paciente.php', 'configuracoes.php', 'detalhes_atendimento.php', 'recibo.php', 'login.php'];
+foreach ($legacy_root_files as $file) {
+    if (file_exists(__DIR__ . '/../' . $file)) {
+        logResultado($relatorio, 'limpeza', 'ERRO', "Arquivo legado detectado na raiz: $file");
+    } else {
+        logResultado($relatorio, 'limpeza', 'OK', "Arquivo legado $file removido da raiz.");
+    }
 }
 
 // --- RELATÓRIO FINAL ---

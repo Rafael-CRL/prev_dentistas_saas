@@ -12,8 +12,7 @@ $requisitos_classes = [
 ];
 
 $arquivos_refatorados = [
-    'app/Controllers/AtendimentoController.php',
-    'actions/salvar_pagamento.php'
+    'app/Controllers/AtendimentoController.php'
 ];
 
 $relatorio = [
