@@ -151,7 +151,7 @@ class FinanceiroController extends BaseController
      */
     public function relatorioGeral(): void
     {
-        if (!is_admin()) {
+        if (!\is_admin()) {
             header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
@@ -303,14 +303,14 @@ class FinanceiroController extends BaseController
      */
     public function relatorioDentistas(): void
     {
-        if (!is_admin() && !is_dentista()) {
+        if (!\is_admin() && !\is_dentista()) {
             header('Location: ' . BASE_URL . 'index.php');
             exit;
         }
 
         $mes = $_GET['mes'] ?? date('Y-m');
         
-        if (is_dentista() && !is_admin()) {
+        if (\is_dentista() && !\is_admin()) {
             $dentista_id = $_SESSION['usuario_id'];
         } else {
             $dentista_id = $_GET['dentista_id'] ?? 'todos';
@@ -322,7 +322,7 @@ class FinanceiroController extends BaseController
         $atendimentoModel = new Atendimento($this->pdo, $this->clinica_id);
         
         $dentistas = [];
-        if (is_admin()) {
+        if (\is_admin()) {
             $stmt = $this->pdo->prepare("SELECT id, nome FROM usuarios WHERE perfil = 'dentista' AND clinica_id = ? ORDER BY nome");
             $stmt->execute([$this->clinica_id]);
             $dentistas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -343,7 +343,7 @@ class FinanceiroController extends BaseController
      */
     public function relatorioProcedimentos(): void
     {
-        if (!is_admin()) {
+        if (!\is_admin()) {
             header('Location: ' . BASE_URL . 'index.php');
             exit;
         }

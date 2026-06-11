@@ -12,7 +12,7 @@ class UsuarioController extends BaseController {
     }
 
     public function index() {
-        if (!is_admin()) {
+        if (!\is_admin()) {
             header("Location: " . BASE_URL);
             exit;
         }
@@ -22,7 +22,7 @@ class UsuarioController extends BaseController {
     }
 
     public function editar() {
-        if (!is_admin()) {
+        if (!\is_admin()) {
             header("Location: " . BASE_URL);
             exit;
         }
@@ -43,7 +43,7 @@ class UsuarioController extends BaseController {
     }
 
     public function salvar() {
-        if (!is_admin()) {
+        if (!\is_admin()) {
             header("Location: " . BASE_URL);
             exit;
         }
@@ -89,7 +89,7 @@ class UsuarioController extends BaseController {
     }
 
     public function remover() {
-        if (!is_admin()) {
+        if (!\is_admin()) {
             header("Location: " . BASE_URL);
             exit;
         }
