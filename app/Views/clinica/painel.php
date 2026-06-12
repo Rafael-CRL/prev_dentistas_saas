@@ -146,9 +146,13 @@
                     <td data-label="Modalidade"><?= ucfirst($t['modalidade']) ?></td>
                     <td data-label="Parcelas"><?= $t['parcelas'] ?>x</td>
                     <td data-label="Taxa"><?= number_format($t['taxa_percentual'], 2) ?>%</td>
-                    <td data-label="Ações">
+                    <td data-label="Ações" style="display: flex; gap: 5px;">
                         <button class="btn btn-primary btn-sm" onclick="editTaxa(<?= htmlspecialchars(json_encode($t)) ?>)">Editar</button>
-                        <a href="<?= BASE_URL ?>clinica/excluir-taxa?id=<?= $t['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Excluir esta taxa?')">Remover</a>
+                        <form action="<?= BASE_URL ?>clinica/excluir-taxa" method="POST" style="display: inline;" onsubmit="return confirm('Excluir esta taxa?');">
+                            <?= \App\Helpers\CsrfHelper::input() ?>
+                            <input type="hidden" name="id" value="<?= $t['id'] ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                        </form>
                     </td>
                 </tr>
                 <?php endforeach; ?>

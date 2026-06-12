@@ -38,10 +38,13 @@ class ClinicaController extends BaseController
      */
     public function salvarDados(): void
     {
+        $cnpj = trim($_POST['cnpj'] ?? '');
+        $cnpjSanitizado = preg_replace('/\D/', '', $cnpj);
+
         $data = [
             'nome_fantasia' => trim($_POST['nome_fantasia'] ?? ''),
             'razao_social' => trim($_POST['razao_social'] ?? ''),
-            'cnpj' => trim($_POST['cnpj'] ?? '')
+            'cnpj' => $cnpjSanitizado
         ];
 
         if (empty($data['nome_fantasia'])) {
@@ -143,10 +146,15 @@ class ClinicaController extends BaseController
      */
     public function excluirTaxa(): void
     {
-        $id = intval($_GET['id'] ?? 0);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: " . BASE_URL . "clinica/painel");
+            exit;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
         if ($id > 0) {
             $this->clinicaModel->excluirTaxaCartao($id);
-            $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Taxa removida.'];
+            $_SESSION['feedback'] = ['type' => 'success', 'message' => 'Taxa removida com sucesso!'];
         }
         header("Location: " . BASE_URL . "clinica/painel");
         exit;
