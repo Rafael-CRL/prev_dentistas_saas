@@ -85,6 +85,42 @@ if (strpos($painelView, 'CsrfHelper::input()') !== false) {
     $falhas++;
 }
 
+// 6. Teste de Integração Lógica (Taxas Dinâmicas)
+echo "\n{$cores['aviso']}--- TESTE DE INTEGRAÇÃO FINANCEIRA ---{$cores['reset']}\n";
+try {
+    $clinica_id = 1; // Clínica padrão para teste
+    
+    // Força a reinicialização da instância Singleton para carregar dados frescos
+    $reflection = new ReflectionClass('App\Models\Config');
+    $instanceProperty = $reflection->getProperty('instance');
+    $instanceProperty->setAccessible(true);
+    $instanceProperty->setValue(null, null);
+
+    $config = App\Models\Config::getInstance($pdo, $clinica_id);
+    $service = new App\Services\FinanceiroService($config);
+    
+    // Simula uma venda de R$ 100,00 no crédito 1x
+    $resultado = $service->calcularLiquidoMaquininha(100, 'credito', 1);
+    
+    if (isset($resultado['taxa_aplicada_percentual'])) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} FinanceiroService está consumindo taxas dinâmicas (Taxa detectada: {$resultado['taxa_aplicada_percentual']}%).\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} FinanceiroService não retornou a taxa aplicada.\n";
+        $falhas++;
+    }
+} catch (Exception $e) {
+    echo "{$cores['erro']}[FALHA]{$cores['reset']} Erro no teste de integração: " . $e->getMessage() . "\n";
+    $falhas++;
+}
+
+// 7. Verificação de Partials (Pilar C)
+if (file_exists(__DIR__ . '/../app/Views/partials/alert.php')) {
+    echo "{$cores['sucesso']}[OK]{$cores['reset']} Partial de alertas (Pilar C) encontrado.\n";
+} else {
+    echo "{$cores['erro']}[FALHA]{$cores['reset']} Partial de alertas não encontrado.\n";
+    $falhas++;
+}
+
 echo "\n" . str_repeat("=", 50) . "\n";
 if ($falhas === 0) {
     echo "{$cores['sucesso']}AUDITORIA CONCLUÍDA COM SUCESSO!{$cores['reset']}\n";
