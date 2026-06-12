@@ -59,6 +59,10 @@
                             R$ <?= number_format((float)$proc['valor_base'], 2, ',', '.') ?>
                         </td>
                         <td data-label="Ações">
+                            <a href="<?= BASE_URL ?>procedimentos/editar?id=<?= $proc['id'] ?>"
+                               class="btn btn-primary">
+                                Editar
+                            </a>
                             <a href="<?= BASE_URL ?>procedimentos/excluir?id=<?= $proc['id'] ?>"
                                class="btn btn-danger"
                                onclick="return confirm('Tem certeza que deseja remover este procedimento?');">

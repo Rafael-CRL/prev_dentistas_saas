@@ -30,6 +30,24 @@ class ProcedimentoController extends BaseController
         $this->render('procedimentos/index', ['procedimentos' => $procedimentos]);
     }
 
+    public function editar(): void
+    {
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id <= 0) {
+            header("Location: " . BASE_URL . "procedimentos");
+            exit;
+        }
+
+        $procedimento = $this->procedimentoModel->getById($id);
+        if (!$procedimento) {
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Procedimento não encontrado.'];
+            header("Location: " . BASE_URL . "procedimentos");
+            exit;
+        }
+
+        $this->render('procedimentos/editar', ['procedimento' => $procedimento]);
+    }
+
     public function salvar(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -37,6 +55,7 @@ class ProcedimentoController extends BaseController
             exit;
         }
 
+        $id        = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $nome      = trim($_POST['nome'] ?? '');
         $categoria = $_POST['categoria'] ?? '';
         $valorBase = !empty($_POST['valor_base']) ? floatval($_POST['valor_base']) : null;
@@ -47,21 +66,32 @@ class ProcedimentoController extends BaseController
                 'type'    => 'error',
                 'message' => 'Nome e categoria são obrigatórios.',
             ];
-            header("Location: " . BASE_URL . "procedimentos");
+            header("Location: " . BASE_URL . ($id > 0 ? "procedimentos/editar?id=$id" : "procedimentos"));
             exit;
         }
 
         try {
-            $this->procedimentoModel->create([
-                'nome'       => $nome,
-                'categoria'  => $categoria,
-                'valor_base' => $valorBase,
-                'tipo'       => $tipo,
-            ]);
+            if ($id > 0) {
+                $this->procedimentoModel->update($id, [
+                    'nome'       => $nome,
+                    'categoria'  => $categoria,
+                    'valor_base' => $valorBase,
+                    'tipo'       => $tipo,
+                ]);
+                $msg = 'Procedimento atualizado com sucesso!';
+            } else {
+                $this->procedimentoModel->create([
+                    'nome'       => $nome,
+                    'categoria'  => $categoria,
+                    'valor_base' => $valorBase,
+                    'tipo'       => $tipo,
+                ]);
+                $msg = 'Procedimento salvo com sucesso!';
+            }
 
             $_SESSION['feedback'] = [
                 'type'    => 'success',
-                'message' => 'Procedimento salvo com sucesso!',
+                'message' => $msg,
             ];
         } catch (\Exception $e) {
             $_SESSION['feedback'] = [

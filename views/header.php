@@ -58,6 +58,7 @@ function isActive($urls) {
                     <div class="dropdown-content">
                         <a href="<?= BASE_URL ?>pacientes">Pacientes</a>
                         <?php if (is_admin()): ?>
+                        <a href="<?= BASE_URL ?>clinica/painel">Configurações Clínica</a>
                         <a href="<?= BASE_URL ?>procedimentos">Procedimentos</a>
                         <a href="<?= BASE_URL ?>financeiro/despesas">Despesas</a>
                         <a href="<?= BASE_URL ?>usuarios">Usuários</a>
