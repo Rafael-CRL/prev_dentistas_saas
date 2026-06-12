@@ -1,12 +1,7 @@
 <div class="card">
     <h2>Configurações da Clínica</h2>
 
-    <?php if (isset($_SESSION['feedback'])): ?>
-        <p class="<?= $_SESSION['feedback']['type'] === 'success' ? 'success' : 'error' ?>">
-            <?= htmlspecialchars($_SESSION['feedback']['message']) ?>
-        </p>
-        <?php unset($_SESSION['feedback']); ?>
-    <?php endif; ?>
+    <?php require_once __DIR__ . '/../partials/alert.php'; ?>
 
     <div class="tabs">
         <button class="tab-link active" onclick="openTab(event, 'dados')">Dados Institucionais</button>

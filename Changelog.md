@@ -378,11 +378,16 @@ Implementação do pilar administrativo do sistema SaaS, movendo a inteligência
 - **Navegação Profissional:**
     - Reconstrução da lógica CSS do Header para garantir interatividade de clique 100% confiável (remoção de "zonas mortas" entre dropdowns).
     - **Linha Ativa Responsiva:** Ajuste matemático da linha branca inferior (underline) para se estender precisamente do início do texto até o ícone da seta (▾), utilizando `inline-flex` e `width: max-content`.
+- **Componentização e Partials (Pilar C):**
+    - Implementação do `app/Views/partials/alert.php`: Centralização do sistema de feedback visual com ícones dinâmicos e animações CSS.
+    - Refatoração das views de Clínicas e Procedimentos para utilizar o novo partial, garantindo consistência em todo o sistema.
 - **Usabilidade (Máscaras de Entrada):**
     - Adição de máscaras de CNPJ e Telefone via JavaScript para padronização de dados institucionais.
 
 ### 🔍 Infraestrutura de Qualidade
 - **Auditoria Automatizada:** Criado o script `scripts/auditoria_conclusao_fase6.php` para validar a conformidade MVC, integridade de tabelas SaaS e presença de proteção CSRF no novo módulo.
+- **Teste de Integração Lógica:** Evolução da auditoria para validar se o `FinanceiroService` reflete instantaneamente as configurações alteradas na interface, garantindo o fim do hardcode.
+
 
 ---
 *Status: Fase 6 (Item 1) Concluída. Sistema com gestão administrativa completa e interface refinada.*

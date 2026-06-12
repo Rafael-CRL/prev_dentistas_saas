@@ -1,14 +1,10 @@
 <div class="card">
     <h2>Gestão de Procedimentos</h2>
 
-    <?php if (isset($_SESSION['feedback'])): ?>
-        <p class="<?= $_SESSION['feedback']['type'] === 'success' ? 'success' : 'error' ?>">
-            <?= htmlspecialchars($_SESSION['feedback']['message']) ?>
-        </p>
-        <?php unset($_SESSION['feedback']); ?>
-    <?php endif; ?>
+    <?php require_once __DIR__ . '/../partials/alert.php'; ?>
 
-    <div class="card" style="margin-top: 2rem;">
+    <table class="mobile-card-table">
+
         <h3>Novo Procedimento</h3>
         <form action="<?= BASE_URL ?>procedimentos/salvar" method="POST">
             <?= \App\Helpers\CsrfHelper::input() ?>

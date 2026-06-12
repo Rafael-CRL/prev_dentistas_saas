@@ -49,13 +49,14 @@ class Config
         $stmtTaxas = $this->pdo->prepare("SELECT bandeira, modalidade, parcelas, taxa_percentual FROM clinica_taxas_cartao WHERE clinica_id = ?");
         $stmtTaxas->execute([$this->clinicaId]);
         foreach ($stmtTaxas->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            // Indexa por 'modalidade_parcelas' para busca rápida. Ignora bandeira por enquanto se não vier da UI.
+            $bandeira = strtolower(trim($row['bandeira']));
             $key = $row['modalidade'] . '_' . $row['parcelas'];
             $taxaDecimal = (float)$row['taxa_percentual'] / 100;
             
-            $this->taxasCartao[$row['bandeira']][$key] = $taxaDecimal;
-            // Salva um default caso a bandeira não seja especificada (comum no sistema legado)
-            if (!isset($this->taxasCartao['default'][$key])) {
+            $this->taxasCartao[$bandeira][$key] = $taxaDecimal;
+            
+            // Fallback: se a bandeira for 'default' ou se não houver um default para esta modalidade_parcela ainda
+            if ($bandeira === 'default' || !isset($this->taxasCartao['default'][$key])) {
                 $this->taxasCartao['default'][$key] = $taxaDecimal;
             }
         }
