@@ -1,5 +1,22 @@
 # Changelog - Sistema de Gestão Odontológica
 
+## [2026-06-12] — Hotfixes e Melhorias Pós-Auditoria — Fase 6 Item 1
+
+Correções cirúrgicas de segurança e integridade realizadas após a auditoria técnica do módulo de gestão administrativa e edição de preços da clínica.
+
+### 🛠️ Correções Realizadas
+
+- **Hotfix CSRF na Remoção de Taxas:**
+    - Refatorado o botão de exclusão de taxas na view [painel.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Views/clinica/painel.php) para disparar via requisição POST segura.
+    - Atualizado o método `excluirTaxa()` em [ClinicaController.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Controllers/ClinicaController.php) para aceitar apenas requisições POST com validação CSRF.
+- **Sanitização de CNPJ:**
+    - Incluído filtro no controller [ClinicaController.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Controllers/ClinicaController.php) para persistir apenas caracteres numéricos puros (sem pontuação) no banco de dados.
+    - Criada e executada a migration [migration_normalize_cnpj.sql](file:///home/rafael/Documents/projetointegrado2_turma2023/database/migration_normalize_cnpj.sql) para normalizar todos os registros de CNPJ existentes no banco de dados da clínica.
+- **Melhoria no Script de Auditoria:**
+    - Atualizado o script [auditoria_conclusao_fase6.php](file:///home/rafael/Documents/projetointegrado2_turma2023/scripts/auditoria_conclusao_fase6.php) para incluir testes lógicos de integridade de banco de dados e verificar a imutabilidade histórica do faturamento e custos contra alterações no valor base de procedimentos.
+
+---
+
 ## [2026-06-11] — Resolução de Débitos Técnicos Pós-Fase 5
 
 Correção cirúrgica de quatro débitos técnicos identificados após a consolidação da Fase 5, mantendo o isolamento multi-tenant, zero hardcode e o rigor arquitetural estabelecido.
