@@ -23,6 +23,13 @@ class Procedimento
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getById(int $id): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM procedimentos WHERE id = ? AND clinica_id = ?");
+        $stmt->execute([$id, $this->clinica_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    }
+
     public function create(array $data): bool
     {
         $sql = "INSERT INTO procedimentos (clinica_id, nome, categoria, valor_base, tipo)
@@ -35,6 +42,20 @@ class Procedimento
             ':categoria'  => $data['categoria'],
             ':valor_base' => $data['valor_base'],
             ':tipo'       => $data['tipo'],
+        ]);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $sql = "UPDATE procedimentos SET nome = ?, categoria = ?, valor_base = ?, tipo = ? WHERE id = ? AND clinica_id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            $data['nome'],
+            $data['categoria'],
+            $data['valor_base'],
+            $data['tipo'],
+            $id,
+            $this->clinica_id
         ]);
     }
 

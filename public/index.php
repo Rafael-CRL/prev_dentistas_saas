@@ -98,6 +98,8 @@ if (strpos($uri, 'procedimentos') === 0) {
 
     if ($uri === 'procedimentos' || $uri === 'procedimentos.php') {
         $controller->index();
+    } elseif ($uri === 'procedimentos/editar') {
+        $controller->editar();
     } elseif ($uri === 'procedimentos/salvar') {
         $controller->salvar();
     } elseif ($uri === 'procedimentos/excluir') {
@@ -183,6 +185,29 @@ if (strpos($uri, 'usuarios') === 0 || $uri === 'usuarios.php' || $uri === 'edita
         $controller->configuracoes();
     } elseif ($uri === 'usuarios/salvar-configuracoes' || $uri === 'actions/salvar_configuracoes.php') {
         $controller->salvarConfiguracoes();
+    }
+    exit;
+}
+
+// 7. Módulo de Gestão da Clínica (Item 1 da Fase 6)
+if (strpos($uri, 'clinica') === 0) {
+    if (!isset($_SESSION['usuario_id']) || !is_admin()) {
+        header("Location: " . BASE_URL . "index.php");
+        exit;
+    }
+
+    $controller = new \App\Controllers\ClinicaController($pdo, (int)$_SESSION['clinica_id']);
+
+    if ($uri === 'clinica/painel') {
+        $controller->painel();
+    } elseif ($uri === 'clinica/salvar-dados') {
+        $controller->salvarDados();
+    } elseif ($uri === 'clinica/salvar-configuracoes') {
+        $controller->salvarConfiguracoes();
+    } elseif ($uri === 'clinica/salvar-taxa') {
+        $controller->salvarTaxa();
+    } elseif ($uri === 'clinica/excluir-taxa') {
+        $controller->excluirTaxa();
     }
     exit;
 }

@@ -348,4 +348,43 @@ Etapa final da Fase 5, focada na migração dos últimos módulos residuais e na
 ---
 *Status: Fase 5 100% Concluída. Sistema totalmente migrado para MVC e pronto para a Fase 6 (Interface).*
 
+## [2026-06-12] — Fase 6: Item 1 - Gestão Administrativa e Regras de Negócio
+
+Implementação do pilar administrativo do sistema SaaS, movendo a inteligência de negócios do código para o banco de dados e refinando a experiência visual para padrões profissionais.
+
+### ⚙️ Gestão Clínica (Zero Hardcode & SaaS)
+- **Novo Módulo de Configurações da Clínica:**
+    - Criada a classe `App\Models\Clinica` para gerenciar tabelas administrativas.
+    - Implementado o `App\Controllers\ClinicaController` para orquestrar parametrizações de taxas e regras.
+    - Criada a View `app/Views/clinica/painel.php` com navegação por abas para Gestão de Dados, Comissões e Taxas.
+- **Parametrização de Taxas de Cartão:** 
+    - Implementado CRUD completo para taxas por bandeira e parcelamento (1x a 12x), gravando na tabela `clinica_taxas_cartao`.
+- **Regras de Comissão e Rateio:**
+    - Interface para configuração de metas de faturamento e percentuais de bônus.
+    - Parametrização de rateios especializados (Canal, Prótese, Especializado) removendo cálculos fixos do `FinanceiroService`.
+- **Dados Institucionais Dinâmicos:**
+    - Implementado CRUD para Nome Fantasia, CNPJ, Endereço e Telefone.
+    - Integração imediata com a View de Recibo (`atendimentos/recibo.php`), garantindo documentos profissionais atualizados.
+
+### 📈 Evolução de Módulos Core
+- **Edição de Preços de Procedimentos:**
+    - Refatorado `ProcedimentoController` e `ProcedimentoModel` para permitir alteração de valores e categorias.
+    - **Imutabilidade Financeira:** Garantida a integridade histórica; alterações de preço afetam apenas novos atendimentos, preservando valores já faturados.
+- **Segurança e Validação:**
+    - Implementadas validações de servidor contra percentuais inconsistentes (>100%) e parcelamentos inválidos.
+    - Proteção CSRF transversal aplicada a todos os novos formulários administrativos.
+
+### 🎨 Refinamentos de UI/UX (High-End Aesthetics)
+- **Navegação Profissional:**
+    - Reconstrução da lógica CSS do Header para garantir interatividade de clique 100% confiável (remoção de "zonas mortas" entre dropdowns).
+    - **Linha Ativa Responsiva:** Ajuste matemático da linha branca inferior (underline) para se estender precisamente do início do texto até o ícone da seta (▾), utilizando `inline-flex` e `width: max-content`.
+- **Usabilidade (Máscaras de Entrada):**
+    - Adição de máscaras de CNPJ e Telefone via JavaScript para padronização de dados institucionais.
+
+### 🔍 Infraestrutura de Qualidade
+- **Auditoria Automatizada:** Criado o script `scripts/auditoria_conclusao_fase6.php` para validar a conformidade MVC, integridade de tabelas SaaS e presença de proteção CSRF no novo módulo.
+
+---
+*Status: Fase 6 (Item 1) Concluída. Sistema com gestão administrativa completa e interface refinada.*
+
 
