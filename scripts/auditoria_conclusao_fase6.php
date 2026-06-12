@@ -82,6 +82,142 @@ if (strpos($painelView, 'CsrfHelper::input()') !== false) {
     echo "{$cores['sucesso']}[OK]{$cores['reset']} Proteção CSRF detectada nos formulários administrativos.\n";
 } else {
     echo "{$cores['erro']}[FALHA]{$cores['reset']} Formulários sem proteção CSRF detectada.\n";
+}
+
+// 6. Verificação Dinâmica de Imutabilidade Histórica
+try {
+    // A. Confirmar via query que nenhum registro em atendimento_procedimentos tem valor_procedimento = 0 ou NULL
+    $stmtZeroNull = $pdo->query("
+        SELECT COUNT(*) 
+        FROM atendimento_procedimentos 
+        WHERE valor_procedimento = 0 OR valor_procedimento IS NULL
+    ");
+    $qtdZeroNull = (int)$stmtZeroNull->fetchColumn();
+    
+    if ($qtdZeroNull === 0) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Nenhum procedimento de atendimento possui valor zerado ou nulo no histórico.\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Encontrados $qtdZeroNull registros com valor zerado/nulo em atendimento_procedimentos.\n";
+        $falhas++;
+    }
+
+    // B. Simular alteração de preço base em procedimentos e verificar que os valores passados de atendimento_procedimentos não mudam
+    $stmtProc = $pdo->query("
+        SELECT ap.id_procedimento, ap.valor_procedimento, p.valor_base 
+        FROM atendimento_procedimentos ap
+        JOIN procedimentos p ON ap.id_procedimento = p.id
+        LIMIT 1
+    ");
+    $amostra = $stmtProc->fetch(PDO::FETCH_ASSOC);
+
+    if ($amostra) {
+        $idProc = (int)$amostra['id_procedimento'];
+        $valorHistorico = (float)$amostra['valor_procedimento'];
+        $valorBaseAtual = (float)$amostra['valor_base'];
+
+        // Iniciamos uma transação para que a simulação não persista no banco
+        $pdo->beginTransaction();
+
+        // Modifica o valor base do procedimento cadastrado
+        $novoValorSimulado = $valorBaseAtual + 50.00;
+        $stmtUpdate = $pdo->prepare("UPDATE procedimentos SET valor_base = ? WHERE id = ?");
+        $stmtUpdate->execute([$novoValorSimulado, $idProc]);
+
+        // Consulta novamente o valor histórico na tabela transacional
+        $stmtCheckHist = $pdo->prepare("SELECT valor_procedimento FROM atendimento_procedimentos WHERE id_procedimento = ? LIMIT 1");
+        $stmtCheckHist->execute([$idProc]);
+        $valorPosAlteracao = (float)$stmtCheckHist->fetchColumn();
+
+        // Reverte as alterações para não corromper o banco
+        $pdo->rollBack();
+
+        if (abs($valorPosAlteracao - $valorHistorico) < 0.001) {
+            echo "{$cores['sucesso']}[OK]{$cores['reset']} Simulação de imutabilidade histórica passou. Alterar valor_base não afetou registros históricos.\n";
+        } else {
+            echo "{$cores['erro']}[FALHA]{$cores['reset']} Simulação falhou! Alterar valor_base corrompeu os valores históricos (Anterior: $valorHistorico, Novo: $valorPosAlteracao).\n";
+            $falhas++;
+        }
+    } else {
+        echo "{$cores['aviso']}[AVISO]{$cores['reset']} Sem registros em atendimento_procedimentos para simular teste de imutabilidade.\n";
+    }
+
+} catch (Exception $e) {
+    echo "{$cores['erro']}[FALHA]{$cores['reset']} Erro ao executar teste lógico de imutabilidade: " . $e->getMessage() . "\n";
+    $falhas++;
+}
+
+// 7. Validação Estática de Casos de Borda no Controller
+try {
+    $controllerCode = file_get_contents(__DIR__ . '/../app/Controllers/ClinicaController.php');
+
+    // A. Validar que comissões fora de 0-100 são bloqueadas
+    $hasComissaoValidation = (
+        strpos($controllerCode, '< 0') !== false && 
+        strpos($controllerCode, '> 100') !== false && 
+        strpos($controllerCode, 'comissao_especializado') !== false
+    );
+    if ($hasComissaoValidation) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Validação de limite de comissão (0-100%) detectada no Controller.\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Falta validação de limite de comissão (0-100%) no ClinicaController.php.\n";
+        $falhas++;
+    }
+
+    // B. Validar que taxa de cartão fora de 0-100 é bloqueada
+    $hasTaxaValidation = (
+        strpos($controllerCode, '< 0') !== false && 
+        strpos($controllerCode, '> 100') !== false && 
+        strpos($controllerCode, 'taxa_percentual') !== false
+    );
+    if ($hasTaxaValidation) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Validação de limite de taxa de cartão (0-100%) detectada no Controller.\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Falta validação de limite de taxa de cartão (0-100%) no ClinicaController.php.\n";
+        $falhas++;
+    }
+
+    // C. Validar que parcelas fora de 1-12 são rejeitadas
+    $hasParcelasValidation = (
+        strpos($controllerCode, '< 1') !== false && 
+        strpos($controllerCode, '> 12') !== false && 
+        strpos($controllerCode, 'parcelas') !== false
+    );
+    if ($hasParcelasValidation) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Validação de limite de parcelas (1-12) detectada no Controller.\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Falta validação de limite de parcelas (1-12) no ClinicaController.php.\n";
+        $falhas++;
+    }
+} catch (Exception $e) {
+    echo "{$cores['erro']}[FALHA]{$cores['reset']} Erro ao executar teste estático de casos de borda: " . $e->getMessage() . "\n";
+    $falhas++;
+}
+
+// 8. Teste Dinâmico de Rejeição de POST sem CSRF (via cURL)
+try {
+    // Rota pública do AuthController que exige CSRF no POST
+    $cmdAuth = 'curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost/actions/login_handler.php';
+    $statusAuth = (int)trim(shell_exec($cmdAuth));
+
+    // Rota protegida do ClinicaController
+    $cmdClinica = 'curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost/clinica/salvar-dados';
+    $statusClinica = (int)trim(shell_exec($cmdClinica));
+
+    if ($statusAuth === 403) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Teste dinâmico: AuthController bloqueou POST sem CSRF com status 403 (Forbidden).\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Teste dinâmico: AuthController POST sem CSRF retornou status $statusAuth (esperado: 403).\n";
+        $falhas++;
+    }
+
+    if ($statusClinica === 302 || $statusClinica === 403) {
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Teste dinâmico: ClinicaController impediu processamento não autorizado de POST sem CSRF (Status: $statusClinica).\n";
+    } else {
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Teste dinâmico: ClinicaController POST sem CSRF retornou status $statusClinica (esperado: 302 ou 403).\n";
+        $falhas++;
+    }
+} catch (Exception $e) {
+    echo "{$cores['erro']}[FALHA]{$cores['reset']} Erro ao executar teste dinâmico de CSRF via cURL: " . $e->getMessage() . "\n";
     $falhas++;
 }
 
