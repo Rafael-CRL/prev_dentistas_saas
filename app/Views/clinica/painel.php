@@ -242,27 +242,33 @@ function toggleEdit(tabId) {
 }
 
 function mascaraCNPJ(i) {
-   var v = i.value;
-   if(isNaN(v[v.length-1])){
-      i.value = v.substring(0, v.length-1);
-      return;
-   }
-   i.setAttribute("maxlength", "18");
-   if (v.length == 2 || v.length == 6) i.value += ".";
-   if (v.length == 10) i.value += "/";
-   if (v.length == 15) i.value += "-";
+    let v = i.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    if (v.length > 14) v = v.substring(0, 14); // Limita a 14 dígitos
+
+    // Aplica a máscara progressivamente
+    v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+    v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+    v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+    v = v.replace(/(\d{4})(\d)/, '$1-$2');
+
+    i.value = v;
 }
 
 function mascaraTelefone(i) {
-   var v = i.value;
-   if(isNaN(v[v.length-1])){
-      i.value = v.substring(0, v.length-1);
-      return;
-   }
-   i.setAttribute("maxlength", "15");
-   if (v.length == 1) i.value = "(" + i.value;
-   if (v.length == 3) i.value += ") ";
-   if (v.length == 10) i.value += "-";
+    let v = i.value.replace(/\D/g, '');
+    if (v.length > 11) v = v.substring(0, 11); // Limita a 11 dígitos (celular com DDD)
+
+    if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+    } else if (v.length > 5) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    } else if (v.length > 0) {
+        v = v.replace(/^(\d*)/, '($1');
+    }
+
+    i.value = v;
 }
 </script>
 
