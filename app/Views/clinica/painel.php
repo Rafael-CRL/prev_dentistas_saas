@@ -16,17 +16,21 @@
             <?= \App\Helpers\CsrfHelper::input() ?>
             <div class="form-group">
                 <label>Nome Fantasia</label>
-                <input type="text" name="nome_fantasia" value="<?= htmlspecialchars($clinica['nome_fantasia'] ?? '') ?>" required>
+                <input type="text" name="nome_fantasia" value="<?= htmlspecialchars($clinica['nome_fantasia'] ?? '') ?>" required readonly class="readonly-field">
             </div>
             <div class="form-group">
                 <label>Razão Social</label>
-                <input type="text" name="razao_social" value="<?= htmlspecialchars($clinica['razao_social'] ?? '') ?>">
+                <input type="text" name="razao_social" value="<?= htmlspecialchars($clinica['razao_social'] ?? '') ?>" readonly class="readonly-field">
             </div>
             <div class="form-group">
                 <label>CNPJ</label>
-                <input type="text" name="cnpj" value="<?= htmlspecialchars($clinica['cnpj'] ?? '') ?>" onkeyup="mascaraCNPJ(this)">
+                <input type="text" name="cnpj" value="<?= htmlspecialchars($clinica['cnpj'] ?? '') ?>" onkeyup="mascaraCNPJ(this)" readonly class="readonly-field">
             </div>
-            <button type="submit" class="btn btn-primary">Salvar Dados</button>
+            <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="toggleEdit('dados')">Editar</button>
+                <button type="submit" class="btn btn-primary" style="display: none;">Salvar Dados</button>
+                <button type="button" class="btn btn-secondary" onclick="location.reload()" style="display: none;">Cancelar</button>
+            </div>
         </form>
     </div>
 
@@ -40,22 +44,22 @@
                 <h4>Repasse Geral (Clínico)</h4>
                 <div class="form-group">
                     <label>Tipo de Repasse</label>
-                    <select name="tipo_comissao">
+                    <select name="tipo_comissao" disabled class="readonly-field">
                         <option value="percentual" <?= ($comissao['tipo'] ?? '') === 'percentual' ? 'selected' : '' ?>>Percentual (%)</option>
                         <option value="fixo" <?= ($comissao['tipo'] ?? '') === 'fixo' ? 'selected' : '' ?>>Valor Fixo (R$)</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Valor/Percentual Base</label>
-                    <input type="number" step="0.01" name="valor_regra" value="<?= $comissao['valor_regra'] ?? 0 ?>">
+                    <input type="number" step="0.01" name="valor_regra" value="<?= $comissao['valor_regra'] ?? 0 ?>" readonly class="readonly-field">
                 </div>
                 <div class="form-group">
                     <label>Meta de Faturamento Mensal (R$)</label>
-                    <input type="number" step="0.01" name="valor_meta" value="<?= $comissao['valor_meta'] ?? 0 ?>">
+                    <input type="number" step="0.01" name="valor_meta" value="<?= $comissao['valor_meta'] ?? 0 ?>" readonly class="readonly-field">
                 </div>
                 <div class="form-group">
                     <label>Bônus após bater meta (%)</label>
-                    <input type="number" step="0.01" name="percentual_bonus" value="<?= $comissao['percentual_bonus'] ?? 0 ?>">
+                    <input type="number" step="0.01" name="percentual_bonus" value="<?= $comissao['percentual_bonus'] ?? 0 ?>" readonly class="readonly-field">
                 </div>
             </div>
 
@@ -63,15 +67,15 @@
                 <h4>Procedimentos Especializados (%)</h4>
                 <div class="form-group">
                     <label>Percentual Base Especializado (%)</label>
-                    <input type="number" step="0.01" name="comissao_especializado" value="<?= $configs['comissao_especializado'] ?? 0 ?>">
+                    <input type="number" step="0.01" name="comissao_especializado" value="<?= $configs['comissao_especializado'] ?? 0 ?>" readonly class="readonly-field">
                 </div>
                 <div class="form-group">
                     <label>Percentual Canal (%)</label>
-                    <input type="number" step="0.01" name="comissao_canal" value="<?= $configs['comissao_canal'] ?? 0 ?>">
+                    <input type="number" step="0.01" name="comissao_canal" value="<?= $configs['comissao_canal'] ?? 0 ?>" readonly class="readonly-field">
                 </div>
                 <div class="form-group">
                     <label>Percentual Prótese (%)</label>
-                    <input type="number" step="0.01" name="comissao_protese" value="<?= $configs['comissao_protese'] ?? 0 ?>">
+                    <input type="number" step="0.01" name="comissao_protese" value="<?= $configs['comissao_protese'] ?? 0 ?>" readonly class="readonly-field">
                 </div>
             </div>
 
@@ -79,15 +83,19 @@
                 <h4>Contatos e Endereço (Recibo)</h4>
                 <div class="form-group">
                     <label>Endereço Completo</label>
-                    <input type="text" name="clinica_endereco" value="<?= htmlspecialchars($configs['clinica_endereco'] ?? '') ?>">
+                    <input type="text" name="clinica_endereco" value="<?= htmlspecialchars($configs['clinica_endereco'] ?? '') ?>" readonly class="readonly-field">
                 </div>
                 <div class="form-group">
                     <label>Telefone de Contato</label>
-                    <input type="text" name="clinica_telefone" value="<?= htmlspecialchars($configs['clinica_telefone'] ?? '') ?>" onkeyup="mascaraTelefone(this)">
+                    <input type="text" name="clinica_telefone" value="<?= htmlspecialchars($configs['clinica_telefone'] ?? '') ?>" onkeyup="mascaraTelefone(this)" readonly class="readonly-field">
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Salvar Regras</button>
+            <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="toggleEdit('regras')">Editar</button>
+                <button type="submit" class="btn btn-primary" style="display: none;">Salvar Regras</button>
+                <button type="button" class="btn btn-secondary" onclick="location.reload()" style="display: none;">Cancelar</button>
+            </div>
         </form>
     </div>
 
@@ -191,6 +199,36 @@ function resetTaxaForm() {
     document.getElementById('taxa_id').value = '';
 }
 
+function toggleEdit(tabId) {
+    const container = document.getElementById(tabId);
+    const inputs = container.querySelectorAll('input:not([type="hidden"]), select, textarea');
+    const buttons = container.querySelectorAll('button');
+    
+    let editBtn, saveBtn, cancelBtn;
+    buttons.forEach(btn => {
+        if (btn.innerText === 'Editar') editBtn = btn;
+        if (btn.type === 'submit') saveBtn = btn;
+        if (btn.innerText === 'Cancelar') cancelBtn = btn;
+    });
+
+    const isLocked = inputs[0].hasAttribute('readonly') || inputs[0].hasAttribute('disabled');
+
+    if (isLocked) {
+        // Unlock
+        inputs.forEach(input => {
+            input.removeAttribute('readonly');
+            input.removeAttribute('disabled');
+            input.classList.remove('readonly-field');
+        });
+        editBtn.style.display = 'none';
+        saveBtn.style.display = 'block';
+        cancelBtn.style.display = 'block';
+    } else {
+        // Lock (Reload to reset changes)
+        location.reload();
+    }
+}
+
 function mascaraCNPJ(i) {
    var v = i.value;
    if(isNaN(v[v.length-1])){
@@ -226,4 +264,5 @@ function mascaraTelefone(i) {
 .success { color: green; background: #e8f5e9; padding: 1rem; border-radius: 6px; }
 .error   { color: red;   background: #ffebee; padding: 1rem; border-radius: 6px; }
 .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+.readonly-field { background-color: #f0f0f0 !important; cursor: not-allowed; border-color: #ddd !important; }
 </style>

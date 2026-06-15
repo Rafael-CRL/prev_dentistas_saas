@@ -5,7 +5,11 @@
 Melhoria na arquitetura de informação do sistema, separando o fluxo operacional das definições de regras de negócio e parâmetros do sistema.
 
 ### 🎨 Melhorias de UI/UX
-- **Unificação do Menu de Configurações:**
+- **Padrão "Visualizar primeiro, Editar depois":**
+    - Implementado bloqueio de edição por padrão nos campos de Dados Institucionais e Regras de Comissão.
+    - Adicionado fluxo de alternância (Toggle) via botões **Editar**, **Salvar** e **Cancelar** no rodapé dos formulários.
+    - **Racional Técnico:** Previne alterações acidentais em parâmetros críticos do sistema e melhora a clareza sobre o estado dos dados (leitura vs. escrita).
+- **Unificação do Menu de Configurações:****
     - Removido o item "Configurações Clínica" do menu de **Cadastros** (operacional).
     - Criado o novo menu de topo **Configurações** (Dropdown).
     - Unificada a gestão de parâmetros da **Clínica** (Admin) com o gerenciamento de **Meu Perfil** (Usuário) em um único hub intuitivo.
