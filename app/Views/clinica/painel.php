@@ -1,3 +1,15 @@
+<?php
+/**
+ * Helper para formatar CNPJ (##.###.###/####-##)
+ */
+function formatarCNPJ($cnpj) {
+    $cnpj = preg_replace('/\D/', '', $cnpj);
+    if (strlen($cnpj) === 14) {
+        return preg_replace('/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/', '$1.$2.$3/$4-$5', $cnpj);
+    }
+    return $cnpj;
+}
+?>
 <div class="card">
     <h2>Configurações da Clínica</h2>
 
@@ -24,7 +36,7 @@
             </div>
             <div class="form-group">
                 <label>CNPJ</label>
-                <input type="text" name="cnpj" value="<?= htmlspecialchars($clinica['cnpj'] ?? '') ?>" onkeyup="mascaraCNPJ(this)" readonly class="readonly-field">
+                <input type="text" name="cnpj" value="<?= htmlspecialchars(formatarCNPJ($clinica['cnpj'] ?? '')) ?>" onkeyup="mascaraCNPJ(this)" readonly class="readonly-field">
             </div>
             <div style="margin-top: 1rem; display: flex; gap: 10px;">
                 <button type="button" class="btn btn-secondary" onclick="toggleEdit('dados')">Editar</button>
