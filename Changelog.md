@@ -5,11 +5,12 @@
 Melhoria na arquitetura de informação do sistema, separando o fluxo operacional das definições de regras de negócio e parâmetros do sistema.
 
 ### 🎨 Melhorias de UI/UX
-- **Formatação e Máscara de CNPJ:**
-    - Adicionada função helper para formatar o CNPJ com pontuação padrão (##.###.###/####-##) no Painel da Clínica e nos Recibos.
-    - Implementada máscara em tempo real via Regex que impede a entrada de mais de 14 dígitos e garante a formatação correta durante a edição.
-    - **Racional Técnico:** Melhora a apresentação visual e garante a integridade dos dados inseridos pelo usuário, seguindo padrões de usabilidade modernos.
-- **Padrão "Visualizar primeiro, Editar depois":******
+- **Formatação e Máscara de CNPJ/Telefone:**
+    - Adicionada função helper para formatar o CNPJ com pontuação padrão no Painel da Clínica e nos Recibos.
+    - Implementada máscara em tempo real via Regex com captura de evento `oninput`, garantindo formatação mesmo em colagens.
+    - Sincronização automática da máscara ao ativar o modo de edição, garantindo consistência visual imediata.
+    - **Racional Técnico:** Melhora a apresentação visual e garante a integridade dos dados inseridos, eliminando falhas de captura em interações de mouse ou teclado.
+- **Padrão "Visualizar primeiro, Editar depois":********
     - Implementado bloqueio de edição por padrão nos campos de Dados Institucionais e Regras de Comissão.
     - Adicionado fluxo de alternância (Toggle) via botões **Editar**, **Salvar** e **Cancelar** no rodapé dos formulários.
     - **Racional Técnico:** Previne alterações acidentais em parâmetros críticos do sistema e melhora a clareza sobre o estado dos dados (leitura vs. escrita).
