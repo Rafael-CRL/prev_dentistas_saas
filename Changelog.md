@@ -1,5 +1,18 @@
 # Changelog - Sistema de Gestão Odontológica
 
+## [2026-06-15] — Refatoração de UX e Unificação de Configurações
+
+Melhoria na arquitetura de informação do sistema, separando o fluxo operacional das definições de regras de negócio e parâmetros do sistema.
+
+### 🎨 Melhorias de UI/UX
+- **Unificação do Menu de Configurações:**
+    - Removido o item "Configurações Clínica" do menu de **Cadastros** (operacional).
+    - Criado o novo menu de topo **Configurações** (Dropdown).
+    - Unificada a gestão de parâmetros da **Clínica** (Admin) com o gerenciamento de **Meu Perfil** (Usuário) em um único hub intuitivo.
+    - **Racional Técnico:** Melhora o modelo mental do usuário ao separar dados que crescem em volume (Pacientes, Procedimentos) de dados que definem regras (Taxas, Comissões, Perfil).
+
+---
+
 ## [2026-06-12] — Hotfixes e Melhorias Pós-Auditoria — Fase 6 Item 1
 
 Correções cirúrgicas de segurança e integridade realizadas após a auditoria técnica do módulo de gestão administrativa e edição de preços da clínica.

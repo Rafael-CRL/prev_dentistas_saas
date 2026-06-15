@@ -58,7 +58,6 @@ function isActive($urls) {
                     <div class="dropdown-content">
                         <a href="<?= BASE_URL ?>pacientes">Pacientes</a>
                         <?php if (is_admin()): ?>
-                        <a href="<?= BASE_URL ?>clinica/painel">Configurações Clínica</a>
                         <a href="<?= BASE_URL ?>procedimentos">Procedimentos</a>
                         <a href="<?= BASE_URL ?>financeiro/despesas">Despesas</a>
                         <a href="<?= BASE_URL ?>usuarios">Usuários</a>
@@ -85,7 +84,17 @@ function isActive($urls) {
                     </div>
                 </div>
 
-                <a href="<?= BASE_URL ?>usuarios/configuracoes" class="<?= isActive(['usuarios/configuracoes']) ? 'active' : '' ?>">Configuração</a>
+                <div class="dropdown">
+                    <a href="javascript:void(0)" class="<?= isActive(['usuarios/configuracoes', 'clinica/painel']) ? 'active' : '' ?>">
+                        Configurações <small>▾</small>
+                    </a>
+                    <div class="dropdown-content">
+                        <?php if (is_admin()): ?>
+                            <a href="<?= BASE_URL ?>clinica/painel">Clínica</a>
+                        <?php endif; ?>
+                        <a href="<?= BASE_URL ?>usuarios/configuracoes">Meu Perfil</a>
+                    </div>
+                </div>
             <?php endif; ?>
         </nav>
 
