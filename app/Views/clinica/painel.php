@@ -36,7 +36,7 @@ function formatarCNPJ($cnpj) {
             </div>
             <div class="form-group">
                 <label>CNPJ</label>
-                <input type="text" name="cnpj" value="<?= htmlspecialchars(formatarCNPJ($clinica['cnpj'] ?? '')) ?>" onkeyup="mascaraCNPJ(this)" readonly class="readonly-field">
+                <input type="text" name="cnpj" value="<?= htmlspecialchars(formatarCNPJ($clinica['cnpj'] ?? '')) ?>" oninput="mascaraCNPJ(this)" readonly class="readonly-field">
             </div>
             <div style="margin-top: 1rem; display: flex; gap: 10px;">
                 <button type="button" class="btn btn-secondary" onclick="toggleEdit('dados')">Editar</button>
@@ -99,7 +99,7 @@ function formatarCNPJ($cnpj) {
                 </div>
                 <div class="form-group">
                     <label>Telefone de Contato</label>
-                    <input type="text" name="clinica_telefone" value="<?= htmlspecialchars($configs['clinica_telefone'] ?? '') ?>" onkeyup="mascaraTelefone(this)" readonly class="readonly-field">
+                    <input type="text" name="clinica_telefone" value="<?= htmlspecialchars($configs['clinica_telefone'] ?? '') ?>" oninput="mascaraTelefone(this)" readonly class="readonly-field">
                 </div>
             </div>
 
@@ -231,6 +231,10 @@ function toggleEdit(tabId) {
             input.removeAttribute('readonly');
             input.removeAttribute('disabled');
             input.classList.remove('readonly-field');
+            
+            // Forçar disparar a máscara ao abrir para garantir formatação correta
+            if (input.name === 'cnpj') mascaraCNPJ(input);
+            if (input.name === 'clinica_telefone') mascaraTelefone(input);
         });
         editBtn.style.display = 'none';
         saveBtn.style.display = 'block';
