@@ -26,14 +26,18 @@ if (empty($uri)) { $uri = 'index.php'; }
 // --- ROTEAMENTO MVC ---
 
 // 0. Módulo de Dashboard
-if ($uri === 'index.php' || $uri === 'index') {
+if ($uri === 'index.php' || $uri === 'index' || $uri === 'dashboard/api-stats') {
     if (!isset($_SESSION['usuario_id'])) {
         header("Location: " . BASE_URL . "login.php");
         exit;
     }
 
     $controller = new \App\Controllers\DashboardController($pdo, (int)$_SESSION['clinica_id']);
-    $controller->index();
+    if ($uri === 'dashboard/api-stats') {
+        $controller->apiStats();
+    } else {
+        $controller->index();
+    }
     exit;
 }
 
