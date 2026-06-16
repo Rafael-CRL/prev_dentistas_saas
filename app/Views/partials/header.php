@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../config/app.php';
-require_once __DIR__ . '/../config/controle_acesso.php';
+require_once __DIR__ . '/../../../config/app.php';
+require_once __DIR__ . '/../../../config/controle_acesso.php';
 
 function isActive($urls) {
     if (!is_array($urls)) { $urls = [$urls]; }
