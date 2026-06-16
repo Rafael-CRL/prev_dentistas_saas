@@ -28,6 +28,12 @@ Conclusão da camada de inteligência visual e consolidação da estética premi
     - Aplicação de **Glassmorphism** (transparência com `backdrop-filter: blur`) na barra de navegação e nos cards estatísticos.
     - Micro-animações de elevação e transições de cor em botões e elementos interativos para feedback tátil aprimorado.
 
+### 🩹 Refinamentos e Correções (Consolidação Final)
+- **Correção do Layout em Telas de Erro:**
+    - Atualizado o método `renderError` no `BaseController.php` para apontar para os novos caminhos dos parciais de layout (`app/Views/partials/`).
+    - **Impacto:** Garante que mensagens de erro críticas (como falha de CSRF) sejam renderizadas dentro do Design System profissional (com CSS e Navbar), eliminando a exibição de texto puro em falhas de segurança.
+- **Validação de Conformidade:** Execução de auditoria empírica via CLI confirmando 100% de sucesso na infraestrutura de dados para dashboards e isolamento multi-tenant.
+
 ---
 
 ## [2026-06-15] — Refatoração de UX e Unificação de Configurações
@@ -87,7 +93,7 @@ Correção cirúrgica de quatro débitos técnicos identificados após a consoli
 
 - **Item 3: Exceções Explícitas para Configurações Ausentes (Zero Hardcode)**
     - Removidos fallbacks fixos de taxas e comissões do código fonte PHP em [Config.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Models/Config.php) e [FinanceiroService.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Services/FinanceiroService.php).
-    - Substituídos os valores silenciosos por exceções explícitas (`\Exception`) que informam a ausência da configuração no banco de dados, fazendo o sistema falhar de forma informativa em vez de mascarar a ausência de parâmetros.
+    - Substituídos os values silenciosos por exceções explícitas (`\Exception`) que informam a ausência da configuração no banco de dados, fazendo o sistema falhar de forma informativa em vez de mascarar a ausência de parâmetros.
     - Atualizado o dump de banco de dados [migration.sql](file:///home/rafael/Documents/projetointegrado2_turma2023/database/migration.sql) para injetar as taxas default e configurações da clínica principal.
 
 - **Item 4: Refatoração do Fluxo de Feedback no UsuarioController**
@@ -238,7 +244,7 @@ Após a integração das frentes de trabalho da Fase 4, o sistema foi consolidad
 
 Esta etapa marca a transição definitiva dos módulos core para o padrão MVC, unificando frentes de trabalho paralelas através de uma "Consolidação Cirúrgica" com foco em alta coesão e segurança SaaS.
 
-### 🏗️ Evolução da Infraestrutura (Refinamento de Arquiteto)
+### 🏗️ Evolução de Infraestrutura (Refinamento de Arquiteto)
 - **Implementação do `App\Controllers\BaseController`:** 
     - Introdução de uma classe abstrata base para todos os controladores.
     - Centralização do motor de renderização de views (`render()`) e padronização de respostas JSON (`json()`).
@@ -460,5 +466,3 @@ Implementação do pilar administrativo do sistema SaaS, movendo a inteligência
 
 ---
 *Status: Fase 6 (Item 1) Concluída. Sistema com gestão administrativa completa e interface refinada.*
-
-
