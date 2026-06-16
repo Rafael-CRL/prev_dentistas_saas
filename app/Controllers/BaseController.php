@@ -33,8 +33,8 @@ abstract class BaseController
      */
     protected function renderError(string $titulo, string $mensagem): void
     {
-        $header = __DIR__ . '/../../views/header.php';
-        $footer = __DIR__ . '/../../views/footer.php';
+        $header = __DIR__ . '/../Views/partials/header.php';
+        $footer = __DIR__ . '/../Views/partials/footer.php';
 
         if (file_exists($header)) require_once $header;
         
