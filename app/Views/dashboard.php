@@ -93,6 +93,39 @@
         <p class="text-muted">Lucro de atendimentos - despesas no mês</p>
     </div>
 </div>
+
+<!-- Gráficos do Dashboard (Fase 6 Item 3) -->
+<div class="dashboard-grid" style="margin-top: 2rem; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">Fluxo de Caixa Mensal</h3>
+            <span id="loaderFluxo" class="text-muted" style="font-size: 0.8rem;"><i class="fa fa-spinner fa-spin"></i> Carregando...</span>
+        </div>
+        <div style="height: 300px; position: relative;">
+            <canvas id="chartFluxo"></canvas>
+        </div>
+    </div>
+    
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">Formas de Pagamento</h3>
+            <span id="loaderPagamentos" class="text-muted" style="font-size: 0.8rem;"><i class="fa fa-spinner fa-spin"></i> Carregando...</span>
+        </div>
+        <div style="height: 300px; position: relative;">
+            <canvas id="chartPagamentos"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Evolução do Resultado Líquido</h3>
+        <span id="loaderLiquido" class="text-muted" style="font-size: 0.8rem;"><i class="fa fa-spinner fa-spin"></i> Carregando...</span>
+    </div>
+    <div style="height: 350px; position: relative;">
+        <canvas id="chartLiquido"></canvas>
+    </div>
+</div>
 <?php endif; ?>
 
 <div class="card" style="margin-top: 2rem;">
