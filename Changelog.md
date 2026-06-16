@@ -1,5 +1,35 @@
 # Changelog - Sistema de Gestão Odontológica
 
+## [2026-06-16] — Fase 6.2: Dashboard Financeiro e Design System Premium
+
+Conclusão da camada de inteligência visual e consolidação da estética premium do sistema, transformando dados brutos em insights gerenciais assíncronos.
+
+### 📊 Visualização de Dados (Pilar B - Item 3)
+- **Gráficos Interativos com Chart.js:**
+    - Implementação de carregamento assíncrono (AJAX/Fetch) para os dados financeiros do dashboard, consumindo o novo endpoint de API.
+    - **Fluxo de Caixa Mensal:** Gráfico de barras comparativo entre Faturamento e Despesas por dia.
+    - **Mix de Receita:** Gráfico de rosca detalhando a participação de cada forma de pagamento (Pix, Crédito, Débito, Dinheiro).
+    - **Evolução do Resultado Líquido:** Gráfico de linha com preenchimento em gradiente para monitorar a rentabilidade diária.
+    - **Racional Técnico:** Desacoplamento da carga de dados da renderização da página, melhorando drasticamente o LCP (*Largest Contentful Paint*) e a interatividade.
+
+### 🏗️ Refatoração de Arquitetura e Service (Pilar B - Itens 1 e 2)
+- **Centralização no `FinanceiroService`:**
+    - Migração de 100% da lógica de agregação e processamento de estatísticas para o `FinanceiroService.php`.
+    - O `DashboardController` agora atua estritamente como orquestrador, sem realizar chamadas SQL diretas aos Models.
+- **API de Estatísticas:**
+    - Criação do endpoint `/dashboard/api-stats` retornando pacotes JSON estruturados com faturamento, despesas e dados para gráficos.
+
+### 🎨 Design System Premium & Partials (Pilar C)
+- **Arquitetura de Partials:**
+    - Migração definitiva dos arquivos de template `header.php` e `footer.php` para o diretório MVC (`app/Views/partials/`).
+    - Refatoração do `BaseController` para gerenciar o empilhamento (*stacking*) de componentes de UI de forma automática.
+- **Estilização High-End:**
+    - Implementação da paleta de cores dinâmica baseada em **HSL** para consistência visual e facilidade de temas.
+    - Aplicação de **Glassmorphism** (transparência com `backdrop-filter: blur`) na barra de navegação e nos cards estatísticos.
+    - Micro-animações de elevação e transições de cor em botões e elementos interativos para feedback tátil aprimorado.
+
+---
+
 ## [2026-06-15] — Refatoração de UX e Unificação de Configurações
 
 Melhoria na arquitetura de informação do sistema, separando o fluxo operacional das definições de regras de negócio e parâmetros do sistema.
