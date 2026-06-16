@@ -1,60 +1,71 @@
 :root {
-    /* Cores extraídas do login.php */
-    --primary-color: #005b96;      /* Azul do padrão login */
-    --primary-dark: #0370b5;       /* Equivalente ao primary-light do login */
-    --background-color: #f4f7f6;   /* Cor bg-light do login */
-    --secondary-color: #6c757d;  
-    --info-color: #17a2b8;       
-    --success-color: #28a745;      /* Verde sucesso */
-    --danger-color: #dc3545;       /* Vermelho erro */
-    --border-color: #dee2e6;
-    --white-color: #ffffff;
-    --card-bg: #ffffff;
-
-    /* Formato dos botões e elementos */
-    --border-radius: 30px;         /* Formato arredondado presente nos botões e inputs do login */
+    /* Cores Premium via HSL para manipulação dinâmica */
+    --primary-h: 204;
+    --primary-s: 100%;
+    --primary-l: 29%;
+    --primary-color: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+    --primary-dark: hsl(var(--primary-h), var(--primary-s), 20%);
+    --primary-light: hsl(var(--primary-h), var(--primary-s), 45%);
     
-    /* Outras variáveis existentes permanecem ou são adaptadas */
-    --text-color: #2d3436;         /* Cor text-dark do login */
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 10px 30px rgba(0,0,0,0.1); /* Sombra padrão do login */
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --info-color: #3498db;
+    
+    --background-color: #f8fafc;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    
+    --white-color: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+    --border-radius-pill: 50px;
+    
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
 }
 
 body {
-    font-family: 'Open Sans', sans-serif; /* Fonte principal do login.php */
+    font-family: 'Inter', 'Open Sans', sans-serif;
     background-color: var(--background-color);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 91, 150, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(46, 204, 113, 0.05) 0px, transparent 50%);
     color: var(--text-color);
     margin: 0;
     padding: 0;
     line-height: 1.6;
 }
 
-/* Adicione se houver seletores de títulos no seu style.css */
 h1, h2, h3, h4, .logo {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
 }
 
-/* ==========================================================================
-   BOTÕES (Ajustados para aparecerem sempre e com formato arredondado)
-   ========================================================================== */
-
-/* Regras gerais para todos os botões */
 .btn, button, input[type="submit"] {
-    border-radius: var(--border-radius); /* 30px conforme o login.php */
+    border-radius: var(--border-radius-pill);
     padding: 10px 25px;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
 }
 
-/* Botão Primário (Azul do padrão) */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 .btn-primary {
     background-color: var(--primary-color);
     color: #ffffff;
@@ -62,79 +73,44 @@ h1, h2, h3, h4, .logo {
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
-    transform: translateY(-2px);
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     box-shadow: var(--shadow-md);
-}
-
-.btn-secondary { 
-    background-color: var(--secondary-color); 
-    color: #ffffff; 
-}
-
-.btn-secondary:hover { 
-    background-color: #28a745; 
-}
-
-
-/* Botão Sucesso (Verde - Corrigido para estar sempre visível) */
-.btn-success {
-    background-color: #28a745; 
-    color: #ffffff;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
-}
-
-/* Botão Perigo/Erro (Vermelho - Corrigido para estar sempre visível) */
-.btn-danger {
-    background-color: #dc3545;
-    color: #ffffff;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-    transform: translateY(-2px);
-}
-
-/* Botão Alerta (Amarelo - Corrigido para estar sempre visível) */
-.btn-warning {
-    background-color: #ffc107;
-    color: #212529;
-}
-
-.btn-warning:hover {
-    background-color: #e0a800;
-    transform: translateY(-2px);
-}
-
-.btn-info { 
-    background-color: var(--info-color); 
-    color:  #ffffff; 
-}
-.btn-info:hover { 
-    background-color: #138496; 
-}
-
-/* Definição do botão Cancelar */
-.btn-cancel {
-    background-color: #17a2b8; /* Cor sólida (Equivalente ao Info) */
-    color: #ffffff !important;
-    border: none;
-    
-    /* Padrão do login.php */
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    border-radius: var(--border-radius); /* Usa os 30px definidos no :root */
-    padding: 10px 25px;
-    display: inline-flex;
+    padding: 0.8rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    text-decoration: none;
     transition: all 0.3s ease;
 }
 
+.navbar:hover {
+    background-color: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.95);
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    background: var(--white-color);
+}
 /* Estado quando passa o mouse */
 .btn-cancel:hover {
     background-color: #138496; /* Cor um pouco mais escura */
@@ -160,21 +136,6 @@ html {
 /* ==========================================================================
    HEADER & NAVBAR (Novo Comportamento Isolado)
    ========================================================================== */
-.navbar {
-    background-color: var(--primary-color);
-    box-shadow: var(--shadow-sm);
-    padding: 0.8rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: none;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 2000;
-    gap: 1rem; /* Garante espaço mínimo entre os blocos */
-}
-
 .logo {
     font-weight: bold;
     color: white;
@@ -638,6 +599,54 @@ tbody tr:hover {
     box-shadow: var(--shadow-sm);
 }
 .img-wrapper img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+
+.lp-error { color: #ffcccc; font-size: 12px; position: absolute; bottom: -18px; right: 0; }
+
+.lp-footer { text-align: center; padding: 40px; background: #212529; color: white; margin-top: 50px; }
+
+@media (max-width: 768px) {
+    .grid-2, .team-grid { grid-template-columns: 1fr; }
+    .hero-text { text-align: center; }
+}
+
+.drop-zone {
+    width: 100%;
+    max-width: 100%;
+    height: 150px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    color: #cccccc;
+    border: 2px dashed #3b82f6;
+    border-radius: 10px;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+.drop-zone--over {
+    border-style: solid;
+    background-color: #eff6ff;
+    transform: scale(1.01);
+}
+
+.drop-zone__icon {
+    font-size: 30px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.drop-zone__prompt p {
+    margin: 5px 0;
+    color: #444;
+}
+
+.drop-zone__specs {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}ht: 100%; object-fit: cover; object-position: center; }
 
 .lp-error { color: #ffcccc; font-size: 12px; position: absolute; bottom: -18px; right: 0; }
 

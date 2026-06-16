@@ -63,8 +63,8 @@ abstract class BaseController
         extract($data);
 
         // Define caminhos base para os componentes de UI
-        $header = __DIR__ . '/../../views/header.php';
-        $footer = __DIR__ . '/../../views/footer.php';
+        $header = __DIR__ . '/../Views/partials/header.php';
+        $footer = __DIR__ . '/../Views/partials/footer.php';
         $viewFile = __DIR__ . '/../Views/' . $view . '.php';
 
         // Renderização sequencial (Header -> Content -> Footer)

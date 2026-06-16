@@ -302,5 +302,138 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'block';
         });
     });
+
+    // --- Lógica dos Gráficos (Fase 6 Item 3) ---
+    async function carregarGraficos() {
+        try {
+            const mes = '<?= $mes_selecionado ?>';
+            const response = await fetch(`<?= BASE_URL ?>dashboard/api-stats?mes=${mes}`);
+            const result = await response.json();
+
+            if (!result.sucesso) {
+                console.error('Erro na API:', result.erro);
+                return;
+            }
+
+            const dados = result.dados;
+
+            // 1. Gráfico de Fluxo de Caixa (Faturamento x Despesas)
+            const ctxFluxo = document.getElementById('chartFluxo').getContext('2d');
+            document.getElementById('loaderFluxo').style.display = 'none';
+            
+            new Chart(ctxFluxo, {
+                type: 'bar',
+                data: {
+                    labels: dados.graficos.evolucao_mensal.map(d => d.dia.split('-')[2]),
+                    datasets: [
+                        {
+                            label: 'Faturamento',
+                            data: dados.graficos.evolucao_mensal.map(d => d.faturamento),
+                            backgroundColor: 'rgba(65, 105, 225, 0.7)', // Royal Blue
+                            borderColor: 'royalblue',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Despesas',
+                            data: dados.graficos.evolucao_mensal.map(d => d.despesa),
+                            backgroundColor: 'rgba(220, 20, 60, 0.7)', // Crimson
+                            borderColor: 'crimson',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // 2. Gráfico de Formas de Pagamento
+            const ctxPagamentos = document.getElementById('chartPagamentos').getContext('2d');
+            document.getElementById('loaderPagamentos').style.display = 'none';
+            
+            const labelsPagamento = {
+                'dinheiro': 'Dinheiro',
+                'pix': 'Pix',
+                'debito': 'Débito',
+                'credito': 'Crédito'
+            };
+
+            const dataPagamentos = Object.entries(dados.graficos.distribuicao_pagamentos);
+
+            new Chart(ctxPagamentos, {
+                type: 'doughnut',
+                data: {
+                    labels: dataPagamentos.map(d => labelsPagamento[d[0]] || d[0]),
+                    datasets: [{
+                        data: dataPagamentos.map(d => d[1]),
+                        backgroundColor: [
+                            '#2ecc71', // Esmeralda (Dinheiro)
+                            '#3498db', // Azul (Pix)
+                            '#f1c40f', // Amarelo (Débito)
+                            '#9b59b6'  // Roxo (Crédito)
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // 3. Gráfico de Resultado Líquido (Evolução Diária)
+            const ctxLiquido = document.getElementById('chartLiquido').getContext('2d');
+            document.getElementById('loaderLiquido').style.display = 'none';
+
+            const gradient = ctxLiquido.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(46, 204, 113, 0.4)');
+            gradient.addColorStop(1, 'rgba(46, 204, 113, 0)');
+
+            new Chart(ctxLiquido, {
+                type: 'line',
+                data: {
+                    labels: dados.graficos.evolucao_liquido.map(d => d.dia.split('-')[2]),
+                    datasets: [{
+                        label: 'Lucro Líquido Diário',
+                        data: dados.graficos.evolucao_liquido.map(d => d.liquido),
+                        fill: true,
+                        backgroundColor: gradient,
+                        borderColor: '#2ecc71',
+                        tension: 0.3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Erro ao carregar dados dos gráficos:', error);
+            document.querySelectorAll('[id^="loader"]').forEach(l => {
+                l.innerHTML = '<span style="color: var(--danger-color);">Erro ao carregar</span>';
+            });
+        }
+    }
+
+    carregarGraficos();
 });
 </script>
