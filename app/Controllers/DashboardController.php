@@ -50,6 +50,26 @@ class DashboardController extends BaseController
 
     /**
      * Retorna estatísticas financeiras formatadas em JSON para gráficos e métricas.
+     * Fulfills Item 3 of Phase 6 (API para Dashboard).
+     *
+     * JSON Schema:
+     * {
+     *   "sucesso": true,
+     *   "dados": {
+     *     "periodo": "YYYY-MM",
+     *     "metricas": {
+     *       "faturamento_bruto": float,
+     *       "faturamento_liquido": float,
+     *       "total_despesas": float,
+     *       "resultado_liquido": float
+     *     },
+     *     "graficos": {
+     *       "evolucao_mensal": array,
+     *       "distribuicao_pagamentos": array,
+     *       "evolucao_liquido": array
+     *     }
+     *   }
+     * }
      */
     public function apiStats(): void
     {
