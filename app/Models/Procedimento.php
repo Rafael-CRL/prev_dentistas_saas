@@ -30,6 +30,13 @@ class Procedimento
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
+    public function getListagemAtendimento(): array
+    {
+        $stmt = $this->pdo->prepare("SELECT id, nome, categoria, valor_base, tipo FROM procedimentos WHERE clinica_id = ?");
+        $stmt->execute([$this->clinica_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function create(array $data): bool
     {
         $sql = "INSERT INTO procedimentos (clinica_id, nome, categoria, valor_base, tipo)
