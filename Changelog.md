@@ -34,6 +34,9 @@ Conclusão da camada de inteligência visual e consolidação da estética premi
     - Reintroduzidas variáveis de design essenciais no `:root` (`--secondary-color`, `--info-color`, `--border-color`) para compatibilidade com módulos legados e dashboards.
     - Restaurado o contraste do menu de usuário (texto "Olá" agora é branco) e padronizados arredondamentos (`30px`) para botões.
     - Saneamento do arquivo CSS com remoção de 100% das duplicatas e isolamento de estilos de Landing Page.
+- **Correção no Fluxo de Atendimentos:**
+    - Eliminado **Fatal Error** na página de "Lançar Atendimento" causado por caminhos de inclusão manuais (`views/header.php`) que estavam obsoletos após a migração MVC.
+    - Limpeza de resquícios de código corrompido no arquivo `cadastrar.php`.
 - **Correção do Layout em Telas de Erro:**
     - Atualizado o método `renderError` no `BaseController.php` para apontar para os novos caminhos dos parciais de layout (`app/Views/partials/`).
     - **Impacto:** Garante que mensagens de erro críticas (como falha de CSRF) sejam renderizadas dentro do Design System profissional (com CSS e Navbar), eliminando a exibição de texto puro em falhas de segurança.
