@@ -58,15 +58,7 @@ class AtendimentoController extends BaseController
             return $this->json(['sucesso' => false, 'erro' => 'ID do paciente inválido.'], 400);
         }
 
-        $stmt = $this->pdo->prepare("
-            SELECT COUNT(*) 
-            FROM atendimentos 
-            WHERE paciente_id = ? 
-            AND status_pagamento = 'pendente'
-            AND clinica_id = ?
-        ");
-        $stmt->execute([$pacienteId, $this->clinicaId]);
-        $count = $stmt->fetchColumn();
+        $count = $this->atendimentoModel->countPendentesByPaciente((int)$pacienteId);
 
         return $this->json(['pendente' => $count > 0]);
     }

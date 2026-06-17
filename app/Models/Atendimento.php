@@ -113,6 +113,22 @@ class Atendimento
     }
 
     /**
+     * Conta atendimentos com pagamento pendente para um paciente específico.
+     */
+    public function countPendentesByPaciente(int $pacienteId): int
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*) 
+            FROM atendimentos 
+            WHERE paciente_id = ? 
+            AND status_pagamento = 'pendente'
+            AND clinica_id = ?
+        ");
+        $stmt->execute([$pacienteId, $this->clinicaId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * Busca o ID do último atendimento pendente de um paciente.
      */
     public function buscarUltimoPendente(int $pacienteId): ?int
