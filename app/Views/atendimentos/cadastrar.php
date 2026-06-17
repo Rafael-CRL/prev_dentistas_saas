@@ -1,6 +1,5 @@
 <?php
 // app/Views/atendimentos/cadastrar.php
-require_once __DIR__ . '/../../../views/header.php';
 
 // As variáveis $dentistas e $procedimentos já estão disponíveis, injetadas pelo Controller.
 ?>
@@ -1030,4 +1029,3 @@ $(document).ready(function() {
     });
 });
 </script>
-php'; ?>
