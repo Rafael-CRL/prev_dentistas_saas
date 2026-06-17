@@ -1,5 +1,20 @@
 # Changelog - Sistema de Gestão Odontológica
 
+## [2026-06-17] — Auditoria Técnica e Refatoração MVC (Fase 6.3)
+
+### Corrigido
+- **Relatório Financeiro Geral:** Corrigidos os avisos de "Undefined variable $data_inicio/$data_fim" no `AtendimentoModel`, restaurando a funcionalidade de filtragem por período que estava inoperante devido a erro de nomenclatura.
+- **Módulo de Atendimentos:** Restaurada a funcionalidade de carregamento de tratamentos planejados (pendências) com a implementação do método `getPendentes()` no `PacienteModel`, corrigindo erro de comunicação AJAX.
+- **Injeção de Dependências:** Corrigido o construtor do `AtendimentoController` para instanciar corretamente os modelos de `Usuario` e `Clinica`, evitando erros de acesso a propriedades nulas.
+
+### Refatorado (MVC & Zero Hardcode)
+- **Eliminação de SQL Bruto:** Removidas todas as consultas SQL diretas do `AtendimentoController`, migrando a persistência de dados para os Models correspondentes:
+  - Listagem de dentistas migrada para `UsuarioModel::getDentistas()`.
+  - Listagem de procedimentos migrada para `ProcedimentoModel::getListagemAtendimento()`.
+  - Contagem de pendências financeiras migrada para `AtendimentoModel::countPendentesByPaciente()`.
+  - Recuperação de nome de paciente migrada para `PacienteModel::getNomeById()`.
+  - Dados institucionais da clínica migrados para `ClinicaModel::getDados()`.
+
 ## [2026-06-16] — Fase 6.2: Dashboard Financeiro e Design System Premium
 
 Conclusão da camada de inteligência visual e consolidação da estética premium do sistema, transformando dados brutos em insights gerenciais assíncronos.
