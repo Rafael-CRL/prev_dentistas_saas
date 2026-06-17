@@ -15,6 +15,8 @@ class AtendimentoController extends BaseController
     private $atendimentoModel;
     private $pacienteModel;
     private $procedimentoModel;
+    private $usuarioModel;
+    private $clinicaModel;
     private $financeiroService;
     private $clinicaId;
     private $pdo;
@@ -27,6 +29,8 @@ class AtendimentoController extends BaseController
         $this->atendimentoModel = new Atendimento($pdo, $clinicaId);
         $this->pacienteModel = new Paciente($pdo, $clinicaId);
         $this->procedimentoModel = new Procedimento($pdo, $clinicaId);
+        $this->usuarioModel = new \App\Models\Usuario($pdo, $clinicaId);
+        $this->clinicaModel = new \App\Models\Clinica($pdo, $clinicaId);
         
         $config = Config::getInstance($pdo, $clinicaId);
         $this->financeiroService = new FinanceiroService($config);
@@ -318,9 +322,7 @@ class AtendimentoController extends BaseController
              exit;
         }
 
-        $stmtClinica = $this->pdo->prepare("SELECT nome_fantasia, cnpj FROM clinicas WHERE id = ?");
-        $stmtClinica->execute([$this->clinicaId]);
-        $clinica = $stmtClinica->fetch(PDO::FETCH_ASSOC);
+        $clinica = $this->clinicaModel->getDados();
 
         $config = Config::getInstance($this->pdo, $this->clinicaId);
         $clinica_endereco = $config->get('clinica_endereco');
