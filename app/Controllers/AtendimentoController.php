@@ -37,14 +37,9 @@ class AtendimentoController extends BaseController
      */
     public function cadastrar()
     {
-        // Busca dados para preencher os selects
-        $stmtDentistas = $this->pdo->prepare("SELECT id, nome FROM usuarios WHERE perfil = 'dentista' AND clinica_id = ?");
-        $stmtDentistas->execute([$this->clinicaId]);
-        $dentistas = $stmtDentistas->fetchAll();
-
-        $stmtProc = $this->pdo->prepare("SELECT id, nome, categoria, valor_base, tipo FROM procedimentos WHERE clinica_id = ?");
-        $stmtProc->execute([$this->clinicaId]);
-        $procedimentos = $stmtProc->fetchAll();
+        // Busca dados para preencher os selects via Models (MVC)
+        $dentistas = $this->usuarioModel->getDentistas();
+        $procedimentos = $this->procedimentoModel->getListagemAtendimento();
 
         return $this->render('atendimentos/cadastrar', [
             'dentistas' => $dentistas,

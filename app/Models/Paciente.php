@@ -208,6 +208,39 @@ class Paciente
     /**
      * Busca procedimentos pendentes do paciente.
      */
+    public function getPendentes(int $pacienteId): array
+    {
+        $sql = "SELECT
+                    ap.id as atendimento_procedimento_id,
+                    p.nome as procedimento_nome,
+                    p.categoria,
+                    ap.local,
+                    ap.descricao,
+                    ap.valor_procedimento,
+                    ap.quantidade,
+                    ap.custo_auxiliar,
+                    ap.natureza,
+                    p.id as id_procedimento
+                FROM atendimento_procedimentos ap
+                JOIN atendimentos a ON ap.id_atendimento = a.id
+                JOIN procedimentos p ON ap.id_procedimento = p.id
+                WHERE a.paciente_id = :paciente_id 
+                AND a.clinica_id = :clinica_id
+                AND ap.status_execucao = 'pendente'
+                ORDER BY a.data_atendimento DESC";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':paciente_id' => $pacienteId,
+            ':clinica_id' => $this->clinica_id
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Busca procedimentos pendentes do paciente.
+     */
     public function findByName(string $name)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM pacientes WHERE clinica_id = ? AND LOWER(nome) LIKE LOWER(?) LIMIT 1");

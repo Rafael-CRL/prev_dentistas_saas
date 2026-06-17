@@ -92,6 +92,12 @@ class Usuario {
         return (bool) $stmt->fetch();
     }
 
+    public function getDentistas() {
+        $stmt = $this->pdo->prepare("SELECT id, nome FROM usuarios WHERE perfil = 'dentista' AND clinica_id = ?");
+        $stmt->execute([$this->clinica_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function temAtendimentos($id) {
         $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM atendimentos WHERE id_dentista = ?");
         $stmt->execute([$id]);
