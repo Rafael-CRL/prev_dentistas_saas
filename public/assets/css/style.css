@@ -7,27 +7,33 @@
     --primary-dark: hsl(var(--primary-h), var(--primary-s), 20%);
     --primary-light: hsl(var(--primary-h), var(--primary-s), 45%);
     
-    --success-color: #2ecc71;
-    --danger-color: #e74c3c;
-    --warning-color: #f1c40f;
-    --info-color: #3498db;
-    
+    /* Cores de Alerta e Status */
+    --success-color: #2ecc71;      /* Verde Esmeralda Premium */
+    --danger-color: #e74c3c;       /* Vermelho Alizarin Premium */
+    --warning-color: #f1c40f;      /* Amarelo Girassol Premium */
+    --info-color: #3498db;         /* Azul Peter River Premium */
+    --secondary-color: #6c757d;    /* Cinza Profissional */
+
+    /* Neutros e Backgrounds */
     --background-color: #f8fafc;
     --text-color: #1e293b;
     --text-muted: #64748b;
-    
+    --border-color: #dee2e6;
     --white-color: #ffffff;
+    
+    /* Glassmorphism & Cards */
     --card-bg: rgba(255, 255, 255, 0.9);
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.3);
+
+    /* Formato dos botões e elementos */
+    --border-radius: 30px;         /* Mantendo o padrão arredondado (Pill) solicitado */
+    --border-radius-lg: 12px;      /* Para cards e containers */
     
-    --border-radius: 12px;
-    --border-radius-lg: 20px;
-    --border-radius-pill: 50px;
-    
+    /* Sombras Elevadas */
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.1);
+    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
 }
 
 body {
@@ -42,30 +48,32 @@ body {
     line-height: 1.6;
 }
 
+/* Adicione se houver seletores de títulos no seu style.css */
 h1, h2, h3, h4, .logo {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
 }
 
+/* ==========================================================================
+   BOTÕES (Ajustados para aparecerem sempre e com formato arredondado)
+   ========================================================================== */
+
+/* Regras gerais para todos os botões */
 .btn, button, input[type="submit"] {
-    border-radius: var(--border-radius-pill);
+    border-radius: var(--border-radius); /* 30px conforme o login.php */
     padding: 10px 25px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
+/* Botão Primário (Azul do padrão) */
 .btn-primary {
     background-color: var(--primary-color);
     color: #ffffff;
@@ -73,44 +81,79 @@ h1, h2, h3, h4, .logo {
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-.navbar {
-    background-color: var(--primary-color);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: var(--shadow-md);
-    padding: 0.8rem 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 2000;
-    display: flex;
-    justify-content: space-between;
+.btn-secondary { 
+    background-color: var(--secondary-color); 
+    color: #ffffff; 
+}
+
+.btn-secondary:hover { 
+    background-color: #28a745; 
+}
+
+
+/* Botão Sucesso (Verde - Corrigido para estar sempre visível) */
+.btn-success {
+    background-color: #28a745; 
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Botão Perigo/Erro (Vermelho - Corrigido para estar sempre visível) */
+.btn-danger {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+/* Botão Alerta (Amarelo - Corrigido para estar sempre visível) */
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    transform: translateY(-2px);
+}
+
+.btn-info { 
+    background-color: var(--info-color); 
+    color:  #ffffff; 
+}
+.btn-info:hover { 
+    background-color: #138496; 
+}
+
+/* Definição do botão Cancelar */
+.btn-cancel {
+    background-color: #17a2b8; /* Cor sólida (Equivalente ao Info) */
+    color: #ffffff !important;
+    border: none;
+    
+    /* Padrão do login.php */
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    border-radius: var(--border-radius); /* Usa os 30px definidos no :root */
+    padding: 10px 25px;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    text-decoration: none;
     transition: all 0.3s ease;
 }
 
-.navbar:hover {
-    background-color: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.95);
-}
-
-.card {
-    background: var(--card-bg);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    background: var(--white-color);
-}
 /* Estado quando passa o mouse */
 .btn-cancel:hover {
     background-color: #138496; /* Cor um pouco mais escura */
@@ -136,10 +179,31 @@ html {
 /* ==========================================================================
    HEADER & NAVBAR (Novo Comportamento Isolado)
    ========================================================================== */
-.logo {
-    font-weight: bold;
+.navbar {
+    background-color: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    padding: 0.8rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    gap: 1rem;
     color: white;
-    font-size: 1.2rem;
+}
+
+.navbar:hover {
+    background-color: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 1);
+}
+
+.logo {
+    font-weight: 700;
+    color: white;
+    font-size: 1.3rem;
     white-space: nowrap; /* Impede que o logo quebre linha */
     flex-shrink: 0;
 }
@@ -164,7 +228,7 @@ html {
     font-weight: 500;
     padding: 0.5rem 0;
     margin: 0;
-    transition: color 0.2s;
+    transition: all 0.2s;
     position: relative;
     white-space: nowrap;
     display: inline-flex;
@@ -182,7 +246,7 @@ html {
     right: 0; /* Usa left/right 0 em vez de width 100% para precisão absoluta */
     background-color: white;
     transform: scaleX(0);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: left;
 }
 
@@ -265,55 +329,28 @@ html {
 
 .user-menu span {
     font-weight: 500;
+    color: white;
 }
 
-/* ==========================================================================
-   BOTÕES (Original)
-   ==========================================================================
-.btn {
-    padding: 0.6rem 1.2rem;
-    border: 1px solid transparent;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.2s;
-    text-align: center;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.btn-primary { background-color: var(--primary-color); color: white; }
-.btn-primary:hover { background-color: var(--primary-dark); }
-.btn-secondary { background-color: var(--secondary-color); color: white; }
-.btn-secondary:hover { background-color: #5a6268; }
-.btn-success { background-color: var(--success-color); color: white; }
-.btn-success:hover { background-color: #218838; }
-.btn-danger { background-color: var(--danger-color); color: white; }
-.btn-danger:hover { background-color: #c82333; }
-.btn-info { background-color: var(--info-color); color: white; }
-.btn-info:hover { background-color: #138496; }
- */
 /* ==========================================================================
    CARDS & FORMULÁRIOS (Original - Restaurado)
    ========================================================================== */
 .card {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
     padding: 2rem;
     margin-bottom: 2rem;
-    border: 1px solid rgba(0,0,0,0.05);
-    transition: box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    background: var(--white-color);
 }
 
 .form-group {
@@ -646,7 +683,74 @@ tbody tr:hover {
 .drop-zone__specs {
     font-size: 0.8rem;
     color: #94a3b8;
-}ht: 100%; object-fit: cover; object-position: center; }
+}/* --- Landing Page Styles --- */
+.lp-body { background-color: white; color: var(--text-color); }
+.lp-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; align-items: center; justify-content: center;}
+.lp-header { background: var(--primary-color); padding: 15px 0; color: white; position: sticky; top:0; z-index: 1000; box-shadow: var(--shadow-md); }
+.lp-header .logo a { color: white; text-decoration: none; font-size: 1.2rem; font-weight: bold; }
+
+.nav-flex { display: flex; justify-content: space-between; align-items: center; }
+
+.lp-login-form { display: flex; gap: 10px; align-items: center; }
+.lp-login-form input { 
+    padding: 6px 12px !important; 
+    font-size: 14px !important; 
+    border-radius: 4px !important; 
+    width: 150px !important; 
+    margin-bottom: 0 !important;
+}
+
+/* Menu Landing Page */
+.lp-nav { display: flex; align-items: center; gap: 20px; }
+.lp-nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 500; transition: 0.3s; }
+.lp-nav a:hover { color: white; text-decoration: underline; }
+
+.lp-mobile-toggle { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+.lp-mobile-toggle span { width: 25px; height: 3px; background-color: white; border-radius: 2px; }
+
+@media (max-width: 768px) {
+    .lp-mobile-toggle { display: flex; }
+    
+    .lp-nav {
+        display: none; /* Escondido por padrão no mobile */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--primary-color);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .lp-nav.active { display: flex; }
+    .lp-login-form { flex-direction: column; width: 100%; }
+    .lp-login-form input { width: 100% !important; margin-bottom: 10px !important; }
+    .lp-login-form button { width: 100%; }
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding: 60px 0; }
+
+.lp-hero h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px; }
+.lp-features { list-style: none; padding: 20px 0; }
+.lp-features li { margin-bottom: 12px; font-size: 1.1rem; }
+.lp-features i { color: var(--success-color); margin-right: 10px; }
+
+.section-title { text-align: center; font-size: 2rem; margin-bottom: 40px; color: var(--primary-dark); }
+
+.team-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+.team-card { text-align: center; transition: 0.3s; padding: 20px; border-radius: var(--border-radius); background: var(--background-color); }
+.team-card:hover { transform: translateY(-10px); background: #ebf5ff; }
+
+.img-wrapper { 
+    width: 100%; 
+    height: 350px; 
+    overflow: hidden; 
+    border-radius: 15px; 
+    margin-bottom: 15px;
+    box-shadow: var(--shadow-sm);
+}
+.img-wrapper img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 
 .lp-error { color: #ffcccc; font-size: 12px; position: absolute; bottom: -18px; right: 0; }
 
@@ -655,43 +759,4 @@ tbody tr:hover {
 @media (max-width: 768px) {
     .grid-2, .team-grid { grid-template-columns: 1fr; }
     .hero-text { text-align: center; }
-}
-
-.drop-zone {
-    width: 100%;
-    max-width: 100%;
-    height: 150px;
-    padding: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    cursor: pointer;
-    color: #cccccc;
-    border: 2px dashed #3b82f6;
-    border-radius: 10px;
-    background-color: #f8fafc;
-    transition: all 0.3s ease;
-}
-
-.drop-zone--over {
-    border-style: solid;
-    background-color: #eff6ff;
-    transform: scale(1.01);
-}
-
-.drop-zone__icon {
-    font-size: 30px;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.drop-zone__prompt p {
-    margin: 5px 0;
-    color: #444;
-}
-
-.drop-zone__specs {
-    font-size: 0.8rem;
-    color: #94a3b8;
 }
