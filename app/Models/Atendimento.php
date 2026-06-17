@@ -231,8 +231,8 @@ class Atendimento
             ORDER BY a.data_atendimento DESC
             LIMIT :limit OFFSET :offset
         ");
-        $stmt->bindValue(':data_inicio', $data_inicio);
-        $stmt->bindValue(':data_fim', $data_fim);
+        $stmt->bindValue(':data_inicio', $dataInicio);
+        $stmt->bindValue(':data_fim', $dataFim);
         $stmt->bindValue(':clinica_id', $this->clinicaId, PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
