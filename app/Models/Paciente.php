@@ -60,6 +60,17 @@ class Paciente
     }
 
     /**
+     * Busca apenas o nome do paciente pelo ID.
+     */
+    public function getNomeById(int $id): ?string
+    {
+        $sql = "SELECT nome FROM pacientes WHERE id = :id AND clinica_id = :clinica_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id, ':clinica_id' => $this->clinica_id]);
+        return $stmt->fetchColumn() ?: null;
+    }
+
+    /**
      * Busca um paciente pelo ID.
      */
     public function getById(int $id): ?array
