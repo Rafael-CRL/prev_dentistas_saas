@@ -17,7 +17,7 @@ function isActive($urls) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clínica Prev Dentistas</title>
+    <title><?= isset($_SESSION['clinica_nome']) ? htmlspecialchars($_SESSION['clinica_nome']) : 'Clínica Prev Dentistas' ?></title>
     <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,7 +26,9 @@ function isActive($urls) {
 <body>
     <header class="navbar">
         <div class="logo" translate="no">
-            <a href="<?= BASE_URL ?>index.php" style="text-decoration:none; color:inherit;">🦷 Prev Dentistas</a>
+            <a href="<?= BASE_URL ?>index.php" style="text-decoration:none; color:inherit;">
+                🦷 <?= isset($_SESSION['clinica_nome']) ? htmlspecialchars($_SESSION['clinica_nome']) : 'Prev Dentistas' ?>
+            </a>
         </div>
         
         <?php if(isset($_SESSION['usuario_id'])): ?>
