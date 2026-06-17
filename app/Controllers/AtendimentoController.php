@@ -95,9 +95,7 @@ class AtendimentoController extends BaseController
             if (!$pacienteId) {
                 $pacienteId = $this->pacienteModel->criar($pacienteNome);
             } else {
-                 $stmtNome = $this->pdo->prepare("SELECT nome FROM pacientes WHERE id = ? AND clinica_id = ?");
-                 $stmtNome->execute([$pacienteId, $this->clinicaId]);
-                 $pacienteNome = $stmtNome->fetchColumn();
+                 $pacienteNome = $this->pacienteModel->getNomeById((int)$pacienteId);
             }
 
             if (!$pacienteId) {
