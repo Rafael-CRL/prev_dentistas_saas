@@ -445,6 +445,7 @@ $(document).ready(function() {
     });
     
     const procedimentos = <?= json_encode($procedimentos) ?>;
+    const custoAuxiliarPadrao = <?= json_encode($custoAuxiliarPadrao ?? '0.00') ?>;
 
     function carregarProcedimentosPendentes(pacienteId) {
         const container = $('#procedimentos_pendentes_container');
@@ -597,7 +598,7 @@ $(document).ready(function() {
         custoAuxiliarInput.type = 'number';
         custoAuxiliarInput.name = 'procedimentos_modal[custo_auxiliar][]';
         custoAuxiliarInput.step = '0.01';
-        custoAuxiliarInput.value = '250.00'; // Inicializa com 0
+        custoAuxiliarInput.value = custoAuxiliarPadrao; // Inicializa com valor padrão da configuração
         custoAuxiliarInput.placeholder = 'Custo Auxiliar (R$)';
         custoAuxiliarInput.style.width = '100%';
         custoAuxiliarInput.style.marginTop = '5px';
