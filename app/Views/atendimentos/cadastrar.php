@@ -623,6 +623,7 @@ $(document).ready(function() {
             } else if (selectedOption && selectedOption.dataset.categoria === 'protese') {
                 custoAuxiliarInput.style.display = 'block';
                 custoAuxiliarInput.required = true;
+                custoAuxiliarInput.value = custoAuxiliarPadrao;
             }
             updateModalTotal();
         });
@@ -631,6 +632,7 @@ $(document).ready(function() {
             if (this.value === 'protese') {
                 custoAuxiliarInput.style.display = 'block';
                 custoAuxiliarInput.required = true;
+                custoAuxiliarInput.value = custoAuxiliarPadrao;
             } else {
                 custoAuxiliarInput.style.display = 'none';
                 custoAuxiliarInput.required = false;
