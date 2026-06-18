@@ -45,9 +45,13 @@ class AtendimentoController extends BaseController
         $dentistas = $this->usuarioModel->getDentistas();
         $procedimentos = $this->procedimentoModel->getListagemAtendimento();
 
+        $config = Config::getInstance($this->pdo, $this->clinicaId);
+        $custoAuxiliarPadrao = $config->get('custo_auxiliar_padrao', '0.00');
+
         return $this->render('atendimentos/cadastrar', [
             'dentistas' => $dentistas,
-            'procedimentos' => $procedimentos
+            'procedimentos' => $procedimentos,
+            'custoAuxiliarPadrao' => $custoAuxiliarPadrao
         ]);
     }
 

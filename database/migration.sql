@@ -145,6 +145,7 @@ INSERT IGNORE INTO `clinica_configuracoes` (`clinica_id`, `chave`, `valor`) VALU
 (@default_clinica_id, 'comissao_canal', '10.00'),
 (@default_clinica_id, 'comissao_protese', '10.00'),
 (@default_clinica_id, 'clinica_endereco', 'Rua União 1, Esquina com a Rua D - Atalaia, Ananindeua - PA, 67013-350'),
-(@default_clinica_id, 'clinica_telefone', '(91) 98306-7459');
+(@default_clinica_id, 'clinica_telefone', '(91) 98306-7459'),
+(@default_clinica_id, 'custo_auxiliar_padrao', '250.00');
 
 SET FOREIGN_KEY_CHECKS = 1;

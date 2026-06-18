@@ -73,6 +73,7 @@ class ClinicaController extends BaseController
             'comissao_especializado' => floatval($_POST['comissao_especializado'] ?? 0),
             'comissao_canal' => floatval($_POST['comissao_canal'] ?? 0),
             'comissao_protese' => floatval($_POST['comissao_protese'] ?? 0),
+            'custo_auxiliar_padrao' => floatval($_POST['custo_auxiliar_padrao'] ?? 0),
         ];
 
         // Validação básica de percentuais
@@ -82,6 +83,12 @@ class ClinicaController extends BaseController
                 header("Location: " . BASE_URL . "clinica/painel");
                 exit;
             }
+        }
+
+        if ($configs['custo_auxiliar_padrao'] < 0) {
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => "O custo auxiliar padrão não pode ser negativo."];
+            header("Location: " . BASE_URL . "clinica/painel");
+            exit;
         }
 
         $this->clinicaModel->salvarConfiguracoes($configs);

@@ -92,6 +92,14 @@ function formatarCNPJ($cnpj) {
             </div>
 
             <div class="card" style="background: #f9f9f9; border: 1px solid #ddd; margin-top: 1rem;">
+                <h4>Custo Auxiliar (Protético)</h4>
+                <div class="form-group">
+                    <label>Custo Auxiliar Padrão (R$)</label>
+                    <input type="number" step="0.01" name="custo_auxiliar_padrao" value="<?= $configs['custo_auxiliar_padrao'] ?? 0 ?>" readonly class="readonly-field">
+                </div>
+            </div>
+
+            <div class="card" style="background: #f9f9f9; border: 1px solid #ddd; margin-top: 1rem;">
                 <h4>Contatos e Endereço (Recibo)</h4>
                 <div class="form-group">
                     <label>Endereço Completo</label>
