@@ -41,24 +41,19 @@ class AuthModel {
 
     /**
      * Autentica um usuário pelo login.
-     * Comportamento temporário: busca apenas por login.
-     * Código multi-tenant isolado comentado abaixo.
+     * Implementação "Login Inteligente": Busca o usuário globalmente e retorna
+     * seus dados, incluindo o clinica_id ao qual ele pertence.
      */
     public function authenticate($login) {
-        // COMPORTAMENTO TEMPORÁRIO (Simplificado):
         $stmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE login = ? LIMIT 1");
         $stmt->execute([$login]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
-        /*
-        // PRONTO PARA PRODUÇÃO MULTI-TENANT:
-        // A query abaixo inclui clinica_id para buscar isoladamente por inquilino.
-        // public function authenticate($login, int $clinicaId) {
-        //     $stmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE login = ? AND clinica_id = ? LIMIT 1");
-        //     $stmt->execute([$login, $clinicaId]);
-        //     return $stmt->fetch(PDO::FETCH_ASSOC);
-        // }
-        */
+    public function getClinicaName(int $clinicaId): ?string {
+        $stmt = $this->pdo->prepare("SELECT nome_fantasia FROM clinicas WHERE id = ? LIMIT 1");
+        $stmt->execute([$clinicaId]);
+        return $stmt->fetchColumn() ?: null;
     }
 
     /**
