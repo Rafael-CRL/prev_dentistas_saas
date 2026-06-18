@@ -398,4 +398,37 @@ class Paciente
         $stmt = $this->pdo->prepare("UPDATE atendimento_procedimentos SET url_arquivo = ? WHERE id = ?");
         return $stmt->execute([$relativeUrl, $idProcedimento]);
     }
+
+    /**
+     * Busca simplificada de todos os pacientes para detecção de duplicidade.
+     */
+    public function getTodosParaDuplicados(): array
+    {
+        $sql = "SELECT id, nome, cpf, telefone FROM pacientes WHERE clinica_id = :clinica_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':clinica_id', $this->clinica_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Busca um paciente pelo CPF.
+     */
+    public function getByCpf(string $cpf): ?array
+    {
+        // Remove pontuação para garantir comparação uniforme
+        $cpfLimpo = preg_replace('/[^0-9]/', '', $cpf);
+        if (empty($cpfLimpo)) {
+            return null;
+        }
+        $sql = "SELECT id, nome, cpf, telefone FROM pacientes 
+                WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), '/', '') = :cpf 
+                  AND clinica_id = :clinica_id LIMIT 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':cpf', $cpfLimpo, PDO::PARAM_STR);
+        $stmt->bindValue(':clinica_id', $this->clinica_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $res ?: null;
+    }
 }

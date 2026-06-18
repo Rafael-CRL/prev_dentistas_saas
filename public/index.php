@@ -75,6 +75,8 @@ if (strpos($uri, 'pacientes') === 0 || $uri === 'editar_paciente.php') {
         $controller->excluir($id);
     } elseif ($uri === 'pacientes/buscar' || $uri === 'actions/buscar_paciente.php') {
         $controller->apiBuscar();
+    } elseif ($uri === 'pacientes/verificar-duplicado') {
+        $controller->apiVerificarDuplicado();
     } elseif ($uri === 'pacientes/historico' || $uri === 'actions/buscar_historico_paciente.php') {
         $controller->apiHistorico();
     } elseif ($uri === 'pacientes/pendentes' || $uri === 'actions/buscar_procedimentos_pendentes.php') {

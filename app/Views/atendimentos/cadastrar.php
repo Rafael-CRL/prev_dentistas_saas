@@ -125,6 +125,26 @@
         </form>
     </div>
 </div>
+
+<div id="modalDuplicados" class="modal">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h3 style="display: flex; align-items: center; gap: 10px; color: #d35400;">
+            ⚠️ <span id="duplicados-titulo">Paciente Semelhante Encontrado</span>
+        </h3>
+        <p id="duplicados-mensagem" style="margin-top: 10px; font-size: 14px; color: #555;">
+            Encontramos cadastros semelhantes no sistema. O paciente que você está lançando é um dos listados abaixo?
+        </p>
+        
+        <div id="duplicados-lista-container" style="margin: 20px 0; border: 1px solid #eee; border-radius: 5px; max-height: 250px; overflow-y: auto;">
+            <!-- Linhas de duplicados serão injetadas aqui por JS -->
+        </div>
+
+        <div class="btn-group" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+            <button type="button" id="btn-ignorar-duplicado" class="btn btn-warning" style="background-color: #f39c12; color: white; display: inline-block;">Não, cadastrar como novo</button>
+            <button type="button" id="btn-cancelar-duplicado" class="btn btn-cancel" style="background-color: #7f8c8d; color: white;">Cancelar</button>
+        </div>
+    </div>
+</div>
 </div>
 
 <style>
@@ -542,10 +562,86 @@ $(document).ready(function() {
         modal.classList.remove('show');
     }
 
+    // Modal de Duplicados
+    const modalDuplicados = document.getElementById('modalDuplicados');
+    const duplicadosTitulo = document.getElementById('duplicados-titulo');
+    const duplicadosMensagem = document.getElementById('duplicados-mensagem');
+    const duplicadosListaContainer = document.getElementById('duplicados-lista-container');
+    const btnIgnorarDuplicado = document.getElementById('btn-ignorar-duplicado');
+    const btnCancelarDuplicado = document.getElementById('btn-cancelar-duplicado');
+
+    window.mostrarModalDuplicados = function(duplicados, isBloqueioRigido) {
+        modalDuplicados.classList.add('show');
+        duplicadosListaContainer.innerHTML = '';
+
+        if (isBloqueioRigido) {
+            duplicadosTitulo.innerText = 'CPF Já Cadastrado';
+            duplicadosMensagem.innerText = `O CPF informado já pertence ao paciente "${duplicados.nome}". O atendimento será vinculado a este cadastro.`;
+            btnIgnorarDuplicado.style.display = 'none'; // Oculta a opção de forçar novo cadastro
+            
+            const itemHtml = `
+                <div class="duplicado-item" style="padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; background: #fafafa; margin: 10px 0;">
+                    <div>
+                        <strong>${duplicados.nome}</strong><br>
+                        <small>CPF: ${duplicados.cpf} | Tel: ${duplicados.telefone || 'Sem telefone'}</small>
+                    </div>
+                    <button type="button" class="btn btn-info btn-sm selecionar-duplicado-btn" style="padding: 5px 15px; font-size: 13px;" data-id="${duplicados.id}" data-nome="${duplicados.nome}">Vincular e Continuar</button>
+                </div>
+            `;
+            duplicadosListaContainer.innerHTML = itemHtml;
+        } else {
+            duplicadosTitulo.innerText = 'Paciente Semelhante Encontrado';
+            duplicadosMensagem.innerText = 'Encontramos cadastros semelhantes no sistema. O paciente que você está lançando é um dos listados abaixo?';
+            btnIgnorarDuplicado.style.display = 'inline-block'; // Mostra a opção de forçar novo cadastro
+            
+            let itemsHtml = '';
+            duplicados.forEach(function(item) {
+                itemsHtml += `
+                    <div class="duplicado-item" style="padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${item.nome}</strong><br>
+                            <small>CPF: ${item.cpf || 'Sem CPF'} | Tel: ${item.telefone || 'Sem telefone'}</small>
+                        </div>
+                        <button type="button" class="btn btn-info btn-sm selecionar-duplicado-btn" style="padding: 5px 12px; font-size: 12px;" data-id="${item.id}" data-nome="${item.nome}">Sim, é este</button>
+                    </div>
+                `;
+            });
+            duplicadosListaContainer.innerHTML = itemsHtml;
+        }
+
+        // Vincular clique aos botões de seleção de duplicado
+        $(duplicadosListaContainer).find('.selecionar-duplicado-btn').on('click', function() {
+            const id = $(this).data('id');
+            const nome = $(this).data('nome');
+            
+            // Define o paciente id e atualiza a busca
+            pacienteIdInput.val(id);
+            pacienteBuscaInput.val(nome);
+            
+            fecharModalDuplicados();
+            // Dispara o submit do formulário novamente para passar pelas verificações subsequentes (como verificação de pagamentos pendentes)
+            $(form).submit();
+        });
+    }
+
+    window.fecharModalDuplicados = function() {
+        modalDuplicados.classList.remove('show');
+    }
+
+    btnCancelarDuplicado.addEventListener('click', fecharModalDuplicados);
+    
+    btnIgnorarDuplicado.addEventListener('click', function() {
+        form.dataset.confirmarDuplicado = 'true';
+        fecharModalDuplicados();
+        $(form).submit();
+    });
+
     // Fecha o modal ao clicar fora
     window.onclick = function(event) {
         if (event.target == modal) {
             fecharModal();
+        } else if (event.target == modalDuplicados) {
+            fecharModalDuplicados();
         }
     }
 
@@ -982,7 +1078,42 @@ $(document).ready(function() {
             return;
         }
 
-        // 1. Verificar pagamento pendente
+        // 1. Verificar duplicidade de paciente (Bloqueio Rígido e Suave)
+        if (!pacienteId) {
+            // Se já confirmou a criação do duplicado, pula a verificação
+            if (!form.dataset.confirmarDuplicado) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Verificando...';
+                try {
+                    const response = await fetch(`<?= BASE_URL ?>pacientes/verificar-duplicado?nome=${encodeURIComponent(pacienteNome)}`);
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        if (data.bloqueio_rigido) {
+                            mostrarModalDuplicados(data.paciente, true);
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Lançar Atendimento';
+                            return; // Interrompe o envio
+                        } else if (data.duplicados && data.duplicados.length > 0) {
+                            mostrarModalDuplicados(data.duplicados, false);
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Lançar Atendimento';
+                            return; // Interrompe o envio
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar duplicados:', error);
+                } finally {
+                    // Restaura se não foi interrompido/aberto o modal
+                    if (!modalDuplicados.classList.contains('show')) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Lançar Atendimento';
+                    }
+                }
+            }
+        }
+
+        // 2. Verificar pagamento pendente
         if (pacienteId) {
             try {
                 const response = await fetch(`<?= BASE_URL ?>atendimentos/verificar-pagamento?paciente_id=${pacienteId}`);
@@ -999,7 +1130,7 @@ $(document).ready(function() {
             }
         }
        
-        // 2. Prosseguir com o envio do formulário
+        // 3. Prosseguir com o envio do formulário
         submitButton.disabled = true;
         submitButton.textContent = 'Salvando...';
 

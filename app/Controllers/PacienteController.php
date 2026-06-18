@@ -314,4 +314,74 @@ class PacienteController extends BaseController
             return $this->json(['erro' => 'Erro ao buscar pendências.'], 500);
         }
     }
+
+    /**
+     * Helper para normalizar nome em português (lowercase, sem acentos, sem múltiplos espaços)
+     */
+    private function normalizarNome(string $nome): string
+    {
+        $map = [
+            'á'=>'a','à'=>'a','â'=>'a','ã'=>'a','ä'=>'a','é'=>'e','è'=>'e','ê'=>'e','ë'=>'e',
+            'í'=>'i','ì'=>'i','î'=>'i','ï'=>'i','ó'=>'o','ò'=>'o','ô'=>'o','õ'=>'o','ö'=>'o',
+            'ú'=>'u','ù'=>'u','û'=>'u','ü'=>'u','ç'=>'c',
+            'Á'=>'A','À'=>'A','Â'=>'A','Ã'=>'A','Ä'=>'A','É'=>'E','È'=>'E','Ê'=>'E','Ë'=>'E',
+            'Í'=>'I','Ì'=>'I','Î'=>'I','Ï'=>'I','Ó'=>'O','Ò'=>'O','Ô'=>'O','Õ'=>'O','Ö'=>'O',
+            'Ú'=>'U','Ù'=>'U','Û'=>'U','Ü'=>'U','Ç'=>'C'
+        ];
+        $nome = strtr($nome, $map);
+        $nome = strtolower($nome);
+        $nome = preg_replace('/[^a-z\s]/', '', $nome);
+        return preg_replace('/\s+/', ' ', trim($nome));
+    }
+
+    /**
+     * API: Verifica duplicados de paciente
+     */
+    public function apiVerificarDuplicado()
+    {
+        $nome = isset($_GET['nome']) ? trim($_GET['nome']) : '';
+        $cpf = isset($_GET['cpf']) ? preg_replace('/[^0-9]/', '', $_GET['cpf']) : '';
+
+        if (empty($nome)) {
+            return $this->json(['status' => 'success', 'duplicados' => [], 'bloqueio_rigido' => false]);
+        }
+
+        // 1. Bloqueio Rígido: Se foi informado CPF e ele já existe no banco, retorna bloqueio rígido imediato
+        if (!empty($cpf)) {
+            $existente = $this->pacienteModel->getByCpf($cpf);
+            if ($existente) {
+                return $this->json([
+                    'status' => 'success',
+                    'bloqueio_rigido' => true,
+                    'paciente' => $existente
+                ]);
+            }
+        }
+
+        // 2. Busca Suave: Levenshtein no PHP com distância <= 3
+        $candidatos = $this->pacienteModel->getTodosParaDuplicados();
+        $duplicados = [];
+        $nomeNormalizado = $this->normalizarNome($nome);
+
+        foreach ($candidatos as $candidato) {
+            $candNomeNormalizado = $this->normalizarNome($candidato['nome']);
+            $distancia = levenshtein($nomeNormalizado, $candNomeNormalizado);
+
+            if ($distancia <= 3) {
+                $candidato['distancia'] = $distancia;
+                $duplicados[] = $candidato;
+            }
+        }
+
+        // Ordenar duplicados pela menor distância Levenshtein
+        usort($duplicados, function ($a, $b) {
+            return $a['distancia'] <=> $b['distancia'];
+        });
+
+        return $this->json([
+            'status' => 'success',
+            'bloqueio_rigido' => false,
+            'duplicados' => $duplicados
+        ]);
+    }
 }
