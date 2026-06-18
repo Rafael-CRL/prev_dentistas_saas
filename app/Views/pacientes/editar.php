@@ -55,7 +55,37 @@
             </div>
             <div class="form-group grid-col-2">
                 <label for="paciente_estado">Estado</label>
-                <input type="text" name="paciente_estado" id="paciente_estado" value="<?= htmlspecialchars($paciente['estado'] ?? '') ?>" maxlength="2">
+                <?php $uf_atual = $paciente['estado'] ?? ''; ?>
+                <select name="paciente_estado" id="paciente_estado">
+                    <option value="">Selecione...</option>
+                    <option value="AC" <?= $uf_atual === 'AC' ? 'selected' : '' ?>>Acre</option>
+                    <option value="AL" <?= $uf_atual === 'AL' ? 'selected' : '' ?>>Alagoas</option>
+                    <option value="AP" <?= $uf_atual === 'AP' ? 'selected' : '' ?>>Amapá</option>
+                    <option value="AM" <?= $uf_atual === 'AM' ? 'selected' : '' ?>>Amazonas</option>
+                    <option value="BA" <?= $uf_atual === 'BA' ? 'selected' : '' ?>>Bahia</option>
+                    <option value="CE" <?= $uf_atual === 'CE' ? 'selected' : '' ?>>Ceará</option>
+                    <option value="DF" <?= $uf_atual === 'DF' ? 'selected' : '' ?>>Distrito Federal</option>
+                    <option value="ES" <?= $uf_atual === 'ES' ? 'selected' : '' ?>>Espírito Santo</option>
+                    <option value="GO" <?= $uf_atual === 'GO' ? 'selected' : '' ?>>Goiás</option>
+                    <option value="MA" <?= $uf_atual === 'MA' ? 'selected' : '' ?>>Maranhão</option>
+                    <option value="MT" <?= $uf_atual === 'MT' ? 'selected' : '' ?>>Mato Grosso</option>
+                    <option value="MS" <?= $uf_atual === 'MS' ? 'selected' : '' ?>>Mato Grosso do Sul</option>
+                    <option value="MG" <?= $uf_atual === 'MG' ? 'selected' : '' ?>>Minas Gerais</option>
+                    <option value="PA" <?= $uf_atual === 'PA' ? 'selected' : '' ?>>Pará</option>
+                    <option value="PB" <?= $uf_atual === 'PB' ? 'selected' : '' ?>>Paraíba</option>
+                    <option value="PR" <?= $uf_atual === 'PR' ? 'selected' : '' ?>>Paraná</option>
+                    <option value="PE" <?= $uf_atual === 'PE' ? 'selected' : '' ?>>Pernambuco</option>
+                    <option value="PI" <?= $uf_atual === 'PI' ? 'selected' : '' ?>>Piauí</option>
+                    <option value="RJ" <?= $uf_atual === 'RJ' ? 'selected' : '' ?>>Rio de Janeiro</option>
+                    <option value="RN" <?= $uf_atual === 'RN' ? 'selected' : '' ?>>Rio Grande do Norte</option>
+                    <option value="RS" <?= $uf_atual === 'RS' ? 'selected' : '' ?>>Rio Grande do Sul</option>
+                    <option value="RO" <?= $uf_atual === 'RO' ? 'selected' : '' ?>>Rondônia</option>
+                    <option value="RR" <?= $uf_atual === 'RR' ? 'selected' : '' ?>>Roraima</option>
+                    <option value="SC" <?= $uf_atual === 'SC' ? 'selected' : '' ?>>Santa Catarina</option>
+                    <option value="SP" <?= $uf_atual === 'SP' ? 'selected' : '' ?>>São Paulo</option>
+                    <option value="SE" <?= $uf_atual === 'SE' ? 'selected' : '' ?>>Sergipe</option>
+                    <option value="TO" <?= $uf_atual === 'TO' ? 'selected' : '' ?>>Tocantins</option>
+                </select>
             </div>
         </div>
 
