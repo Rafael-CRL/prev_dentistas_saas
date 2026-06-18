@@ -13,13 +13,13 @@ class Usuario {
     }
 
     public function listarTodos() {
-        $stmt = $this->pdo->prepare("SELECT id, nome, login, perfil FROM usuarios WHERE clinica_id = ? ORDER BY nome ASC");
+        $stmt = $this->pdo->prepare("SELECT id, nome, login, perfil, percentual_comissao FROM usuarios WHERE clinica_id = ? ORDER BY nome ASC");
         $stmt->execute([$this->clinica_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function buscarPorId($id) {
-        $stmt = $this->pdo->prepare("SELECT id, nome, login, perfil, senha FROM usuarios WHERE id = ? AND clinica_id = ?");
+        $stmt = $this->pdo->prepare("SELECT id, nome, login, perfil, percentual_comissao, senha FROM usuarios WHERE id = ? AND clinica_id = ?");
         $stmt->execute([$id, $this->clinica_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -34,25 +34,26 @@ class Usuario {
 
     private function inserir($dados) {
         $senhaHash = password_hash($dados['senha'], PASSWORD_BCRYPT);
-        $sql = "INSERT INTO usuarios (nome, login, senha, perfil, clinica_id) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO usuarios (nome, login, senha, perfil, percentual_comissao, clinica_id) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             $dados['nome'],
             $dados['login'],
             $senhaHash,
             $dados['perfil'],
+            $dados['percentual_comissao'] ?? null,
             $this->clinica_id
         ]);
     }
 
     private function atualizar($dados) {
-        $sql = "UPDATE usuarios SET nome = ?, login = ?, perfil = ? WHERE id = ? AND clinica_id = ?";
-        $params = [$dados['nome'], $dados['login'], $dados['perfil'], $dados['id'], $this->clinica_id];
+        $sql = "UPDATE usuarios SET nome = ?, login = ?, perfil = ?, percentual_comissao = ? WHERE id = ? AND clinica_id = ?";
+        $params = [$dados['nome'], $dados['login'], $dados['perfil'], $dados['percentual_comissao'] ?? null, $dados['id'], $this->clinica_id];
 
         if (!empty($dados['senha'])) {
             $senhaHash = password_hash($dados['senha'], PASSWORD_BCRYPT);
-            $sql = "UPDATE usuarios SET nome = ?, login = ?, perfil = ?, senha = ? WHERE id = ? AND clinica_id = ?";
-            $params = [$dados['nome'], $dados['login'], $dados['perfil'], $senhaHash, $dados['id'], $this->clinica_id];
+            $sql = "UPDATE usuarios SET nome = ?, login = ?, perfil = ?, percentual_comissao = ?, senha = ? WHERE id = ? AND clinica_id = ?";
+            $params = [$dados['nome'], $dados['login'], $dados['perfil'], $dados['percentual_comissao'] ?? null, $senhaHash, $dados['id'], $this->clinica_id];
         }
 
         $stmt = $this->pdo->prepare($sql);

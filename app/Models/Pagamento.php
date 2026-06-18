@@ -55,7 +55,7 @@ class Pagamento
 
         // 2. Buscar detalhes do atendimento atual
         $stmtAtend = $this->pdo->prepare("
-            SELECT valor_total, custo_auxiliar 
+            SELECT valor_total, custo_auxiliar, id_dentista, comissao_dentista 
             FROM atendimentos 
             WHERE id = ? AND clinica_id = ?
         ");
@@ -102,17 +102,29 @@ class Pagamento
         $stmtProcedimentos->execute([$atendimento_id, $this->clinica_id]);
         $procedimentosDoAtendimento = $stmtProcedimentos->fetchAll(PDO::FETCH_ASSOC);
 
-        // 5. Recalcular a comissão do dentista baseada na regra de meta de faturamento mensal
-        $novaComissaoTotal = 0.0;
-        foreach ($procedimentosDoAtendimento as $proc) {
-            $resComissao = $financeiroService->calcularComissao(
-                $proc['valor_procedimento'],
-                $proc['categoria'],
-                $faturamentoParaCalculo,
-                $proc['custo_auxiliar'],
-                $proc['natureza']
-            );
-            $novaComissaoTotal += $resComissao['dentista'];
+        // 5. Recalcular a comissão do dentista baseada na regra de meta de faturamento mensal ou manter a comissão individual
+        $idDentista = (int)$atendimento['id_dentista'];
+        $stmtDentista = $this->pdo->prepare("SELECT percentual_comissao FROM usuarios WHERE id = ? AND clinica_id = ?");
+        $stmtDentista->execute([$idDentista, $this->clinica_id]);
+        $comissaoPersonalizadaVal = $stmtDentista->fetchColumn();
+
+        if ($comissaoPersonalizadaVal !== null && $comissaoPersonalizadaVal !== false) {
+            // Se o dentista possui comissão individual (Flat), ela foi fixada no momento da criação.
+            // Para respeitar a imutabilidade histórica do contrato, usamos o valor já salvo em atendimentos.
+            $novaComissaoTotal = (float)$atendimento['comissao_dentista'];
+        } else {
+            // Caso contrário (Fallback), recalculamos a comissão aplicando a regra de meta
+            $novaComissaoTotal = 0.0;
+            foreach ($procedimentosDoAtendimento as $proc) {
+                $resComissao = $financeiroService->calcularComissao(
+                    $proc['valor_procedimento'],
+                    $proc['categoria'],
+                    $faturamentoParaCalculo,
+                    $proc['custo_auxiliar'],
+                    $proc['natureza']
+                );
+                $novaComissaoTotal += $resComissao['dentista'];
+            }
         }
 
         // 6. Calcular o valor líquido final da clínica

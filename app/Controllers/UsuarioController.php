@@ -54,10 +54,20 @@ class UsuarioController extends BaseController {
             $login = trim($_POST['login']);
             $senha = $_POST['senha'];
             $perfil = $_POST['perfil'];
+            $percentualComissao = isset($_POST['percentual_comissao']) && $_POST['percentual_comissao'] !== '' 
+                ? floatval($_POST['percentual_comissao']) 
+                : null;
 
             // Validação
             if (empty($nome) || empty($login) || empty($perfil)) {
                 $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Nome, login e perfil são obrigatórios.'];
+                $redirect = $id ? "usuarios/editar?id=$id" : "usuarios";
+                header("Location: " . BASE_URL . $redirect);
+                exit;
+            }
+
+            if ($percentualComissao !== null && ($percentualComissao < 0 || $percentualComissao > 100)) {
+                $_SESSION['feedback'] = ['type' => 'error', 'message' => 'A comissão deve ser um percentual entre 0% e 100% (ou vazia).'];
                 $redirect = $id ? "usuarios/editar?id=$id" : "usuarios";
                 header("Location: " . BASE_URL . $redirect);
                 exit;
@@ -82,7 +92,8 @@ class UsuarioController extends BaseController {
                 'nome' => $nome,
                 'login' => $login,
                 'senha' => $senha,
-                'perfil' => $perfil
+                'perfil' => $perfil,
+                'percentual_comissao' => $percentualComissao
             ];
 
             if ($this->usuarioModel->salvar($dados)) {

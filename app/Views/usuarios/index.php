@@ -33,6 +33,10 @@
                     <option value="proprietario">Proprietário</option>                    
                 </select>
             </div>
+            <div class="form-group">
+                <label for="percentual_comissao">Percentual de Comissão Individual (%) <span style="font-size: 0.85rem; font-weight: normal; color: #666;">(Opcional - Apenas Dentistas. Se vazio, aplica a regra por categoria)</span></label>
+                <input type="number" step="0.01" min="0" max="100" name="percentual_comissao" id="percentual_comissao">
+            </div>
             <button type="submit" class="btn btn-success">Salvar Usuário</button>
         </form>
     </div>
@@ -45,6 +49,7 @@
                 <th>Nome</th>
                 <th>Login</th>
                 <th>Perfil</th>
+                <th>Comissão (%)</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -55,6 +60,7 @@
                         <td data-label="Nome"><?= htmlspecialchars($usuario['nome']) ?></td>
                         <td data-label="Login"><?= htmlspecialchars($usuario['login']) ?></td>
                         <td data-label="Perfil"><?= ucfirst($usuario['perfil']) ?></td>
+                        <td data-label="Comissão"><?= $usuario['percentual_comissao'] !== null ? number_format($usuario['percentual_comissao'], 2) . '%' : 'Padrão (Categoria)' ?></td>
                         <td data-label= "Ações" style="display: flex; gap: 0.5rem;">
                             <a href="<?= BASE_URL ?>usuarios/editar?id=<?= $usuario['id'] ?>" class="btn btn-primary">Editar</a>
                             <?php if ($usuario['id'] != $_SESSION['usuario_id']): // Não pode excluir a si mesmo ?>

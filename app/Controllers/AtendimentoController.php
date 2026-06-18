@@ -160,6 +160,12 @@ class AtendimentoController extends BaseController
                 $totalComissaoDentista = 0.0;
                 $totalCustoAuxiliar = 0.0;
 
+                // Recupera a comissão individual do dentista (se houver)
+                $dentistaObj = $this->usuarioModel->buscarPorId($idDentista);
+                $comissaoPersonalizada = isset($dentistaObj['percentual_comissao']) && $dentistaObj['percentual_comissao'] !== null 
+                    ? floatval($dentistaObj['percentual_comissao']) 
+                    : null;
+
                 // Processa cálculos financeiros usando o Service
                 foreach ($procedimentosFinalizados as &$proc) {
                     $resComissao = $this->financeiroService->calcularComissao(
@@ -167,7 +173,8 @@ class AtendimentoController extends BaseController
                         $proc['categoria'], 
                         $faturamentoBrutoMensal, 
                         $proc['custo_auxiliar_manual'], 
-                        $proc['natureza']
+                        $proc['natureza'],
+                        $comissaoPersonalizada
                     );
                     $proc['comissao_calculada'] = $resComissao['dentista'];
                     $proc['custo_auxiliar_calculado'] = $resComissao['auxiliar'] ?? 0.0;
