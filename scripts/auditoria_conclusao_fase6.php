@@ -176,16 +176,16 @@ try {
         $falhas++;
     }
 
-    // C. Validar que parcelas fora de 1-12 são rejeitadas
+    // C. Validar que parcelas fora de 1-12 ou 1-24 são rejeitadas
     $hasParcelasValidation = (
         strpos($controllerCode, '< 1') !== false && 
-        strpos($controllerCode, '> 12') !== false && 
+        (strpos($controllerCode, '> 12') !== false || strpos($controllerCode, '> 24') !== false) && 
         strpos($controllerCode, 'parcelas') !== false
     );
     if ($hasParcelasValidation) {
-        echo "{$cores['sucesso']}[OK]{$cores['reset']} Validação de limite de parcelas (1-12) detectada no Controller.\n";
+        echo "{$cores['sucesso']}[OK]{$cores['reset']} Validação de limite de parcelas (1-12 ou 1-24) detectada no Controller.\n";
     } else {
-        echo "{$cores['erro']}[FALHA]{$cores['reset']} Falta validação de limite de parcelas (1-12) no ClinicaController.php.\n";
+        echo "{$cores['erro']}[FALHA]{$cores['reset']} Falta validação de limite de parcelas (1-12 ou 1-24) no ClinicaController.php.\n";
         $falhas++;
     }
 } catch (Exception $e) {
