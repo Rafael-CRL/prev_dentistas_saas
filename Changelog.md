@@ -1,6 +1,20 @@
 # Changelog - Sistema de Gestão Odontológica
 
+## [2026-06-18] — Parametrização de Custo do Auxiliar e Comissão Individual
+
+### Adicionado
+- **Comissão Individual para Dentistas (Tarefa 2):**
+  - Adicionado o campo `percentual_comissao` (DECIMAL) na tabela `usuarios` para permitir comissões personalizadas por profissional.
+  - Implementado modelo de comissão híbrida/fallback: a taxa individual cadastrada para o dentista tem prioridade sobre as regras de categoria ou comissão escalonada por meta da clínica.
+  - Salvaguarda de imutabilidade histórica no processamento de pagamentos ([Pagamento.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Models/Pagamento.php)): ao confirmar o pagamento de um atendimento, o sistema utiliza o valor de comissão já calculado e travado na tabela `atendimentos` no momento do lançamento, prevenindo que alterações contratuais posteriores recalculassem retroativamente os valores.
+
+- **Custo do Auxiliar Parametrizado (Tarefa 1):**
+  - Removido o custo fixo de auxiliar (*hardcoded* de R$ 250,00) que estava embutido na view de cadastro de atendimentos.
+  - Criado o campo `custo_auxiliar_padrao` na tabela `clinica_configuracoes` e adicionada interface administrativa na aba "Regras de Comissão" no painel da clínica para edição e persistência desse parâmetro.
+  - Refatorada a view de lançamento de atendimento ([cadastrar.php](file:///home/rafael/Documents/projetointegrado2_turma2023/app/Views/atendimentos/cadastrar.php)) para carregar dinamicamente o valor parametrizado via AJAX, garantindo o correto cálculo dinâmico dos procedimentos e protéticos.
+
 ## [2026-06-17] — Auditoria Técnica e Refatoração MVC (Fase 6.3)
+
 
 ### Corrigido
 - **Relatório Financeiro Geral:** Corrigidos os avisos de "Undefined variable $data_inicio/$data_fim" no `AtendimentoModel`, restaurando a funcionalidade de filtragem por período que estava inoperante devido a erro de nomenclatura.
