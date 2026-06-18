@@ -135,7 +135,7 @@ function formatarCNPJ($cnpj) {
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 80px;">
                         <label>Parcelas</label>
-                        <input type="number" name="parcelas" id="taxa_parcelas" value="1" min="1" max="12" required>
+                        <input type="number" name="parcelas" id="taxa_parcelas" value="1" min="1" max="24" required>
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 100px;">
                         <label>Taxa (%)</label>
