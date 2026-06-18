@@ -147,6 +147,21 @@ class FinanceiroController extends BaseController
     }
 
     /**
+     * Retorna as taxas de cartão configuradas para a clínica em formato JSON.
+     * Usado para alimentar dinamicamente o seletor de parcelas no checkout.
+     */
+    public function apiTaxas(): void
+    {
+        try {
+            $clinicaModel = new \App\Models\Clinica($this->pdo, $this->clinica_id);
+            $taxas = $clinicaModel->getTaxasCartao();
+            $this->json(['sucesso' => true, 'taxas' => $taxas]);
+        } catch (\Exception $e) {
+            $this->json(['sucesso' => false, 'erro' => 'Erro ao carregar taxas.'], 500);
+        }
+    }
+
+    /**
      * Relatório Financeiro Geral (MVC/SaaS)
      */
     public function relatorioGeral(): void

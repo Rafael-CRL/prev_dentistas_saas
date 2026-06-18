@@ -125,8 +125,8 @@ class ClinicaController extends BaseController
         ];
 
         // Validações
-        if ($data['parcelas'] < 1 || $data['parcelas'] > 12) {
-            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Número de parcelas deve ser entre 1 e 12.'];
+        if ($data['parcelas'] < 1 || $data['parcelas'] > 24) {
+            $_SESSION['feedback'] = ['type' => 'error', 'message' => 'Número de parcelas deve ser entre 1 e 24.'];
         } elseif ($data['taxa_percentual'] < 0 || $data['taxa_percentual'] > 100) {
             $_SESSION['feedback'] = ['type' => 'error', 'message' => 'A taxa deve estar entre 0% e 100%.'];
         } else {

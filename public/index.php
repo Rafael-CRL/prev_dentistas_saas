@@ -164,6 +164,8 @@ if (strpos($uri, 'financeiro') === 0 || in_array($uri, ['relatorios.php', 'relat
         $controller->relatorioDentistas();
     } elseif ($uri === 'financeiro/relatorios/procedimentos' || $uri === 'relatorio_procedimentos.php') {
         $controller->relatorioProcedimentos();
+    } elseif ($uri === 'financeiro/api-taxas') {
+        $controller->apiTaxas();
     }
     exit;
 }

@@ -103,6 +103,14 @@ $(document).ready(function() {
     const totalPagoSpan = document.getElementById('total_pago');
     const restantePagarSpan = document.getElementById('restante_pagar');
 
+    // Carrega as taxas configuradas via API para uso dinâmico
+    let taxasConfiguradas = [];
+    $.get("<?= BASE_URL ?>financeiro/api-taxas", function(response) {
+        if (response.sucesso) {
+            taxasConfiguradas = response.taxas;
+        }
+    });
+
     function createPagamentoRow() {
         const row = document.createElement('div');
         row.classList.add('pagamento-row');
@@ -113,11 +121,16 @@ $(document).ready(function() {
         select.name = 'pagamentos[forma][]';
         select.className = 'form-control';
         select.required = true;
-        const formas = ['dinheiro', 'pix', 'debito', 'credito'];
+        const formas = [
+            {v: 'dinheiro', l: 'Dinheiro'},
+            {v: 'pix', l: 'Pix'},
+            {v: 'debito', l: 'Débito'},
+            {v: 'credito', l: 'Crédito'}
+        ];
         formas.forEach(f => {
             const opt = document.createElement('option');
-            opt.value = f;
-            opt.textContent = f.charAt(0).toUpperCase() + f.slice(1);
+            opt.value = f.v;
+            opt.textContent = f.l;
             select.appendChild(opt);
         });
 
@@ -134,11 +147,110 @@ $(document).ready(function() {
         parcelasSelect.className = 'form-control';
         parcelasSelect.style.display = 'none';
         parcelasSelect.style.marginLeft = '10px';
-        for (let i = 1; i <= 12; i++) {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = `${i}x`;
-            parcelasSelect.appendChild(opt);
+
+        const bandeiraSelect = document.createElement('select');
+        bandeiraSelect.name = 'pagamentos[bandeira][]';
+        bandeiraSelect.className = 'form-control';
+        bandeiraSelect.style.display = 'none';
+        bandeiraSelect.style.marginLeft = '10px';
+
+        const infoCalculo = document.createElement('div');
+        infoCalculo.style.fontSize = '0.8rem';
+        infoCalculo.style.color = '#666';
+        infoCalculo.style.width = '100%';
+        infoCalculo.style.marginTop = '5px';
+        infoCalculo.style.paddingLeft = '5px';
+
+        function atualizarOpcoesBandeiras() {
+            const modalidade = select.value;
+            bandeiraSelect.innerHTML = '';
+            
+            // Pega bandeiras únicas para aquela modalidade
+            const bandeirasDisponiveis = [...new Set(taxasConfiguradas
+                .filter(t => t.modalidade === modalidade)
+                .map(t => t.bandeira))];
+
+            if (bandeirasDisponiveis.length > 0) {
+                bandeirasDisponiveis.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b;
+                    opt.textContent = b.charAt(0).toUpperCase() + b.slice(1);
+                    bandeiraSelect.appendChild(opt);
+                });
+            } else {
+                const opt = document.createElement('option');
+                opt.value = 'default';
+                opt.textContent = 'Padrão';
+                bandeiraSelect.appendChild(opt);
+            }
+        }
+
+        function atualizarOpcoesParcelas() {
+            const modalidade = select.value;
+            const bandeira = bandeiraSelect.value;
+            const valorAnterior = parcelasSelect.value;
+            parcelasSelect.innerHTML = '';
+            
+            // Pega todas as parcelas cadastradas para esta combinação
+            const parcelasRegistradas = taxasConfiguradas
+                .filter(t => t.modalidade === modalidade && t.bandeira === bandeira)
+                .map(t => parseInt(t.parcelas));
+
+            if (parcelasRegistradas.length > 0) {
+                const maxP = Math.max(...parcelasRegistradas);
+                
+                // Gera o loop de 1 até a maior parcela encontrada
+                for (let i = 1; i <= maxP; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    
+                    const temTaxa = parcelasRegistradas.includes(i);
+                    opt.textContent = `${i}x` + (temTaxa ? '' : ' (Sem taxa no banco)');
+                    
+                    // Se não tiver taxa, podemos estilizar ou desabilitar. 
+                    if (!temTaxa) opt.style.color = '#999';
+
+                    if (i.toString() === valorAnterior) opt.selected = true;
+                    parcelasSelect.appendChild(opt);
+                }
+            } else {
+                const opt = document.createElement('option');
+                opt.value = 1;
+                opt.textContent = '1x';
+                parcelasSelect.appendChild(opt);
+            }
+            calcularValoresInformativos();
+        }
+
+        function calcularValoresInformativos() {
+            const valorRaw = valorInput.value.replace(',', '.');
+            const valor = parseFloat(valorRaw);
+            const modalidade = select.value;
+            const bandeira = bandeiraSelect.value;
+            const parcelas = parseInt(parcelasSelect.value) || 1;
+
+            if (isNaN(valor) || valor <= 0 || (modalidade !== 'credito' && modalidade !== 'debito')) {
+                infoCalculo.textContent = '';
+                return;
+            }
+
+            const taxaObj = taxasConfiguradas.find(t => 
+                t.modalidade === modalidade && 
+                t.bandeira === bandeira && 
+                parseInt(t.parcelas) === parcelas
+            );
+
+            if (!taxaObj) {
+                infoCalculo.innerHTML = `<span style="color: #d32f2f;"><i class="fa fa-warning"></i> <strong>Atenção:</strong> Taxa para ${parcelas}x não cadastrada no painel.</span>`;
+                return;
+            }
+
+            const taxa = parseFloat(taxaObj.taxa_percentual) / 100;
+            const valorTaxa = valor * taxa;
+            const liquido = valor - valorTaxa;
+            const valorParcela = liquido / parcelas;
+
+            infoCalculo.innerHTML = `Taxa: ${ (taxa*100).toFixed(2) }% (R$ ${valorTaxa.toFixed(2)}) | <strong>Líquido: R$ ${liquido.toFixed(2)}</strong> | Parc. Líquida: R$ ${valorParcela.toFixed(2)}`;
         }
 
         const removeButton = document.createElement('button');
@@ -153,13 +265,35 @@ $(document).ready(function() {
 
         row.appendChild(select);
         row.appendChild(valorInput);
+        row.appendChild(bandeiraSelect);
         row.appendChild(parcelasSelect);
         row.appendChild(removeButton);
+        row.appendChild(infoCalculo); // Adiciona a linha de info abaixo
 
         select.addEventListener('change', () => {
-            parcelasSelect.style.display = select.value === 'credito' ? 'block' : 'none';
+            const isCartao = select.value === 'credito' || select.value === 'debito';
+            bandeiraSelect.style.display = isCartao ? 'block' : 'none';
+            parcelasSelect.style.display = isCartao ? 'block' : 'none';
+            atualizarOpcoesBandeiras();
+            atualizarOpcoesParcelas();
         });
-        valorInput.addEventListener('input', updatePagamentos);
+
+        bandeiraSelect.addEventListener('change', () => {
+            atualizarOpcoesParcelas();
+        });
+
+        parcelasSelect.addEventListener('change', () => {
+            calcularValoresInformativos();
+        });
+        
+        // Inicializa as opções
+        atualizarOpcoesBandeiras();
+        atualizarOpcoesParcelas();
+
+        valorInput.addEventListener('input', () => {
+            updatePagamentos();
+            calcularValoresInformativos();
+        });
         return row;
     }
 
