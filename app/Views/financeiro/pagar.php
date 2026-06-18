@@ -15,6 +15,44 @@
         </fieldset>
     </form>
 
+    <?php if (empty($paciente_id)): ?>
+        <div style="margin-top: 2rem;">
+            <h3>Pagamentos Pendentes</h3>
+            <?php if (!empty($pendentes_geral)): ?>
+                <table class="mobile-card-table" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Paciente</th>
+                            <th>Procedimentos</th>
+                            <th>Valor Total</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($pendentes_geral as $pendente): ?>
+                            <tr>
+                                <td data-label="Data"><?= date('d/m/Y H:i', strtotime($pendente['data_atendimento'])) ?></td>
+                                <td data-label="Paciente"><strong><?= htmlspecialchars($pendente['paciente_nome']) ?></strong></td>
+                                <td data-label="Procedimentos"><small><?= htmlspecialchars($pendente['procedimentos']) ?></small></td>
+                                <td data-label="Valor Total">R$ <?= number_format($pendente['valor_total'], 2, ',', '.') ?></td>
+                                <td data-label="Ação">
+                                    <a href="<?= BASE_URL ?>financeiro/pagar?paciente_id=<?= $pendente['paciente_id'] ?>" class="btn btn-success btn-sm">
+                                        Receber
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 10px; border: 1px dashed #ccc; margin-top: 1rem;">
+                    <i class="fa fa-check-circle" style="font-size: 2rem; color: #28a745;"></i>
+                    <p style="margin-top: 10px; color: #666;">Não há pagamentos pendentes no momento. Bom trabalho!</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <?php if ($paciente_id && $paciente): ?>
         <form id="form-pagamento" action="<?= BASE_URL ?>financeiro/salvar-pagamento" method="POST">
@@ -62,7 +100,12 @@
                 <p>Restante a Pagar: <span id="restante_pagar">R$ 0,00</span></p>
             </div>
 
-            <button type="submit" class="btn btn-success" style="width: 100%;">Confirmar Pagamento</button>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button type="submit" class="btn btn-success" style="flex: 2;">Confirmar Pagamento</button>
+                <a href="<?= BASE_URL ?>financeiro/pagar" class="btn btn-secondary" style="flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; background-color: #6c757d; color: white;">
+                    Cancelar
+                </a>
+            </div>
         </form>
     <?php endif; ?>
 </div>
@@ -191,28 +234,20 @@ $(document).ready(function() {
             const valorAnterior = parcelasSelect.value;
             parcelasSelect.innerHTML = '';
             
-            // Pega todas as parcelas cadastradas para esta combinação
-            const parcelasRegistradas = taxasConfiguradas
+            // Filtra rigorosamente apenas as parcelas que POSSUEM taxa cadastrada
+            const parcelasDisponiveis = taxasConfiguradas
                 .filter(t => t.modalidade === modalidade && t.bandeira === bandeira)
-                .map(t => parseInt(t.parcelas));
+                .map(t => parseInt(t.parcelas))
+                .sort((a, b) => a - b);
 
-            if (parcelasRegistradas.length > 0) {
-                const maxP = Math.max(...parcelasRegistradas);
-                
-                // Gera o loop de 1 até a maior parcela encontrada
-                for (let i = 1; i <= maxP; i++) {
+            if (parcelasDisponiveis.length > 0) {
+                parcelasDisponiveis.forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = i;
-                    
-                    const temTaxa = parcelasRegistradas.includes(i);
-                    opt.textContent = `${i}x` + (temTaxa ? '' : ' (Sem taxa no banco)');
-                    
-                    // Se não tiver taxa, podemos estilizar ou desabilitar. 
-                    if (!temTaxa) opt.style.color = '#999';
-
-                    if (i.toString() === valorAnterior) opt.selected = true;
+                    opt.value = p;
+                    opt.textContent = `${p}x`;
+                    if (p.toString() === valorAnterior) opt.selected = true;
                     parcelasSelect.appendChild(opt);
-                }
+                });
             } else {
                 const opt = document.createElement('option');
                 opt.value = 1;

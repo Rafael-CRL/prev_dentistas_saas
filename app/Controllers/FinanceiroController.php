@@ -40,7 +40,8 @@ class FinanceiroController extends BaseController
             'paciente' => null,
             'atendimentos' => [],
             'valor_total' => 0,
-            'ultimo_atendimento_id' => null
+            'ultimo_atendimento_id' => null,
+            'pendentes_geral' => $atendimentoModel->listarPendentesGeral() // Nova lista proativa
         ];
 
         if ($paciente_id) {
