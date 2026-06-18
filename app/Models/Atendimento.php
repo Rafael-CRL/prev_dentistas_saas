@@ -129,6 +129,33 @@ class Atendimento
     }
 
     /**
+     * Lista todos os atendimentos com pagamento pendente da clínica.
+     * Útil para o painel proativo de cobrança.
+     */
+    public function listarPendentesGeral(): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                a.id, 
+                a.data_atendimento, 
+                p.nome as paciente_nome, 
+                p.id as paciente_id,
+                a.valor_total,
+                GROUP_CONCAT(proc.nome SEPARATOR ', ') as procedimentos
+            FROM atendimentos a
+            JOIN pacientes p ON a.paciente_id = p.id
+            LEFT JOIN atendimento_procedimentos ap ON a.id = ap.id_atendimento
+            LEFT JOIN procedimentos proc ON ap.id_procedimento = proc.id
+            WHERE a.status_pagamento = 'pendente' 
+            AND a.clinica_id = ?
+            GROUP BY a.id
+            ORDER BY a.data_atendimento ASC
+        ");
+        $stmt->execute([$this->clinicaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Busca o ID do último atendimento pendente de um paciente.
      */
     public function buscarUltimoPendente(int $pacienteId): ?int
