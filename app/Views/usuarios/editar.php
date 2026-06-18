@@ -36,6 +36,11 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label for="percentual_comissao">Percentual de Comissão Individual (%) <span style="font-size: 0.85rem; font-weight: normal; color: #666;">(Opcional - Apenas Dentistas. Se vazio, aplica a regra por categoria)</span></label>
+            <input type="number" step="0.01" min="0" max="100" name="percentual_comissao" id="percentual_comissao" value="<?= $usuario['percentual_comissao'] !== null ? htmlspecialchars($usuario['percentual_comissao']) : '' ?>">
+        </div>
+
         <div style="margin-top: 2rem;">
             <button type="submit" class="btn btn-success">Salvar Alterações</button>
             <a href="<?= BASE_URL ?>usuarios" class="btn btn-secondary">Cancelar</a>

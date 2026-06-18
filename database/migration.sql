@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS `clinica_regras_comissao` (
 
 -- Usuarios
 ALTER TABLE `usuarios` ADD COLUMN IF NOT EXISTS `clinica_id` INT NOT NULL AFTER `id`;
+ALTER TABLE `usuarios` ADD COLUMN `percentual_comissao` DECIMAL(5,2) DEFAULT NULL AFTER `perfil`;
 UPDATE `usuarios` SET `clinica_id` = @default_clinica_id WHERE `clinica_id` = 0;
 -- Tenta dropar o índice antigo (se existir) e cria o novo
 ALTER TABLE `usuarios` DROP INDEX IF EXISTS `login`;

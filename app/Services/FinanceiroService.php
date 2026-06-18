@@ -56,13 +56,22 @@ class FinanceiroService
     /**
      * Calcula a divisão do valor entre dentista e custos associados (Split).
      */
-    public function calcularComissao($valorBruto, $categoria, $faturamentoBrutoMensal = 0, $custoAuxiliarManual = 0.0, $natureza = null)
+    public function calcularComissao($valorBruto, $categoria, $faturamentoBrutoMensal = 0, $custoAuxiliarManual = 0.0, $natureza = null, $comissaoPersonalizada = null)
     {
         $comissaoDentista = 0.0;
         $custoAuxiliarLab = 0.0;
 
-        // Recupera regra geral do banco de dados (SaaS Zero Hardcode)
-        $regraComissao = $this->config->getRegraComissao();
+        if ($comissaoPersonalizada !== null && $comissaoPersonalizada >= 0) {
+            // Se o dentista tem uma comissão individual configurada, ela sobrepõe a comissão geral (Flat Rate)
+            $comissaoDentista = $valorBruto * (floatval($comissaoPersonalizada) / 100);
+            
+            // O custo do auxiliar/laboratório ainda é deduzido se for prótese ou especializado com natureza correspondente
+            if ($categoria === 'protese' || ($categoria === 'especializado' && ($natureza === 'canal' || $natureza === 'cirurgia_especializada' || $natureza === 'protese'))) {
+                $custoAuxiliarLab = floatval($custoAuxiliarManual);
+            }
+        } else {
+            // Recupera regra geral do banco de dados (SaaS Zero Hardcode)
+            $regraComissao = $this->config->getRegraComissao();
         
         $comissaoBase = floatval($regraComissao['valor_regra']) / 100;
         $comissaoBonus = $comissaoBase + (floatval($regraComissao['percentual_bonus']) / 100);
@@ -109,6 +118,7 @@ class FinanceiroService
                 $custoAuxiliarLab = floatval($custoAuxiliarManual);
                 $comissaoDentista = $valorBruto * $comissaoProtese;
                 break;
+        }
         }
 
         return [
