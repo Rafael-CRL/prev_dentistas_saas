@@ -8,6 +8,8 @@
 - **Injeção de Dependências:** Corrigido o construtor do `AtendimentoController` para instanciar corretamente os modelos de `Usuario` e `Clinica`, evitando erros de acesso a propriedades nulas.
 
 ### Refatorado (MVC & Zero Hardcode)
+- **Motor Multi-tenant:** Implementado "Login Inteligente" que identifica automaticamente a clínica do usuário durante o login, eliminando a necessidade de seleção manual de clínica na interface.
+- **Identidade Visual Dinâmica:** Interface agora exibe o nome personalizado da clínica na Navbar e no título da página via sessão.
 - **Eliminação de SQL Bruto:** Removidas todas as consultas SQL diretas do `AtendimentoController`, migrando a persistência de dados para os Models correspondentes:
   - Listagem de dentistas migrada para `UsuarioModel::getDentistas()`.
   - Listagem de procedimentos migrada para `ProcedimentoModel::getListagemAtendimento()`.
