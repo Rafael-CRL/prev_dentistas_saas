@@ -182,8 +182,8 @@
                 <input type="file" name="arquivo_procedimento" id="arquivo_procedimento" accept=".pdf,image/jpeg,image/png" required>
             </div>
             <div class="btn-group">
-                <button type="submit" class="btn-success">Enviar</button>
-                <button type="button" onclick="fecharModalUpload()" class="btn-danger">Cancelar</button>
+                <button type="submit" class="btn btn-success">Enviar</button>
+                <button type="button" onclick="fecharModalUpload()" class="btn btn-danger">Cancelar</button>
             </div>
         </form>
     </div>
@@ -192,7 +192,7 @@
 <div id="modalConfirm" class="modal">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <h3 id="confirm-title" style="margin-top: 0; color: var(--text-color);">Confirmação</h3>
-        <p id="confirm-message" style="font-size: 1.1rem; color: #555; margin: 20px 0;">Tem certeza?</p>
+        <p id="confirm-message" style="font-size: 1.1rem; color: var(--text-color); margin: 20px 0;">Tem certeza?</p>
         <div class="btn-group" style="justify-content: center; margin-top: 20px;">
             <button id="btn-confirm-yes" class="btn btn-danger">Sim, confirmar</button>
             <button type="button" onclick="fecharModalConfirm()" class="btn btn-secondary">Cancelar</button>

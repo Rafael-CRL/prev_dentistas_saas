@@ -350,11 +350,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const dados = result.dados;
 
+            // Define as cores padrões do Chart.js com base no tema ativo
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#cbd5e1' : '#666';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            
+            Chart.defaults.color = textColor;
+            Chart.defaults.borderColor = gridColor;
+
+            window.myCharts = window.myCharts || {};
+
             // 1. Gráfico de Fluxo de Caixa (Faturamento x Despesas)
             const ctxFluxo = document.getElementById('chartFluxo').getContext('2d');
             document.getElementById('loaderFluxo').style.display = 'none';
             
-            new Chart(ctxFluxo, {
+            if (window.myCharts.fluxo) { window.myCharts.fluxo.destroy(); }
+            window.myCharts.fluxo = new Chart(ctxFluxo, {
                 type: 'bar',
                 data: {
                     labels: dados.graficos.evolucao_mensal.map(d => d.dia.split('-')[2]),
@@ -379,10 +390,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        }
                     },
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: { 
+                            position: 'top',
+                            labels: { color: textColor }
+                        }
                     }
                 }
             });
@@ -395,12 +417,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 'dinheiro': 'Dinheiro',
                 'pix': 'Pix',
                 'debito': 'Débito',
-                'credito': 'Crédito'
+                'credito': 'Crédito',
+                'fiado': 'Fiado'
             };
 
             const dataPagamentos = Object.entries(dados.graficos.distribuicao_pagamentos);
-
-            new Chart(ctxPagamentos, {
+            
+            if (window.myCharts.pagamentos) { window.myCharts.pagamentos.destroy(); }
+            window.myCharts.pagamentos = new Chart(ctxPagamentos, {
                 type: 'doughnut',
                 data: {
                     labels: dataPagamentos.map(d => labelsPagamento[d[0]] || d[0]),
@@ -410,7 +434,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             '#2ecc71', // Esmeralda (Dinheiro)
                             '#3498db', // Azul (Pix)
                             '#f1c40f', // Amarelo (Débito)
-                            '#9b59b6'  // Roxo (Crédito)
+                            '#9b59b6', // Roxo (Crédito)
+                            '#e67e22'  // Laranja (Fiado)
                         ],
                         borderWidth: 1
                     }]
@@ -419,7 +444,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'right' }
+                        legend: { 
+                            position: 'right',
+                            labels: { color: textColor }
+                        }
                     }
                 }
             });
@@ -432,7 +460,8 @@ document.addEventListener('DOMContentLoaded', function() {
             gradient.addColorStop(0, 'rgba(46, 204, 113, 0.4)');
             gradient.addColorStop(1, 'rgba(46, 204, 113, 0)');
 
-            new Chart(ctxLiquido, {
+            if (window.myCharts.liquido) { window.myCharts.liquido.destroy(); }
+            window.myCharts.liquido = new Chart(ctxLiquido, {
                 type: 'line',
                 data: {
                     labels: dados.graficos.evolucao_liquido.map(d => d.dia.split('-')[2]),
@@ -451,7 +480,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        }
                     },
                     plugins: {
                         legend: { display: false }

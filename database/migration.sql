@@ -113,6 +113,8 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 -- Atendimento Pagamentos
 ALTER TABLE `atendimento_pagamentos` ADD COLUMN IF NOT EXISTS `clinica_id` INT NOT NULL AFTER `id`;
 UPDATE `atendimento_pagamentos` SET `clinica_id` = @default_clinica_id WHERE `clinica_id` = 0;
+ALTER TABLE `atendimento_pagamentos` MODIFY COLUMN `forma_pagamento` ENUM('dinheiro','pix','debito','credito','fiado') NOT NULL;
+ALTER TABLE `atendimento_pagamentos` ADD COLUMN IF NOT EXISTS `status` ENUM('pago','pendente') DEFAULT 'pago' AFTER `qtd_parcelas`;
 SET @exist = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'atendimento_pagamentos' AND CONSTRAINT_NAME = 'fk_atendimento_pagamentos_clinica' AND TABLE_SCHEMA = DATABASE());
 SET @sql = IF(@exist = 0, 'ALTER TABLE atendimento_pagamentos ADD CONSTRAINT fk_atendimento_pagamentos_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id)', 'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

@@ -56,6 +56,22 @@ class FinanceiroController extends BaseController
                 foreach ($procedimentos as $proc) {
                     $data['valor_total'] += $proc['valor_procedimento'];
                 }
+
+                // Carrega pagamentos já realizados (para caso de Fiado pendente)
+                $pagamentosRealizados = $atendimentoModel->getPagamentos($data['ultimo_atendimento_id']);
+                $data['total_pago_anterior'] = 0.0;
+                $data['possui_fiado'] = false;
+                
+                foreach ($pagamentosRealizados as $pag) {
+                    if ($pag['status'] === 'pago') {
+                        $data['total_pago_anterior'] += (float)$pag['valor'];
+                    }
+                    if ($pag['forma_pagamento'] === 'fiado') {
+                        $data['possui_fiado'] = true;
+                    }
+                }
+                
+                $data['saldo_devedor'] = max(0.0, $data['valor_total'] - $data['total_pago_anterior']);
             }
         }
 

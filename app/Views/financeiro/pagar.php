@@ -82,9 +82,16 @@
                 <p>Nenhum procedimento finalizado encontrado para este paciente no último atendimento.</p>
             <?php endif; ?>
 
+            <?php if (!empty($total_pago_anterior) && $total_pago_anterior > 0): ?>
+                <div class="alert alert-info" style="background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa fa-info-circle" style="font-size: 1.2rem;"></i>
+                    <span>Este atendimento possui pagamento parcial (Fiado) de <strong>R$ <?= number_format($total_pago_anterior, 2, ',', '.') ?></strong> já quitado. Saldo restante a pagar: <strong>R$ <?= number_format($saldo_devedor, 2, ',', '.') ?></strong>.</span>
+                </div>
+            <?php endif; ?>
+
             <div class="form-group">
                 <label for="valor">Valor Bruto Total (R$)</label>
-                <input type="number" step="0.01" id="valor" name="valor_total" required readonly value="<?= number_format($valor_total, 2, '.', '') ?>">
+                <input type="number" step="0.01" id="valor" name="valor_total" required readonly value="<?= number_format(isset($saldo_devedor) ? $saldo_devedor : $valor_total, 2, '.', '') ?>">
             </div>
             
             <div id="pagamentos_container">
@@ -164,12 +171,16 @@ $(document).ready(function() {
         select.name = 'pagamentos[forma][]';
         select.className = 'form-control';
         select.required = true;
+        const totalPagoAnterior = <?= isset($total_pago_anterior) ? (float)$total_pago_anterior : 0.0 ?>;
         const formas = [
             {v: 'dinheiro', l: 'Dinheiro'},
             {v: 'pix', l: 'Pix'},
             {v: 'debito', l: 'Débito'},
             {v: 'credito', l: 'Crédito'}
         ];
+        if (totalPagoAnterior === 0) {
+            formas.push({v: 'fiado', l: 'Fiado'});
+        }
         formas.forEach(f => {
             const opt = document.createElement('option');
             opt.value = f.v;
@@ -369,9 +380,27 @@ $(document).ready(function() {
 
         const valorTotal = parseFloat($('#valor').val());
 
-        if (Math.abs(totalPago - valorTotal) > 0.01) {
-            alert('O valor pago não corresponde ao valor total.');
-            return;
+        let hasFiado = false;
+        $('.pagamento-row select[name="pagamentos[forma][]"]').each(function() {
+            if ($(this).val() === 'fiado') {
+                hasFiado = true;
+            }
+        });
+
+        if (hasFiado) {
+            if (totalPago <= 0) {
+                alert('O valor inicial do pagamento Fiado deve ser maior que zero.');
+                return;
+            }
+            if (totalPago >= valorTotal - 0.01) {
+                alert('Para pagamento Fiado, o valor pago hoje (1ª parcela) deve ser menor que o total.');
+                return;
+            }
+        } else {
+            if (Math.abs(totalPago - valorTotal) > 0.01) {
+                alert('O valor pago não corresponde ao valor total de R$ ' + valorTotal.toFixed(2).replace('.', ',') + '.');
+                return;
+            }
         }
 
         submitButton.prop('disabled', true).text('Processando...');
