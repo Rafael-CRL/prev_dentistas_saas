@@ -528,6 +528,7 @@ class Atendimento
                 a.data_atendimento BETWEEN ? AND ?
                 AND a.clinica_id = ?
                 AND ap.clinica_id = ?
+                AND ap.status = 'pago'
             GROUP BY
                 ap.forma_pagamento
         ");

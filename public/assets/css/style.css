@@ -34,6 +34,38 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
     --shadow-md: 0 10px 30px rgba(0,0,0,0.1);
     --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+
+    /* Variáveis do Tema Claro */
+    --label-color: #495057;
+    --input-bg: #ffffff;
+    --table-bg: #ffffff;
+    --table-header-bg: #e9ecef;
+    --table-header-color: #495057;
+    --mobile-menu-bg: #ffffff;
+    --drop-zone-bg: #f8fafc;
+    --drop-zone-color: #444444;
+}
+
+[data-theme="dark"] {
+    --background-color: #0f172a;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --white-color: #1e293b;
+    
+    --card-bg: rgba(30, 41, 59, 0.95);
+    --glass-bg: rgba(30, 41, 59, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.05);
+
+    --label-color: #cbd5e1;
+    --input-bg: #1e293b;
+    --table-bg: #1e293b;
+    --table-header-bg: #334155;
+    --table-header-color: #f8fafc;
+    --mobile-menu-bg: #1e293b;
+    --drop-zone-bg: #1e293b;
+    --drop-zone-color: #cbd5e1;
+    --secondary-color: #94a3b8;
 }
 
 body {
@@ -283,7 +315,7 @@ html {
     color: var(--text-color) !important;
     font-weight: 400 !important;
     text-transform: none !important;
-    border-bottom: 1px solid #f8f9fa;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .dropdown-content a:last-child { border-bottom: none; }
@@ -361,7 +393,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #495057;
+    color: var(--label-color);
 }
 
 input[type="text"],
@@ -378,7 +410,7 @@ select, textarea {
     box-sizing: border-box;
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #fff;
+    background-color: var(--input-bg);
     color: var(--text-color); /* Garante que o texto do input não seja branco */
 }
 
@@ -388,6 +420,20 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
+select option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+input:disabled, select:disabled, textarea:disabled,
+input[readonly], select[readonly], textarea[readonly],
+.readonly-field {
+    background-color: var(--background-color) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+    border-color: var(--border-color) !important;
+}
+
 /* ==========================================================================
    TABELAS (Original)
    ========================================================================== */
@@ -395,7 +441,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
-    background-color: #fff;
+    background-color: var(--table-bg);
     border-radius: var(--border-radius);
     overflow: hidden;
     align-self: start;
@@ -408,9 +454,9 @@ th, td {
 }
 
 thead th {
-    background-color: #e9ecef;
+    background-color: var(--table-header-bg);
     font-weight: 600;
-    color: #495057;
+    color: var(--table-header-color);
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
@@ -480,7 +526,7 @@ tbody tr:hover {
         flex-direction: column;
         gap: 0;
         margin-top: 1rem;
-        background-color: white;
+        background-color: var(--mobile-menu-bg);
         box-shadow: var(--shadow-md);
         border-radius: var(--border-radius);
         padding: 1rem;
@@ -541,7 +587,7 @@ tbody tr:hover {
         margin-bottom: 1rem;
         border: 1px solid var(--border-color);
         border-radius: var(--border-radius);
-        background-color: #fff;
+        background-color: var(--table-bg);
         box-shadow: var(--shadow-sm);
     }
     .mobile-card-table td {
@@ -626,6 +672,7 @@ tbody tr:hover {
 .team-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
 .team-card { text-align: center; transition: 0.3s; padding: 20px; border-radius: var(--border-radius); background: var(--background-color); }
 .team-card:hover { transform: translateY(-10px); background: #ebf5ff; }
+[data-theme="dark"] .team-card:hover { background: #334155; }
 
 .img-wrapper { 
     width: 100%; 
@@ -659,7 +706,7 @@ tbody tr:hover {
     color: #cccccc;
     border: 2px dashed #3b82f6;
     border-radius: 10px;
-    background-color: #f8fafc;
+    background-color: var(--drop-zone-bg);
     transition: all 0.3s ease;
 }
 
@@ -677,7 +724,7 @@ tbody tr:hover {
 
 .drop-zone__prompt p {
     margin: 5px 0;
-    color: #444;
+    color: var(--drop-zone-color);
 }
 
 .drop-zone__specs {
@@ -760,3 +807,58 @@ tbody tr:hover {
     .grid-2, .team-grid { grid-template-columns: 1fr; }
     .hero-text { text-align: center; }
 }
+
+/* ==========================================================================
+   JQUERY UI AUTOCOMPLETE (Modo Escuro / Light Adaptável)
+   ========================================================================== */
+.ui-autocomplete {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+    box-shadow: var(--shadow-lg) !important;
+    font-family: inherit !important;
+    z-index: 9999 !important;
+    padding: 0.5rem 0 !important;
+}
+
+.ui-menu-item {
+    color: var(--text-color) !important;
+    padding: 0.6rem 1.2rem !important;
+    cursor: pointer !important;
+}
+
+.ui-menu-item-wrapper:hover, 
+.ui-menu-item-wrapper.ui-state-active {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    border: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* Modais e Sub-cards com suporte a Modo Escuro */
+.modal-content {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.modal-content h3, .modal-content h4 {
+    color: var(--text-color) !important;
+}
+
+.sub-card {
+    background-color: var(--white-color) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.sub-card strong {
+    color: var(--text-color) !important;
+}
+
+.sub-card p {
+    color: var(--text-muted) !important;
+}
+
+

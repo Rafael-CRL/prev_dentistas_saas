@@ -33,6 +33,7 @@ abstract class BaseController
      */
     protected function renderError(string $titulo, string $mensagem): void
     {
+        $GLOBALS['current_view'] = 'error';
         $header = __DIR__ . '/../Views/partials/header.php';
         $footer = __DIR__ . '/../Views/partials/footer.php';
 
@@ -56,6 +57,7 @@ abstract class BaseController
      */
     protected function render(string $view, array $data = []): void
     {
+        $GLOBALS['current_view'] = $view;
         // Garante que o token CSRF esteja sempre disponível nas views (caso queiram usar manualmente)
         $data['csrf_token'] = CsrfHelper::getToken();
 
@@ -84,6 +86,7 @@ abstract class BaseController
      */
     protected function renderRaw(string $view, array $data = []): void
     {
+        $GLOBALS['current_view'] = $view;
         extract($data);
         $viewFile = __DIR__ . '/../Views/' . $view . '.php';
         if (file_exists($viewFile)) {

@@ -52,7 +52,7 @@ function formatarCNPJ($cnpj) {
         <form action="<?= BASE_URL ?>clinica/salvar-configuracoes" method="POST">
             <?= \App\Helpers\CsrfHelper::input() ?>
             
-            <div class="card" style="background: #f9f9f9; border: 1px solid #ddd;">
+            <div class="card" style="margin-bottom: 1rem;">
                 <h4>Repasse Geral (Clínico)</h4>
                 <div class="form-group">
                     <label>Tipo de Repasse</label>
@@ -75,7 +75,7 @@ function formatarCNPJ($cnpj) {
                 </div>
             </div>
 
-            <div class="card" style="background: #f9f9f9; border: 1px solid #ddd; margin-top: 1rem;">
+            <div class="card" style="margin-top: 1rem;">
                 <h4>Procedimentos Especializados (%)</h4>
                 <div class="form-group">
                     <label>Percentual Base Especializado (%)</label>
@@ -91,7 +91,7 @@ function formatarCNPJ($cnpj) {
                 </div>
             </div>
 
-            <div class="card" style="background: #f9f9f9; border: 1px solid #ddd; margin-top: 1rem;">
+            <div class="card" style="margin-top: 1rem;">
                 <h4>Contatos e Endereço (Recibo)</h4>
                 <div class="form-group">
                     <label>Endereço Completo</label>
@@ -115,7 +115,7 @@ function formatarCNPJ($cnpj) {
     <div id="taxas" class="tab-content">
         <h3>Gestão de Taxas de Cartão</h3>
         
-        <div class="card" style="background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 1rem;">
+        <div class="card" style="margin-bottom: 1rem;">
             <h4>Adicionar/Editar Taxa</h4>
             <form action="<?= BASE_URL ?>clinica/salvar-taxa" method="POST" id="form-taxa">
                 <?= \App\Helpers\CsrfHelper::input() ?>
@@ -141,9 +141,12 @@ function formatarCNPJ($cnpj) {
                         <label>Taxa (%)</label>
                         <input type="number" step="0.01" name="taxa_percentual" id="taxa_percentual" required>
                     </div>
-                    <div style="display: flex; align-items: flex-end; padding-bottom: 15px;">
-                        <button type="submit" class="btn btn-success">Salvar Taxa</button>
-                        <button type="button" class="btn btn-secondary" onclick="resetTaxaForm()" style="margin-left: 5px;">Limpar</button>
+                    <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end; min-width: 250px;">
+                        <label>&nbsp;</label>
+                        <div style="display: flex; gap: 5px;">
+                            <button type="submit" class="btn btn-success">Salvar Taxa</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetTaxaForm()">Limpar</button>
+                        </div>
                     </div>
                 </div>
             </form>

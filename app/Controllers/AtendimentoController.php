@@ -138,6 +138,10 @@ class AtendimentoController extends BaseController
                         'natureza' => trim($procedimentosInput['natureza'][$key] ?? '')
                     ];
 
+                    if ($procParaSalvar['custo_auxiliar_manual'] > $procParaSalvar['valor_total']) {
+                        throw new Exception("Erro: O custo auxiliar do procedimento (" . htmlspecialchars($procedimento['nome']) . ") não pode ser maior que o seu valor total.");
+                    }
+
                     if ($procParaSalvar['status_execucao'] === 'finalizado') {
                         $procedimentosFinalizados[] = $procParaSalvar;
                         $valorBrutoTotal += $procParaSalvar['valor_total'];

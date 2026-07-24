@@ -45,7 +45,7 @@
             </tbody>
             <?php if (count($procedimentos_relatorio) > 0): ?>
             <tfoot>
-                <tr style="font-weight: bold; background-color: #f8f9fa;">
+                <tr style="font-weight: bold; background-color: var(--table-header-bg);">
                     <td>Total</td>
                     <td data-label="Total Executado"><?= htmlspecialchars($totalProcedimentos) ?></td>
                     <td data-label="Total %">100,00%</td>

@@ -118,9 +118,9 @@
                 <strong>Total:</strong> <span id="modal-total-valor">R$ 0,00</span>
             </div>
 
-            <div class="btn-group">
-                <button type="button" id="salvar-tratamento-modal" class="btn-save">Salvar</button>
-                <button type="button" onclick="fecharModal()" class="btn-cancel">Cancelar</button>
+            <div class="btn-group" style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" id="salvar-tratamento-modal" class="btn btn-success" style="flex: 1;">Salvar</button>
+                <button type="button" onclick="fecharModal()" class="btn-cancel" style="flex: 1;">Cancelar</button>
             </div>
         </form>
     </div>
