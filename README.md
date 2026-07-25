@@ -104,5 +104,7 @@ docker compose exec -T app php scripts/auditoria_conclusao_fase6.php
 Se todos os comandos acima finalizarem com sucesso, acesse o sistema em:
 
 http://localhost:8080/setup.php
+
 http://localhost:8080/setup_data.php
+
 http://localhost:8080/
