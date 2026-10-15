@@ -1,6 +1,7 @@
 # Prev-Dentistas
 
 SaaS multi-tenant para clínicas odontológicas. Projeto Integrado II, UFPA. Projeto realizado em equipe.
+O principal objetivo foi refatorar o código de um projeto existente e funcional no mundo real. Também Implementando melhorias de UX/UI.
 
 Pacientes, atendimentos, procedimentos, pagamentos, despesas e financeiro. Taxas de cartão e regras de comissão parametrizadas por clínica, sem valores fixos no código.
 
