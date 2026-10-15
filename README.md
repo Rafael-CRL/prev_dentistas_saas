@@ -1,6 +1,6 @@
 # Prev-Dentistas
 
-SaaS multi-tenant para clínicas odontológicas. Projeto Integrado II, UFPA.
+SaaS multi-tenant para clínicas odontológicas. Projeto Integrado II, UFPA. Projeto realizado em equipe.
 
 Pacientes, atendimentos, procedimentos, pagamentos, despesas e financeiro. Taxas de cartão e regras de comissão parametrizadas por clínica, sem valores fixos no código.
 
